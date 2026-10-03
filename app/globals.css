@@ -1,0 +1,384 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===================================================================== */
+/* THEME TOKENS — Day (light sky blue + white) / Night (deep dark gray)  */
+/* ===================================================================== */
+:root {
+  /* DAY (default) */
+  --bg-page:        #F0F9FF;   /* very light sky blue */
+  --bg-surface:     rgba(255, 255, 255, 0.65);
+  --bg-surface-2:   rgba(255, 255, 255, 0.45);
+  --bg-elevated:    rgba(255, 255, 255, 0.85);
+  --bg-sidebar:     rgba(255, 255, 255, 0.55);
+  --border-soft:    rgba(14, 165, 233, 0.18);
+  --border-strong:  rgba(14, 165, 233, 0.30);
+  --text-primary:   #000000;   /* pure black in day mode */
+  --text-secondary: #000000;
+  --text-muted:     #000000;
+  --accent:         #0284C7;   /* sky-600 */
+  --accent-hover:  #0369A1;   /* sky-700 */
+  --accent-soft:   rgba(14, 165, 233, 0.12);
+  --shadow-color:  rgba(14, 165, 233, 0.18);
+  --backdrop-blur: 14px;
+  --ring:          rgba(14, 165, 233, 0.35);
+}
+
+[data-theme="night"] {
+  /* NIGHT */
+  --bg-page:        #161819;   /* deep dark gray */
+  --bg-surface:     rgba(38, 41, 44, 0.60);
+  --bg-surface-2:   rgba(28, 31, 33, 0.55);
+  --bg-elevated:    rgba(22, 24, 25, 0.78);
+  --bg-sidebar:     rgba(20, 22, 24, 0.78);
+  --border-soft:    rgba(255, 255, 255, 0.08);
+  --border-strong:  rgba(255, 255, 255, 0.18);
+  --text-primary:   #FFFFFF;   /* pure white in night mode */
+  --text-secondary: #FFFFFF;
+  --text-muted:     #FFFFFF;
+  --accent:         #38BDF8;   /* sky-400 */
+  --accent-hover:  #7DD3FC;   /* sky-300 */
+  --accent-soft:   rgba(56, 189, 248, 0.14);
+  --shadow-color:  rgba(0, 0, 0, 0.55);
+  --backdrop-blur: 16px;
+  --ring:          rgba(56, 189, 248, 0.40);
+}
+
+html, body {
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter",
+               Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color 350ms ease, color 350ms ease;
+}
+
+/* ===================================================================== */
+/* ENFORCE TEXT COLORS — black in day mode, white in night mode           */
+/* Tailwind's text-slate-* / text-gray-* / text-zinc-* / text-neutral-*   */
+/* classes are overridden so every body text element is forced to the     */
+/* theme color. Accent colors (sky-*, emerald-*, amber-*, etc.) are NOT   */
+/* overridden — they still provide visual emphasis.                       */
+/* ===================================================================== */
+[data-theme="day"] .text-slate-50,
+[data-theme="day"] .text-slate-100,
+[data-theme="day"] .text-slate-200,
+[data-theme="day"] .text-slate-300,
+[data-theme="day"] .text-slate-400,
+[data-theme="day"] .text-slate-500,
+[data-theme="day"] .text-slate-600,
+[data-theme="day"] .text-slate-700,
+[data-theme="day"] .text-slate-800,
+[data-theme="day"] .text-slate-900,
+[data-theme="day"] .text-slate-950,
+[data-theme="day"] .text-gray-50,
+[data-theme="day"] .text-gray-100,
+[data-theme="day"] .text-gray-200,
+[data-theme="day"] .text-gray-300,
+[data-theme="day"] .text-gray-400,
+[data-theme="day"] .text-gray-500,
+[data-theme="day"] .text-gray-600,
+[data-theme="day"] .text-gray-700,
+[data-theme="day"] .text-gray-800,
+[data-theme="day"] .text-gray-900,
+[data-theme="day"] .text-gray-950,
+[data-theme="day"] .text-zinc-50,
+[data-theme="day"] .text-zinc-100,
+[data-theme="day"] .text-zinc-200,
+[data-theme="day"] .text-zinc-300,
+[data-theme="day"] .text-zinc-400,
+[data-theme="day"] .text-zinc-500,
+[data-theme="day"] .text-zinc-600,
+[data-theme="day"] .text-zinc-700,
+[data-theme="day"] .text-zinc-800,
+[data-theme="day"] .text-zinc-900,
+[data-theme="day"] .text-zinc-950,
+[data-theme="day"] .text-neutral-50,
+[data-theme="day"] .text-neutral-100,
+[data-theme="day"] .text-neutral-200,
+[data-theme="day"] .text-neutral-300,
+[data-theme="day"] .text-neutral-400,
+[data-theme="day"] .text-neutral-500,
+[data-theme="day"] .text-neutral-600,
+[data-theme="day"] .text-neutral-700,
+[data-theme="day"] .text-neutral-800,
+[data-theme="day"] .text-neutral-900,
+[data-theme="day"] .text-neutral-950 { color: #000000 !important; }
+
+[data-theme="night"] .text-slate-50,
+[data-theme="night"] .text-slate-100,
+[data-theme="night"] .text-slate-200,
+[data-theme="night"] .text-slate-300,
+[data-theme="night"] .text-slate-400,
+[data-theme="night"] .text-slate-500,
+[data-theme="night"] .text-slate-600,
+[data-theme="night"] .text-slate-700,
+[data-theme="night"] .text-slate-800,
+[data-theme="night"] .text-slate-900,
+[data-theme="night"] .text-slate-950,
+[data-theme="night"] .text-gray-50,
+[data-theme="night"] .text-gray-100,
+[data-theme="night"] .text-gray-200,
+[data-theme="night"] .text-gray-300,
+[data-theme="night"] .text-gray-400,
+[data-theme="night"] .text-gray-500,
+[data-theme="night"] .text-gray-600,
+[data-theme="night"] .text-gray-700,
+[data-theme="night"] .text-gray-800,
+[data-theme="night"] .text-gray-900,
+[data-theme="night"] .text-gray-950,
+[data-theme="night"] .text-zinc-50,
+[data-theme="night"] .text-zinc-100,
+[data-theme="night"] .text-zinc-200,
+[data-theme="night"] .text-zinc-300,
+[data-theme="night"] .text-zinc-400,
+[data-theme="night"] .text-zinc-500,
+[data-theme="night"] .text-zinc-600,
+[data-theme="night"] .text-zinc-700,
+[data-theme="night"] .text-zinc-800,
+[data-theme="night"] .text-zinc-900,
+[data-theme="night"] .text-zinc-950,
+[data-theme="night"] .text-neutral-50,
+[data-theme="night"] .text-neutral-100,
+[data-theme="night"] .text-neutral-200,
+[data-theme="night"] .text-neutral-300,
+[data-theme="night"] .text-neutral-400,
+[data-theme="night"] .text-neutral-500,
+[data-theme="night"] .text-neutral-600,
+[data-theme="night"] .text-neutral-700,
+[data-theme="night"] .text-neutral-800,
+[data-theme="night"] .text-neutral-900,
+[data-theme="night"] .text-neutral-950,
+/* Also map white/black utility classes for consistency */
+[data-theme="night"] .text-black { color: #FFFFFF !important; }
+[data-theme="day"]   .text-white { color: #000000 !important; }
+
+/* "dark:" variants commonly used in JSX — also flip */
+[data-theme="day"]   .dark\:text-white { color: #000000 !important; }
+[data-theme="night"] .dark\:text-white { color: #FFFFFF !important; }
+[data-theme="day"]   .dark\:text-slate-100,
+[data-theme="day"]   .dark\:text-slate-200,
+[data-theme="day"]   .dark\:text-slate-300,
+[data-theme="day"]   .dark\:text-slate-400 { color: #000000 !important; }
+[data-theme="night"] .dark\:text-slate-100,
+[data-theme="night"] .dark\:text-slate-200,
+[data-theme="night"] .dark\:text-slate-300,
+[data-theme="night"] .dark\:text-slate-400 { color: #FFFFFF !important; }
+
+/* ===================================================================== */
+/* GLASS SURFACES — vanilla transparent CSS                              */
+/* ===================================================================== */
+.glass {
+  background: var(--bg-surface);
+  backdrop-filter: blur(var(--backdrop-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--backdrop-blur)) saturate(160%);
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 8px 32px var(--shadow-color);
+}
+.glass-strong {
+  background: var(--bg-elevated);
+  backdrop-filter: blur(calc(var(--backdrop-blur) + 4px)) saturate(180%);
+  -webkit-backdrop-filter: blur(calc(var(--backdrop-blur) + 4px)) saturate(180%);
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 12px 40px var(--shadow-color);
+}
+.glass-subtle {
+  background: var(--bg-surface-2);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  border: 1px solid var(--border-soft);
+}
+.glass-sidebar {
+  background: var(--bg-sidebar);
+  backdrop-filter: blur(20px) saturate(170%);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  border-right: 1px solid var(--border-soft);
+}
+
+/* ===================================================================== */
+/* POPUP / BUTTON ANIMATIONS                                              */
+/* ===================================================================== */
+@keyframes fs-popup {
+  0%   { transform: scale(0.92) translateY(6px); opacity: 0; }
+  60%  { transform: scale(1.03) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes fs-rise {
+  0%   { transform: translateY(12px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes fs-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--ring); }
+  50%      { box-shadow: 0 0 0 6px transparent; }
+}
+
+.btn-popup {
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 220ms ease,
+              background-color 200ms ease,
+              color 200ms ease,
+              border-color 200ms ease;
+  will-change: transform;
+}
+.btn-popup:hover {
+  transform: translateY(-2px) scale(1.025);
+  box-shadow: 0 10px 24px var(--shadow-color);
+}
+.btn-popup:active {
+  transform: translateY(0) scale(0.97);
+  animation: fs-glow 600ms ease;
+}
+
+.card-popup {
+  animation: fs-popup 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.card-rise {
+  animation: fs-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Stagger helper */
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 60ms; }
+.stagger > *:nth-child(3) { animation-delay: 120ms; }
+.stagger > *:nth-child(4) { animation-delay: 180ms; }
+.stagger > *:nth-child(5) { animation-delay: 240ms; }
+.stagger > *:nth-child(6) { animation-delay: 300ms; }
+.stagger > *:nth-child(7) { animation-delay: 360ms; }
+.stagger > *:nth-child(8) { animation-delay: 420ms; }
+
+/* ===================================================================== */
+/* YOUTUBE-STYLE HAMBURGER BUTTON (top-left, transparent ghost icon)      */
+/* ===================================================================== */
+.fs-fab {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 80;                /* always above drawer (50) + backdrop (40) + header (30) */
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;         /* YouTube uses a circular hover state */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;     /* ghost / transparent by default — like YouTube */
+  color: var(--text-primary);
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background-color 180ms ease,
+              transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              color 180ms ease;
+}
+/* YouTube-style: subtle dark circular hover background */
+.fs-fab:hover {
+  background: rgba(127, 127, 127, 0.18);
+  transform: scale(1.05);
+}
+.fs-fab:active {
+  transform: scale(0.92);
+  background: rgba(127, 127, 127, 0.28);
+}
+/* When the drawer is open the button sits on the dark sidebar — keep icon light */
+.fs-fab.is-open {
+  color: #F1F5F9;
+}
+.fs-fab.is-open:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Drawer slide animation is handled by Tailwind's transition-transform
+   utility classes (translate-x-0 / -translate-x-full) on the <aside>
+   element — this gives a smooth slide both in AND out. No one-shot
+   keyframe animation here, otherwise the closed state would be overridden. */
+
+/* ===================================================================== */
+/* LOGIN PAGE VIDEO BACKGROUND                                           */
+/* Native <video> element using Google Drive's direct-download endpoint.   */
+/* This lets the video autoPlay + mute + loop natively — no play button,  */
+/* no Drive UI chrome. The video is 100% visible across the whole page.   */
+/* The login card itself uses .fs-login-card with 50% transparency so     */
+/* the video shows through behind the card.                                */
+/* ===================================================================== */
+.fs-video-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  width: 100dvw;
+  height: 100dvh;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 1;
+  border: 0;
+}
+
+/* Login card backdrop: 50% transparent so the video shows through */
+.fs-login-card {
+  background: rgba(255, 255, 255, 0.50);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+[data-theme="night"] .fs-login-card {
+  background: rgba(22, 24, 25, 0.50);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+/* Header on the login page also uses 50% transparent backdrop */
+.fs-login-header {
+  background: rgba(255, 255, 255, 0.50);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.30);
+}
+[data-theme="night"] .fs-login-header {
+  background: rgba(22, 24, 25, 0.50);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+/* make sure the login card sits above the video */
+.fs-login-wrap { position: relative; z-index: 2; }
+.fs-login-header-wrap { position: relative; z-index: 3; }
+
+/* ===================================================================== */
+/* CUSTOM SCROLLBAR                                                      */
+/* ===================================================================== */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+/* Range inputs get the accent color */
+input[type="range"] { accent-color: var(--accent); }
+
+/* Focus ring for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Hide ugly default number arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
