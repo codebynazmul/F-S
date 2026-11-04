@@ -23,8 +23,8 @@ export default function SettingsTab() {
           icon={SlidersHorizontal}
           badge={t('Settings & Preferences', 'সেটিংস ও পছন্দ')}
           title={t('Theme & Language', 'থিম ও ভাষা পছন্দ')}
-          description={t('Day mode uses a light sky-blue and white theme. Night mode switches to deep dark gray.',
-                         'দিনের মুডে আকাশি নীল ও সাদা থিম থাকে; রাতের মুডে গাঢ় ধূসর থিম চালু হয়।')}
+          description={t('Day mode uses a light sky-blue and white theme. Night mode switches to deep dark gray, which is easier on the eyes at night.',
+                         'দিনের মুডে আকাশি নীল ও সাদা থিম থাকে; রাতের মুডে গাঢ় ধূসর থিম চালু হয়, যা রাতে চোখের জন্য আরামদায়ক।')}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -51,12 +51,12 @@ export default function SettingsTab() {
 
         <div className="pt-4 border-t border-sky-500/10 space-y-2">
           <span className={labelClass}>{t('Saved data', 'সংরক্ষিত তথ্য')}</span>
-          <p className="text-[11px] text-slate-600 dark:text-slate-400">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             {t('Your preferences, farm profile and plans are stored only in this browser.',
                'আপনার পছন্দ, খামারের তথ্য ও পরিকল্পনা শুধু এই ব্রাউজারে সংরক্ষিত থাকে।')}
           </p>
-          <button type="button" onClick={resetAll} className="btn-popup text-xs font-bold flex items-center gap-1.5 text-red-600 dark:text-red-400 px-3 py-2 rounded-xl border border-red-500/30">
-            <Trash2 className="h-3.5 w-3.5" />{t('Clear all saved data', 'সব সংরক্ষিত তথ্য মুছুন')}
+          <button type="button" onClick={resetAll} className="btn-popup min-h-tap text-sm font-bold flex items-center gap-1.5 text-red-600 dark:text-red-400 px-4 rounded-xl border border-red-500/30">
+            <Trash2 className="h-4 w-4" />{t('Clear all saved data', 'সব সংরক্ষিত তথ্য মুছুন')}
           </button>
         </div>
       </Card>
@@ -81,7 +81,7 @@ function ThemeCard({ active, onClick, icon, title, subtitle, swatches, style }: 
         <span className="text-sm font-black flex items-center gap-2" style={{ color: style.color }}>{icon}{title}</span>
         {active && <CheckCircle2 className="h-5 w-5 text-sky-500" />}
       </div>
-      <p className="text-[11px] opacity-80" style={{ color: style.color }}>{subtitle}</p>
+      <p className="text-xs opacity-80" style={{ color: style.color }}>{subtitle}</p>
       <div className="mt-3 flex gap-1.5">
         {swatches.map(c => <span key={c} className="h-3 w-3 rounded-full border border-black/10" style={{ background: c }} />)}
       </div>

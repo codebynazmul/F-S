@@ -28,7 +28,7 @@ export default function AccountTab() {
     setSaved(true);
   };
 
-  const fieldBox = 'flex items-center gap-2 glass-subtle rounded-xl px-3 py-2 border border-sky-500/15';
+  const fieldBox = 'min-h-tap flex items-center gap-2 glass-subtle rounded-xl px-3 py-2 border border-sky-500/15';
 
   return (
     <div className="space-y-6 card-rise">
@@ -52,10 +52,10 @@ export default function AccountTab() {
             <Avatar initials={user.initials} admin={admin} size="lg" />
             <div>
               <span className="text-sm font-bold block">{user.name}</span>
-              <span className="text-[11px] text-slate-600 dark:text-slate-400">{user.email}</span>
+              <span className="text-xs text-slate-600 dark:text-slate-400">{user.email}</span>
             </div>
-            <button type="button" onClick={signOut} className="btn-popup text-xs font-bold flex items-center gap-1.5 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-xl border border-red-500/30">
-              <LogOut className="h-3.5 w-3.5" />{t('Sign Out', 'লগআউট')}
+            <button type="button" onClick={signOut} className="btn-popup min-h-tap text-sm font-bold flex items-center gap-1.5 text-red-600 dark:text-red-400 px-4 rounded-xl border border-red-500/30">
+              <LogOut className="h-4 w-4" />{t('Sign Out', 'লগআউট')}
             </button>
           </SubCard>
 
@@ -76,18 +76,18 @@ export default function AccountTab() {
             </div>
             <div>
               <span className={labelClass}>{t('Email', 'ইমেইল')}</span>
-              <div className={`${fieldBox} text-xs`}>
+              <div className={`${fieldBox} text-sm`}>
                 <Mail className="h-4 w-4 text-sky-500" />
                 <span className="font-mono truncate">{user.email}</span>
               </div>
             </div>
             <div className="pt-2 flex flex-wrap items-center gap-3">
-              <button type="submit" disabled={!dirty} className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs disabled:opacity-50 disabled:pointer-events-none ${primaryBtn}`}>
+              <button type="submit" disabled={!dirty} className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm disabled:opacity-50 disabled:pointer-events-none ${primaryBtn}`}>
                 <Save className="h-4 w-4" />
                 <span>{t('Save Profile Changes', 'সংরক্ষণ করুন')}</span>
               </button>
               {saved && (
-                <span role="status" className="text-xs text-emerald-600 dark:text-emerald-300 font-bold flex items-center gap-1.5 card-popup">
+                <span role="status" className="text-sm text-emerald-600 dark:text-emerald-300 font-bold flex items-center gap-1.5 card-popup">
                   <CheckCircle2 className="h-4 w-4" />{t('Profile updated!', 'সফলভাবে আপডেট হয়েছে!')}
                 </span>
               )}
