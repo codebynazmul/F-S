@@ -8,193 +8,112 @@
 :root {
   /* DAY (default) */
   --bg-page:        #F0F9FF;   /* very light sky blue */
-  --bg-surface:     rgba(255, 255, 255, 0.65);
-  --bg-surface-2:   rgba(255, 255, 255, 0.45);
-  --bg-elevated:    rgba(255, 255, 255, 0.85);
-  --bg-sidebar:     rgba(255, 255, 255, 0.55);
+  --bg-surface:     #FFFFFF;   /* cards */
+  --bg-surface-2:   #F3F9FD;   /* boxes inside cards */
+  --bg-elevated:    #FFFFFF;
+  --bg-bar:         rgba(255, 255, 255, 0.82); /* top bar, sidebar, bottom bar */
   --border-soft:    rgba(14, 165, 233, 0.18);
   --border-strong:  rgba(14, 165, 233, 0.30);
-  --text-primary:   #000000;   /* pure black in day mode */
-  --text-secondary: #000000;
-  --text-muted:     #000000;
+  --text-primary:   #0F172A;   /* headings and main text */
+  --text-secondary: #334155;   /* body text, labels */
+  --text-muted:     #475569;   /* notes, captions */
   --accent:         #0284C7;   /* sky-600 */
-  --accent-hover:  #0369A1;   /* sky-700 */
-  --accent-soft:   rgba(14, 165, 233, 0.12);
-  --shadow-color:  rgba(14, 165, 233, 0.18);
-  --backdrop-blur: 14px;
-  --ring:          rgba(14, 165, 233, 0.35);
+  --accent-hover:   #0369A1;   /* sky-700 */
+  --accent-soft:    rgba(14, 165, 233, 0.12);
+  --shadow-color:   rgba(14, 116, 144, 0.10);
+  --skeleton:       #E2EEF6;
+  --skeleton-shine: #F4FAFD;
+  --ring:           rgba(14, 165, 233, 0.35);
 }
 
 [data-theme="night"] {
   /* NIGHT */
   --bg-page:        #161819;   /* deep dark gray */
-  --bg-surface:     rgba(38, 41, 44, 0.60);
-  --bg-surface-2:   rgba(28, 31, 33, 0.55);
-  --bg-elevated:    rgba(22, 24, 25, 0.78);
-  --bg-sidebar:     rgba(20, 22, 24, 0.78);
+  --bg-surface:     #212427;
+  --bg-surface-2:   #1A1D1F;
+  --bg-elevated:    #24282B;
+  --bg-bar:         rgba(20, 22, 24, 0.85);
   --border-soft:    rgba(255, 255, 255, 0.08);
   --border-strong:  rgba(255, 255, 255, 0.18);
-  --text-primary:   #FFFFFF;   /* pure white in night mode */
-  --text-secondary: #FFFFFF;
-  --text-muted:     #FFFFFF;
+  --text-primary:   #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted:     #A3B1C2;
   --accent:         #38BDF8;   /* sky-400 */
-  --accent-hover:  #7DD3FC;   /* sky-300 */
-  --accent-soft:   rgba(56, 189, 248, 0.14);
-  --shadow-color:  rgba(0, 0, 0, 0.55);
-  --backdrop-blur: 16px;
-  --ring:          rgba(56, 189, 248, 0.40);
+  --accent-hover:   #7DD3FC;   /* sky-300 */
+  --accent-soft:    rgba(56, 189, 248, 0.14);
+  --shadow-color:   rgba(0, 0, 0, 0.45);
+  --skeleton:       #2A2E31;
+  --skeleton-shine: #33383C;
+  --ring:           rgba(56, 189, 248, 0.40);
 }
 
 html, body {
   background: var(--bg-page);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter",
-               Roboto, "Helvetica Neue", Arial, sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   transition: background-color 350ms ease, color 350ms ease;
 }
 
-/* ===================================================================== */
-/* ENFORCE TEXT COLORS — black in day mode, white in night mode           */
-/* Tailwind's text-slate-* / text-gray-* / text-zinc-* / text-neutral-*   */
-/* classes are overridden so every body text element is forced to the     */
-/* theme color. Accent colors (sky-*, emerald-*, amber-*, etc.) are NOT   */
-/* overridden — they still provide visual emphasis.                       */
-/* ===================================================================== */
-[data-theme="day"] .text-slate-50,
-[data-theme="day"] .text-slate-100,
-[data-theme="day"] .text-slate-200,
-[data-theme="day"] .text-slate-300,
-[data-theme="day"] .text-slate-400,
-[data-theme="day"] .text-slate-500,
-[data-theme="day"] .text-slate-600,
-[data-theme="day"] .text-slate-700,
-[data-theme="day"] .text-slate-800,
-[data-theme="day"] .text-slate-900,
-[data-theme="day"] .text-slate-950,
-[data-theme="day"] .text-gray-50,
-[data-theme="day"] .text-gray-100,
-[data-theme="day"] .text-gray-200,
-[data-theme="day"] .text-gray-300,
-[data-theme="day"] .text-gray-400,
-[data-theme="day"] .text-gray-500,
-[data-theme="day"] .text-gray-600,
-[data-theme="day"] .text-gray-700,
-[data-theme="day"] .text-gray-800,
-[data-theme="day"] .text-gray-900,
-[data-theme="day"] .text-gray-950,
-[data-theme="day"] .text-zinc-50,
-[data-theme="day"] .text-zinc-100,
-[data-theme="day"] .text-zinc-200,
-[data-theme="day"] .text-zinc-300,
-[data-theme="day"] .text-zinc-400,
-[data-theme="day"] .text-zinc-500,
-[data-theme="day"] .text-zinc-600,
-[data-theme="day"] .text-zinc-700,
-[data-theme="day"] .text-zinc-800,
-[data-theme="day"] .text-zinc-900,
-[data-theme="day"] .text-zinc-950,
-[data-theme="day"] .text-neutral-50,
-[data-theme="day"] .text-neutral-100,
-[data-theme="day"] .text-neutral-200,
-[data-theme="day"] .text-neutral-300,
-[data-theme="day"] .text-neutral-400,
-[data-theme="day"] .text-neutral-500,
-[data-theme="day"] .text-neutral-600,
-[data-theme="day"] .text-neutral-700,
-[data-theme="day"] .text-neutral-800,
-[data-theme="day"] .text-neutral-900,
-[data-theme="day"] .text-neutral-950 { color: #000000 !important; }
-
-[data-theme="night"] .text-slate-50,
-[data-theme="night"] .text-slate-100,
-[data-theme="night"] .text-slate-200,
-[data-theme="night"] .text-slate-300,
-[data-theme="night"] .text-slate-400,
-[data-theme="night"] .text-slate-500,
-[data-theme="night"] .text-slate-600,
-[data-theme="night"] .text-slate-700,
-[data-theme="night"] .text-slate-800,
-[data-theme="night"] .text-slate-900,
-[data-theme="night"] .text-slate-950,
-[data-theme="night"] .text-gray-50,
-[data-theme="night"] .text-gray-100,
-[data-theme="night"] .text-gray-200,
-[data-theme="night"] .text-gray-300,
-[data-theme="night"] .text-gray-400,
-[data-theme="night"] .text-gray-500,
-[data-theme="night"] .text-gray-600,
-[data-theme="night"] .text-gray-700,
-[data-theme="night"] .text-gray-800,
-[data-theme="night"] .text-gray-900,
-[data-theme="night"] .text-gray-950,
-[data-theme="night"] .text-zinc-50,
-[data-theme="night"] .text-zinc-100,
-[data-theme="night"] .text-zinc-200,
-[data-theme="night"] .text-zinc-300,
-[data-theme="night"] .text-zinc-400,
-[data-theme="night"] .text-zinc-500,
-[data-theme="night"] .text-zinc-600,
-[data-theme="night"] .text-zinc-700,
-[data-theme="night"] .text-zinc-800,
-[data-theme="night"] .text-zinc-900,
-[data-theme="night"] .text-zinc-950,
-[data-theme="night"] .text-neutral-50,
-[data-theme="night"] .text-neutral-100,
-[data-theme="night"] .text-neutral-200,
-[data-theme="night"] .text-neutral-300,
-[data-theme="night"] .text-neutral-400,
-[data-theme="night"] .text-neutral-500,
-[data-theme="night"] .text-neutral-600,
-[data-theme="night"] .text-neutral-700,
-[data-theme="night"] .text-neutral-800,
-[data-theme="night"] .text-neutral-900,
-[data-theme="night"] .text-neutral-950,
-/* Also map white/black utility classes for consistency */
-[data-theme="night"] .text-black { color: #FFFFFF !important; }
-
-/* "dark:" variants commonly used in JSX — also flip */
-[data-theme="day"]   .dark\:text-white { color: #000000 !important; }
-[data-theme="night"] .dark\:text-white { color: #FFFFFF !important; }
-[data-theme="day"]   .dark\:text-slate-100,
-[data-theme="day"]   .dark\:text-slate-200,
-[data-theme="day"]   .dark\:text-slate-300,
-[data-theme="day"]   .dark\:text-slate-400 { color: #000000 !important; }
-[data-theme="night"] .dark\:text-slate-100,
-[data-theme="night"] .dark\:text-slate-200,
-[data-theme="night"] .dark\:text-slate-300,
-[data-theme="night"] .dark\:text-slate-400 { color: #FFFFFF !important; }
+/* Bangla script has taller letters, so give lines more room. */
+html[lang="bn"] body { line-height: 1.65; }
+html[lang="bn"] .leading-relaxed { line-height: 1.8; }
 
 /* ===================================================================== */
-/* GLASS SURFACES — vanilla transparent CSS                              */
+/* TEXT LEVELS                                                           */
+/* Gray text classes map to three theme levels so headings, body text    */
+/* and notes look different but always have strong contrast.             */
+/* Accent colors (sky-*, emerald-*, amber-*, …) are left alone.          */
 /* ===================================================================== */
-.glass {
-  background: var(--bg-surface);
-  backdrop-filter: blur(var(--backdrop-blur)) saturate(160%);
-  -webkit-backdrop-filter: blur(var(--backdrop-blur)) saturate(160%);
-  border: 1px solid var(--border-soft);
-  box-shadow: 0 8px 32px var(--shadow-color);
-}
+[data-theme="day"] :is(.text-slate-950, .text-slate-900, .text-slate-800,
+  .text-slate-50, .text-slate-100, .text-slate-200, .text-black) { color: var(--text-primary); }
+[data-theme="day"] :is(.text-slate-700, .text-slate-600, .text-slate-300) { color: var(--text-secondary); }
+[data-theme="day"] :is(.text-slate-500, .text-slate-400) { color: var(--text-muted); }
+
+[data-theme="night"] :is(.text-slate-50, .text-slate-100, .text-slate-200,
+  .text-slate-800, .text-slate-900, .text-slate-950, .text-black) { color: var(--text-primary); }
+[data-theme="night"] :is(.text-slate-300, .text-slate-600, .text-slate-700) { color: var(--text-secondary); }
+[data-theme="night"] :is(.text-slate-400, .text-slate-500) { color: var(--text-muted); }
+
+/* `dark:` variants win in night mode (they come later with equal weight). */
+[data-theme="night"] :is(.dark\:text-white, .dark\:text-slate-50, .dark\:text-slate-100, .dark\:text-slate-200) { color: var(--text-primary); }
+[data-theme="night"] .dark\:text-slate-300 { color: var(--text-secondary); }
+[data-theme="night"] .dark\:text-slate-400 { color: var(--text-muted); }
+
+/* ===================================================================== */
+/* SURFACES                                                              */
+/* Cards are solid (fast on low-end phones, better contrast).            */
+/* Only the fixed bars use a frosted blur.                               */
+/* ===================================================================== */
+.glass,
 .glass-strong {
-  background: var(--bg-elevated);
-  backdrop-filter: blur(calc(var(--backdrop-blur) + 4px)) saturate(180%);
-  -webkit-backdrop-filter: blur(calc(var(--backdrop-blur) + 4px)) saturate(180%);
+  background: var(--bg-surface);
   border: 1px solid var(--border-soft);
-  box-shadow: 0 12px 40px var(--shadow-color);
+  box-shadow: 0 1px 2px var(--shadow-color), 0 6px 20px var(--shadow-color);
 }
 .glass-subtle {
   background: var(--bg-surface-2);
-  backdrop-filter: blur(8px) saturate(140%);
-  -webkit-backdrop-filter: blur(8px) saturate(140%);
   border: 1px solid var(--border-soft);
 }
+.glass-bar,
 .glass-sidebar {
-  background: var(--bg-sidebar);
-  backdrop-filter: blur(20px) saturate(170%);
-  -webkit-backdrop-filter: blur(20px) saturate(170%);
-  border-right: 1px solid var(--border-soft);
+  background: var(--bg-bar);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+.glass-sidebar { border-right: 1px solid var(--border-soft); }
+
+/* Loading placeholder */
+@keyframes fs-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--skeleton) 25%, var(--skeleton-shine) 50%, var(--skeleton) 75%);
+  background-size: 200% 100%;
+  animation: fs-shimmer 1.4s ease-in-out infinite;
+  border-radius: 0.75rem;
 }
 
 /* ===================================================================== */
@@ -290,12 +209,9 @@ html, body {
    keyframe animation here, otherwise the closed state would be overridden. */
 
 /* ===================================================================== */
-/* LOGIN PAGE VIDEO BACKGROUND                                           */
-/* Native <video> element using Google Drive's direct-download endpoint.   */
-/* This lets the video autoPlay + mute + loop natively — no play button,  */
-/* no Drive UI chrome. The video is 100% visible across the whole page.   */
-/* The login card itself uses .fs-login-card with 50% transparency so     */
-/* the video shows through behind the card.                                */
+/* LOGIN PAGE BACKGROUND                                                 */
+/* A still photo always shows; the short looping video (public/) plays   */
+/* on top of it only on fast connections without data saver.             */
 /* ===================================================================== */
 .fs-video-bg {
   position: fixed;
@@ -312,19 +228,12 @@ html, body {
   border: 0;
 }
 
-/* Shown behind the video, and on its own if the video can't load */
+/* Still photo shown behind the video, and on its own when the video is skipped */
 .fs-login-fallback {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background:
-    radial-gradient(ellipse at 20% 10%, rgba(125, 211, 252, 0.55), transparent 60%),
-    linear-gradient(180deg, #BAE6FD 0%, #E0F2FE 45%, #FDE68A 75%, #D9A441 100%);
-}
-[data-theme="night"] .fs-login-fallback {
-  background:
-    radial-gradient(ellipse at 20% 10%, rgba(56, 189, 248, 0.25), transparent 60%),
-    linear-gradient(180deg, #0B0F14 0%, #161819 55%, #3B2F1A 100%);
+  background: #3B2F1A url('/login-bg.jpg') center / cover no-repeat;
 }
 
 /* Login card backdrop: 50% transparent so the video shows through */
@@ -373,8 +282,15 @@ html, body {
   border: 2px solid transparent;
 }
 
-/* Range inputs get the accent color */
-input[type="range"] { accent-color: var(--accent); }
+/* Range inputs: accent color and a taller touch area */
+input[type="range"] {
+  accent-color: var(--accent);
+  height: 32px;
+  touch-action: manipulation;
+}
+
+/* Leave room for the phone bottom bar and the iPhone home indicator */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 
 /* Focus ring for accessibility */
 button:focus-visible,
@@ -406,10 +322,10 @@ input[type="number"]::-webkit-inner-spin-button {
 /* PRINT — clean black-on-white report                                   */
 /* ===================================================================== */
 @media print {
-  .fs-fab, .fs-drawer, .no-print, .fs-video-bg, .fs-login-fallback { display: none !important; }
+  .fs-fab, .fs-drawer, .fs-bottom-nav, .no-print, .fs-video-bg, .fs-login-fallback { display: none !important; }
   html, body { background: #FFFFFF !important; }
   * { color: #000000 !important; box-shadow: none !important; text-shadow: none !important; }
-  .glass, .glass-strong, .glass-subtle, .glass-sidebar {
+  .glass, .glass-strong, .glass-subtle, .glass-sidebar, .glass-bar {
     background: #FFFFFF !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
