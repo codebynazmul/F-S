@@ -1,16 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, Info, Lock, LogIn, Mail, Phone, Send } from 'lucide-react';
 import { useApp } from './AppProvider';
 import { LangToggle, primaryBtn } from './ui';
 import { DEMO_ADMIN_EMAIL, initialsOf, isAdminLogin, isValidBdMobile, isValidEmail, makeUser } from '@/lib/auth';
 
-// Background video hosted on Google Drive (direct-download endpoint so it can autoplay).
-const DRIVE_VIDEO_ID = '15YYRvFlfpZEEx_mEdfK98R1RRdXmgNFC';
-const VIDEO_URL = `https://drive.usercontent.google.com/download?id=${DRIVE_VIDEO_ID}&export=download&confirm=t`;
+// Short, compressed background loop (about 1 MB). public/login-bg.jpg is shown until it plays,
+// and instead of it on slow connections, with data saver on, or when motion is reduced.
+const VIDEO_URL = '/login-bg.mp4';
 
-const fieldBox = 'flex items-center gap-2 glass-subtle rounded-xl px-3 py-2.5';
+/** Play the background video only when it won't cost the user much data or time. */
+function canPlayVideo(): boolean {
+  if (typeof window === 'undefined') return false;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  if (conn?.saveData) return false;
+  if (conn?.effectiveType && conn.effectiveType !== '4g') return false;
+  return true;
+}
+
+const fieldBox = 'min-h-tap flex items-center gap-2 glass-subtle rounded-xl px-3 py-2.5';
 const fieldInput =
   'w-full bg-transparent outline-none font-bold text-sm text-slate-900 dark:text-white placeholder:text-slate-400';
 
@@ -24,7 +34,8 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [videoFailed, setVideoFailed] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  useEffect(() => { setShowVideo(canPlayVideo()); }, []);
 
   const phoneDigits = phone.replace(/\D/g, '').replace(/^(880|0)/, '');
 
@@ -90,7 +101,7 @@ export default function LoginScreen() {
   return (
     <div className="min-h-screen flex flex-col font-sans antialiased text-slate-900 dark:text-slate-100">
       <div className="fs-login-fallback" aria-hidden />
-      {!videoFailed && (
+      {showVideo && (
         <video
           className="fs-video-bg"
           autoPlay
@@ -98,16 +109,17 @@ export default function LoginScreen() {
           loop
           playsInline
           preload="auto"
+          poster="/login-bg.jpg"
           aria-hidden
-          onError={() => setVideoFailed(true)}
+          onError={() => setShowVideo(false)}
         >
-          <source src={VIDEO_URL} type="video/mp4" onError={() => setVideoFailed(true)} />
+          <source src={VIDEO_URL} type="video/mp4" onError={() => setShowVideo(false)} />
         </video>
       )}
 
       <header className="fs-login-header fs-login-header-wrap px-6 lg:px-12 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="" className="h-12 w-12 rounded-full object-cover shadow-md" />
+          <img src="/logo-sm.png" alt="" className="h-12 w-12 rounded-full object-cover shadow-md" />
           <h1 className="text-xl lg:text-2xl font-black tracking-tight">{t('Field Shift', 'ফিল্ড শিফট')}</h1>
         </div>
         <LangToggle />
@@ -116,18 +128,18 @@ export default function LoginScreen() {
       <main className="fs-login-wrap flex-1 flex items-center justify-center p-4 lg:p-12">
         <div className="fs-login-card rounded-4xl p-8 lg:p-10 w-full max-w-md space-y-6 card-popup">
           <div className="text-center space-y-3">
-            <img src="/logo.png" alt="Field Shift logo" className="h-20 w-20 rounded-full object-cover shadow-xl mx-auto ring-4 ring-white/40" />
+            <img src="/logo-sm.png" alt="Field Shift logo" className="h-20 w-20 rounded-full object-cover shadow-xl mx-auto ring-4 ring-white/40" />
             <h2 className="text-2xl font-black tracking-tight">
               {t('Welcome to Field Shift', 'ফিল্ড শিফট লগইন')}
             </h2>
-            <p className="text-xs text-slate-600 dark:text-slate-300 max-w-xs mx-auto leading-relaxed">
+            <p className="text-sm text-slate-700 dark:text-slate-300 max-w-xs mx-auto leading-relaxed">
               {t('Sign in with Phone OTP, Google, or your Email to access NASA-powered crop planning.',
                  'ফোন ওটিপি, গুগল অথবা ইমেইল দিয়ে প্রবেশ করুন।')}
             </p>
           </div>
 
           {error && (
-            <div role="alert" className="text-[11px] font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
+            <div role="alert" className="text-sm font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
               {error}
             </div>
           )}
@@ -136,13 +148,13 @@ export default function LoginScreen() {
           <section className="space-y-3" aria-labelledby="phone-heading">
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-sky-500" />
-              <h3 id="phone-heading" className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">
+              <h3 id="phone-heading" className="text-sm font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">
                 {t('Phone Verification', 'ফোন নম্বর যাচাই')}
               </h3>
             </div>
 
             <label className={fieldBox}>
-              <span className="font-bold text-slate-500 text-xs">+880</span>
+              <span className="font-bold text-slate-600 dark:text-slate-300 text-sm">+880</span>
               <input
                 type="tel"
                 inputMode="numeric"
@@ -158,13 +170,13 @@ export default function LoginScreen() {
             </label>
 
             {!sentCode ? (
-              <button type="button" onClick={sendOtp} className={`w-full py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 ${primaryBtn}`}>
+              <button type="button" onClick={sendOtp} className={`w-full py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 ${primaryBtn}`}>
                 <Send className="h-4 w-4" />
                 <span>{t('Send OTP Code', 'ওটিপি পাঠান')}</span>
               </button>
             ) : (
               <>
-                <div className="text-[11px] flex items-start gap-1.5 rounded-lg px-3 py-2 bg-sky-500/10 border border-sky-500/25 text-sky-700 dark:text-sky-200">
+                <div className="text-sm flex items-start gap-1.5 rounded-lg px-3 py-2 bg-sky-500/10 border border-sky-500/25 text-sky-700 dark:text-sky-200">
                   <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                   <span>
                     {t('Demo mode — SMS is not connected yet. Your code is ', 'ডেমো মোড — এসএমএস এখনো যুক্ত নয়। আপনার কোড ')}
@@ -190,12 +202,12 @@ export default function LoginScreen() {
                   <button
                     type="button"
                     onClick={() => { setSentCode(null); setError(''); }}
-                    className="btn-popup px-3 rounded-xl glass-subtle text-xs font-bold flex items-center gap-1"
+                    className="btn-popup min-h-tap min-w-tap px-3 rounded-xl glass-subtle text-sm font-bold flex items-center justify-center gap-1"
                     aria-label={t('Change number', 'নম্বর পরিবর্তন')}
                   >
                     <ArrowLeft className="h-4 w-4" />
                   </button>
-                  <button type="button" onClick={verifyOtp} className={`flex-1 py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 ${primaryBtn}`}>
+                  <button type="button" onClick={verifyOtp} className={`flex-1 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 ${primaryBtn}`}>
                     <ArrowRight className="h-4 w-4" />
                     <span>{t('Verify & Continue', 'ওটিপি যাচাই করে প্রবেশ করুন')}</span>
                   </button>
@@ -209,7 +221,7 @@ export default function LoginScreen() {
           <button
             type="button"
             onClick={googleLogin}
-            className="btn-popup w-full flex items-center justify-center gap-3 py-3 px-5 rounded-2xl glass-subtle border border-sky-500/25 hover:border-sky-500/50 font-bold text-sm"
+            className="btn-popup min-h-tap w-full flex items-center justify-center gap-3 py-3 px-5 rounded-2xl glass-subtle border border-sky-500/25 hover:border-sky-500/50 font-bold text-sm"
           >
             <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden>
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -224,7 +236,7 @@ export default function LoginScreen() {
 
           <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); emailLogin(); }}>
             <div>
-              <label htmlFor="login-email" className="text-xs font-bold block mb-1 text-slate-600 dark:text-slate-300">
+              <label htmlFor="login-email" className="text-sm font-bold block mb-1 text-slate-700 dark:text-slate-300">
                 {t('Email Address', 'ইমেইল ঠিকানা')}
               </label>
               <div className={fieldBox}>
@@ -241,7 +253,7 @@ export default function LoginScreen() {
               </div>
             </div>
             <div>
-              <label htmlFor="login-password" className="text-xs font-bold block mb-1 text-slate-600 dark:text-slate-300">
+              <label htmlFor="login-password" className="text-sm font-bold block mb-1 text-slate-700 dark:text-slate-300">
                 {t('Password', 'পাসওয়ার্ড')}
               </label>
               <div className={fieldBox}>
@@ -261,12 +273,12 @@ export default function LoginScreen() {
               <LogIn className="h-4 w-4" />
               <span>{busy ? t('Signing in…', 'প্রবেশ করা হচ্ছে…') : t('Sign In', 'প্রবেশ করুন')}</span>
             </button>
-            <p className="text-[10px] text-center text-slate-500 dark:text-slate-400 pt-1">
+            <p className="text-xs text-center text-slate-500 dark:text-slate-400 pt-1">
               {t('Admin access is restricted to authorized credentials.', 'অ্যাডমিন অ্যাক্সেস শুধু অনুমোদিত ইমেইল দিয়ে।')}
             </p>
           </form>
 
-          <div className="pt-3 text-center text-[10px] text-slate-500 dark:text-slate-400 border-t border-sky-500/10">
+          <div className="pt-3 text-center text-xs text-slate-500 dark:text-slate-400 border-t border-sky-500/10">
             {t('Open Source Public Decision Support Tool', 'ওপেন সোর্স পাবলিক ডিসিশন সাপোর্ট টুল')}
           </div>
         </div>
@@ -279,7 +291,7 @@ function Divider({ label }: { label: string }) {
   return (
     <div className="relative flex items-center py-1">
       <div className="flex-grow border-t border-sky-500/15" />
-      <span className="mx-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider">{label}</span>
+      <span className="mx-4 text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">{label}</span>
       <div className="flex-grow border-t border-sky-500/15" />
     </div>
   );

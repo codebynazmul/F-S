@@ -4,12 +4,12 @@ import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { useApp } from './AppProvider';
 
-export const primaryBtn = 'btn-popup bg-sky-600 hover:bg-sky-700 text-white font-bold shadow-md';
+export const primaryBtn = 'btn-popup min-h-tap bg-sky-600 hover:bg-sky-700 text-white font-bold shadow-md';
 export const ghostBtn =
-  'btn-popup px-3 py-1.5 rounded-xl border border-sky-500/15 glass-subtle text-xs font-bold flex items-center gap-1.5 w-fit text-sky-600 dark:text-sky-300';
+  'btn-popup min-h-tap px-3.5 py-2 rounded-xl border border-sky-500/15 glass-subtle text-xs font-bold flex items-center justify-center gap-1.5 w-fit text-sky-600 dark:text-sky-300';
 export const inputClass =
-  'w-full text-sm font-bold p-2.5 rounded-xl glass-subtle border border-sky-500/15 outline-none text-slate-800 dark:text-slate-100';
-export const labelClass = 'text-xs font-bold block mb-1 text-slate-600 dark:text-slate-300';
+  'w-full min-h-tap text-sm font-bold px-3 py-2.5 rounded-xl glass-subtle border border-sky-500/15 outline-none text-slate-800 dark:text-slate-100';
+export const labelClass = 'text-sm font-bold block mb-1.5 text-slate-700 dark:text-slate-300';
 export const mutedText = 'text-slate-600 dark:text-slate-400';
 export const titleText = 'text-slate-900 dark:text-slate-50';
 
@@ -44,13 +44,13 @@ export function TabHeader({
     <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-sky-500/15 gap-4">
       <div>
         {badge && (
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${badgeColor}`}>{badge}</span>
+          <span className={`text-xs font-bold px-2 py-0.5 rounded border ${badgeColor}`}>{badge}</span>
         )}
         <h2 className={`text-lg lg:text-xl font-black ${titleText} mt-1 flex items-center gap-2`}>
           <Icon className={`h-6 w-6 shrink-0 ${color}`} />
           <span>{title}</span>
         </h2>
-        {description && <p className="text-xs mt-1 text-slate-600 dark:text-slate-300">{description}</p>}
+        {description && <p className="text-sm mt-1 leading-relaxed text-slate-600 dark:text-slate-300">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2 no-print">{actions}</div>}
     </div>
@@ -60,9 +60,9 @@ export function TabHeader({
 /** Two-button English / Bangla switch. */
 export function LangToggle({ size = 'sm', full = false }: { size?: 'sm' | 'md'; full?: boolean }) {
   const { lang, setLang } = useApp();
-  const pad = size === 'md' ? 'px-4 py-1.5' : 'px-2.5 py-1';
+  const pad = size === 'md' ? 'px-4' : 'px-3';
   const btn = (active: boolean) =>
-    `btn-popup ${pad} rounded-lg text-xs font-bold ${
+    `btn-popup ${pad} min-h-[40px] rounded-lg text-sm font-bold ${
       active ? 'bg-sky-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
     }`;
   return (
@@ -106,4 +106,9 @@ export function Avatar({ initials, admin, size = 'sm' }: { initials: string; adm
       {initials}
     </span>
   );
+}
+
+/** Grey shimmering block shown while content loads. */
+export function Skeleton({ className = '' }: { className?: string }) {
+  return <div className={`skeleton ${className}`} aria-hidden />;
 }

@@ -6,6 +6,7 @@ import { CROP_DATABASE } from '@/data/crops';
 import { usePersistentState } from '@/lib/storage';
 import { calculatePlanMetrics, type PlanMetrics } from '@/lib/metrics';
 import { recommendPlan, type Recommendation } from '@/lib/recommend';
+import { formatNum, localDigits, tr } from '@/lib/i18n';
 import type {
   BroadcastAlert, FarmProfile, Lang, SimSettings, TabId, Theme, User,
 } from '@/lib/types';
@@ -29,7 +30,12 @@ const isDistrictId = (v: unknown): v is string => ALL_DISTRICTS.some(d => d.id =
 interface AppState {
   ready: boolean;
   lang: Lang; setLang: (l: Lang) => void;
+  /** Pick English or Bangla text (Bangla gets Bangla digits). */
   t: (en: string, bn: string) => string;
+  /** Format a number in the current language's digits. */
+  n: (value: number, digits?: number) => string;
+  /** Convert the digits in any text to the current language. */
+  d: (text: string) => string;
   theme: Theme; setTheme: (t: Theme) => void;
   isNight: boolean;
 
@@ -37,6 +43,10 @@ interface AppState {
   signIn: (u: User) => void;
   signOut: () => void;
   updateUser: (patch: Partial<User>) => void;
+
+  /** True once the first-time setup has been finished or skipped on this device. */
+  onboarded: boolean;
+  finishOnboarding: () => void;
 
   activeTab: TabId; setActiveTab: (t: TabId) => void;
   menuOpen: boolean; setMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -91,7 +101,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [planOverrides, setPlanOverrides, l8] = usePersistentState<Record<string, string[]>>('plan-overrides', {});
   const [alerts, setAlerts, l9] = usePersistentState<BroadcastAlert[]>('alerts', []);
   const [dismissedAlerts, setDismissed, l10] = usePersistentState<string[]>('dismissed-alerts', []);
-  const ready = l1 && l2 && l3 && l4 && l5 && l6 && l7 && l8 && l9 && l10;
+  const [onboarded, setOnboarded, l11] = usePersistentState<boolean>('onboarded', false, (v): v is boolean => typeof v === 'boolean');
+  const ready = l1 && l2 && l3 && l4 && l5 && l6 && l7 && l8 && l9 && l10 && l11;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [sim, setSim] = useState<SimSettings>(DEFAULT_SIM);
@@ -124,7 +135,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value: AppState = {
     ready,
     lang, setLang,
-    t: (en, bn) => (lang === 'bn' ? bn : en),
+    t: (en, bn) => tr(lang, en, bn),
+    n: (value, digits = 0) => formatNum(lang, value, digits),
+    d: (text) => localDigits(lang, text),
     theme, setTheme,
     isNight: theme === 'night',
 
@@ -139,6 +152,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setActiveTab('rotation');
     },
     updateUser: (patch) => setUser(prev => (prev ? { ...prev, ...patch } : prev)),
+
+    onboarded,
+    finishOnboarding: () => { setOnboarded(true); setActiveTab('rotation'); },
 
     activeTab: activeTab === 'admin' && user?.role !== 'admin' ? 'rotation' : activeTab,
     setActiveTab,
