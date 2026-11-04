@@ -1,0 +1,221 @@
+'use client';
+
+import React, { useState } from 'react';
+import { ArrowLeft, ArrowRight, Check, CloudRain, Droplets, Layers, LocateFixed, MapPin, Waves } from 'lucide-react';
+import { ALL_DISTRICTS } from '@/data/districts';
+import { DIVISIONS, IRRIGATION_TYPES, SOIL_TEXTURES, divisionName } from '@/lib/options';
+import type { IrrigationType, SoilTexture } from '@/lib/types';
+import { useApp } from './AppProvider';
+import { LangToggle, Card, inputClass, labelClass, primaryBtn, ghostBtn } from './ui';
+
+const SOIL_HINTS: Record<SoilTexture, { en: string; bn: string }> = {
+  sand:       { en: 'Gritty, water drains away fast', bn: 'খসখসে, পানি দ্রুত চলে যায়' },
+  sandy_loam: { en: 'Loose, a little gritty', bn: 'ঝুরঝুরে, একটু খসখসে' },
+  loam:       { en: 'Soft and crumbly, ideal', bn: 'নরম ও ঝুরঝুরে, আদর্শ' },
+  silt_loam:  { en: 'Smooth, like flour when dry', bn: 'মসৃণ, শুকালে ময়দার মতো' },
+  clay_loam:  { en: 'Sticky when wet, cracks when dry', bn: 'ভেজা অবস্থায় আঠালো, শুকালে ফাটে' },
+  clay:       { en: 'Very sticky, holds water long', bn: 'খুব আঠালো, দীর্ঘ সময় পানি ধরে রাখে' },
+  peat:       { en: 'Dark, spongy, low-lying beel land', bn: 'কালো, স্পঞ্জের মতো, নিচু বিল এলাকা' },
+};
+
+const IRRIGATION_ICONS: Record<IrrigationType, typeof Droplets> = {
+  deep_tw: Droplets,
+  shallow_tw: Droplets,
+  canal: Waves,
+  rainfed: CloudRain,
+};
+
+/** Distance in km between two points (haversine). */
+function distanceKm(aLat: number, aLng: number, bLat: number, bLng: number) {
+  const r = (x: number) => (x * Math.PI) / 180;
+  const dLat = r(bLat - aLat);
+  const dLng = r(bLng - aLng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(aLat)) * Math.cos(r(bLat)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(h));
+}
+
+/** Three short steps for new users: district → soil → water and farm size. */
+export default function Onboarding() {
+  const { t, n, lang, user, district, setDistrictId, farm, updateFarm, finishOnboarding } = useApp();
+  const [step, setStep] = useState(0);
+  const [locating, setLocating] = useState(false);
+  const [locError, setLocError] = useState('');
+
+  const steps = [
+    { icon: MapPin, title: t('Where is your farm?', 'আপনার জমি কোথায়?') },
+    { icon: Layers, title: t('What is your soil like?', 'আপনার মাটি কেমন?') },
+    { icon: Droplets, title: t('How do you water your crops?', 'আপনি কীভাবে সেচ দেন?') },
+  ];
+  const last = step === steps.length - 1;
+
+  const locate = () => {
+    if (!('geolocation' in navigator)) {
+      setLocError(t('Location is not available on this device.', 'এই ডিভাইসে লোকেশন পাওয়া যাচ্ছে না।'));
+      return;
+    }
+    setLocating(true);
+    setLocError('');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const nearest = ALL_DISTRICTS.reduce((best, d) =>
+          distanceKm(latitude, longitude, d.lat, d.lng) < distanceKm(latitude, longitude, best.lat, best.lng) ? d : best
+        );
+        setDistrictId(nearest.id);
+        setLocating(false);
+      },
+      () => {
+        setLocError(t('Could not get your location. Please choose your district from the list.', 'লোকেশন পাওয়া যায়নি। তালিকা থেকে জেলা বেছে নিন।'));
+        setLocating(false);
+      },
+      { timeout: 10000, maximumAge: 600000 }
+    );
+  };
+
+  const optionClass = (active: boolean) =>
+    `btn-popup min-h-tap w-full flex items-center gap-3 p-3 rounded-2xl border text-left ${
+      active ? 'border-sky-500 bg-sky-500/10 ring-2 ring-sky-500/30' : 'border-sky-500/15 glass-subtle hover:border-sky-500/40'
+    }`;
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <header className="glass-bar border-b border-sky-500/15 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <img src="/logo-sm.png" alt="" className="h-10 w-10 rounded-full object-cover" />
+          <span className="text-lg font-black">{t('Field Shift', 'ফিল্ড শিফট')}</span>
+        </div>
+        <LangToggle />
+      </header>
+
+      <main className="flex-1 flex items-start sm:items-center justify-center p-4 sm:p-8">
+        <Card className="w-full max-w-xl rounded-4xl p-5 sm:p-8 space-y-6 card-rise">
+          <div className="space-y-3">
+            <p className="text-sm font-bold text-sky-600 dark:text-sky-300">
+              {t(`Welcome, ${user?.name ?? ''}! Let's set up your farm.`, `স্বাগতম, ${user?.name ?? ''}! চলুন আপনার খামারের তথ্য দিই।`)}
+            </p>
+            {/* Progress */}
+            <div className="flex items-center gap-2" aria-hidden>
+              {steps.map((_, i) => (
+                <div key={i} className={`h-2 flex-1 rounded-full transition-colors ${i <= step ? 'bg-sky-500' : 'bg-slate-400/25'}`} />
+              ))}
+            </div>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {t(`Step ${step + 1} of ${steps.length}`, `ধাপ ${step + 1} / ${steps.length}`)}
+            </p>
+            <h1 className="text-xl sm:text-2xl font-black flex items-center gap-2">
+              {React.createElement(steps[step].icon, { className: 'h-6 w-6 text-sky-500 shrink-0' })}
+              {steps[step].title}
+            </h1>
+          </div>
+
+          {step === 0 && (
+            <div className="space-y-4">
+              <button type="button" onClick={locate} disabled={locating} className={`${ghostBtn} w-full sm:w-auto text-sm`}>
+                <LocateFixed className={`h-5 w-5 ${locating ? 'animate-pulse' : ''}`} />
+                {locating ? t('Finding you…', 'খোঁজা হচ্ছে…') : t('Use my location', 'আমার লোকেশন ব্যবহার করুন')}
+              </button>
+              {locError && <p role="alert" className="text-sm text-amber-700 dark:text-amber-400">{locError}</p>}
+              <div>
+                <label htmlFor="ob-district" className={labelClass}>{t('Or choose your district', 'অথবা জেলা বেছে নিন')}</label>
+                <select id="ob-district" value={district.id} onChange={(e) => setDistrictId(e.target.value)} className={inputClass}>
+                  {DIVISIONS.map(div => (
+                    <optgroup key={div.id} label={`${divisionName(div.id, lang)} ${t('Division', 'বিভাগ')}`}>
+                      {ALL_DISTRICTS.filter(d => d.division === div.id).map(d => (
+                        <option key={d.id} value={d.id}>{lang === 'bn' ? d.nameBn : d.name}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+              <div className="p-4 rounded-2xl glass-subtle text-sm space-y-1">
+                <div className="font-black text-sky-700 dark:text-sky-300 flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4" />{lang === 'bn' ? district.nameBn : district.name}, {divisionName(district.division, lang)}
+                </div>
+                <div className="text-slate-600 dark:text-slate-400">
+                  {t('Rainfall', 'বৃষ্টিপাত')}: {n(district.rainfall)} {t('mm/yr', 'মিমি/বছর')} · {t('Main risk', 'প্রধান ঝুঁকি')}: {lang === 'bn' ? district.riskBn : district.risk}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 1 && (
+            <div className="space-y-3">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {t('Pick the one closest to your field. Not sure? Keep the selected one — you can change it later.',
+                   'আপনার জমির সাথে সবচেয়ে মিল আছে এমনটি বেছে নিন। নিশ্চিত না হলে যেটি বাছাই করা আছে সেটিই রাখুন — পরে বদলানো যাবে।')}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('Soil type', 'মাটির ধরণ')}>
+                {SOIL_TEXTURES.map(s => {
+                  const active = farm.texture === s.id;
+                  return (
+                    <button key={s.id} type="button" role="radio" aria-checked={active} onClick={() => updateFarm({ texture: s.id })} className={optionClass(active)}>
+                      <span className="flex-1">
+                        <span className="block text-sm font-bold">{lang === 'bn' ? s.bn : s.en}</span>
+                        <span className="block text-xs text-slate-500 dark:text-slate-400">{lang === 'bn' ? SOIL_HINTS[s.id].bn : SOIL_HINTS[s.id].en}</span>
+                      </span>
+                      {active && <Check className="h-5 w-5 text-sky-600 dark:text-sky-300 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {t(`District soil: ${district.soil}. Have a soil test? Add pH and organic matter later in Farm & Soil Profile.`,
+                   `জেলার মাটি: ${district.soil}। মাটি পরীক্ষা করা থাকলে পরে "খামার ও মাটির তথ্য" অংশে pH ও জৈব পদার্থ যোগ করুন।`)}
+              </p>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('Irrigation source', 'সেচ ব্যবস্থা')}>
+                {IRRIGATION_TYPES.map(i => {
+                  const active = farm.irrigation === i.id;
+                  const Icon = IRRIGATION_ICONS[i.id];
+                  return (
+                    <button key={i.id} type="button" role="radio" aria-checked={active} onClick={() => updateFarm({ irrigation: i.id })} className={optionClass(active)}>
+                      <span className="h-10 w-10 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-300 flex items-center justify-center shrink-0">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span className="flex-1 text-sm font-bold">{lang === 'bn' ? i.bn : i.en}</span>
+                      {active && <Check className="h-5 w-5 text-sky-600 dark:text-sky-300 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+              <div>
+                <label htmlFor="ob-size" className={labelClass}>{t('Farm size (bigha)', 'জমির পরিমাণ (বিঘা)')}</label>
+                <input
+                  id="ob-size" type="number" inputMode="decimal" min={0.5} max={1000} step={0.5}
+                  value={farm.sizeBigha}
+                  onChange={(e) => updateFarm({ sizeBigha: Math.min(1000, Math.max(0, Number(e.target.value) || 0)) })}
+                  onBlur={() => updateFarm({ sizeBigha: Math.min(1000, Math.max(0.5, farm.sizeBigha)) })}
+                  className={`${inputClass} max-w-[200px]`}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between gap-3 pt-2 border-t border-sky-500/10">
+            {step > 0 ? (
+              <button type="button" onClick={() => setStep(s => s - 1)} className={`${ghostBtn} text-sm`}>
+                <ArrowLeft className="h-4 w-4" />{t('Back', 'পেছনে')}
+              </button>
+            ) : (
+              <button type="button" onClick={finishOnboarding} className="min-h-tap px-3 text-sm font-bold text-slate-600 dark:text-slate-400 hover:underline">
+                {t('Skip for now', 'এখন নয়')}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => (last ? finishOnboarding() : setStep(s => s + 1))}
+              className={`flex items-center gap-2 px-6 rounded-xl text-sm ${primaryBtn}`}
+            >
+              {last ? t('Show my crop plan', 'আমার ফসল পরিকল্পনা দেখুন') : t('Next', 'পরবর্তী')}
+              {last ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
+            </button>
+          </div>
+        </Card>
+      </main>
+    </div>
+  );
+}

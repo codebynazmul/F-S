@@ -4,6 +4,7 @@ import React from 'react';
 import { useApp } from './AppProvider';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import BottomNav from './BottomNav';
 import RotationTab from './tabs/RotationTab';
 import WhatIfTab from './tabs/WhatIfTab';
 import AnalyticsTab from './tabs/AnalyticsTab';
@@ -45,17 +46,18 @@ export default function Dashboard() {
           <Tab key={activeTab} />
         </main>
 
-        <footer className="no-print glass-subtle border-t border-sky-500/10 py-6 px-4 lg:px-8 mt-auto text-xs text-slate-600 dark:text-slate-400">
+        <footer className="no-print glass-subtle border-x-0 border-b-0 py-6 px-4 lg:px-8 mt-auto mb-[calc(64px+env(safe-area-inset-bottom))] lg:mb-0 text-xs text-slate-600 dark:text-slate-400">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center">
             <div>
               <span className="font-bold text-slate-900 dark:text-white">Field Shift</span> · {t('Developed by SPIDERX', 'ডেভেলপড বাই SPIDERX')}
             </div>
-            <div className="text-[11px]">
+            <div className="text-xs">
               {t('Climate data: NASA POWER · Built for NASA Space Apps Challenge', 'জলবায়ু তথ্য: নাসা POWER · নাসা স্পেস অ্যাপস চ্যালেঞ্জের জন্য তৈরি')}
             </div>
           </div>
         </footer>
       </div>
+      <BottomNav />
     </div>
   );
 }
