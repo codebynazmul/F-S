@@ -154,7 +154,6 @@ html, body {
 [data-theme="night"] .text-neutral-950,
 /* Also map white/black utility classes for consistency */
 [data-theme="night"] .text-black { color: #FFFFFF !important; }
-[data-theme="day"]   .text-white { color: #000000 !important; }
 
 /* "dark:" variants commonly used in JSX — also flip */
 [data-theme="day"]   .dark\:text-white { color: #000000 !important; }
@@ -281,12 +280,8 @@ html, body {
   transform: scale(0.92);
   background: rgba(127, 127, 127, 0.28);
 }
-/* When the drawer is open the button sits on the dark sidebar — keep icon light */
 .fs-fab.is-open {
-  color: #F1F5F9;
-}
-.fs-fab.is-open:hover {
-  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
 }
 
 /* Drawer slide animation is handled by Tailwind's transition-transform
@@ -315,6 +310,21 @@ html, body {
   pointer-events: none;
   opacity: 1;
   border: 0;
+}
+
+/* Shown behind the video, and on its own if the video can't load */
+.fs-login-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(125, 211, 252, 0.55), transparent 60%),
+    linear-gradient(180deg, #BAE6FD 0%, #E0F2FE 45%, #FDE68A 75%, #D9A441 100%);
+}
+[data-theme="night"] .fs-login-fallback {
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(56, 189, 248, 0.25), transparent 60%),
+    linear-gradient(180deg, #0B0F14 0%, #161819 55%, #3B2F1A 100%);
 }
 
 /* Login card backdrop: 50% transparent so the video shows through */
@@ -381,4 +391,32 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* ===================================================================== */
+/* PRINT — clean black-on-white report                                   */
+/* ===================================================================== */
+@media print {
+  .fs-fab, .fs-drawer, .no-print, .fs-video-bg, .fs-login-fallback { display: none !important; }
+  html, body { background: #FFFFFF !important; }
+  * { color: #000000 !important; box-shadow: none !important; text-shadow: none !important; }
+  .glass, .glass-strong, .glass-subtle, .glass-sidebar {
+    background: #FFFFFF !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid #D4D4D8 !important;
+  }
+  .card-rise, .card-popup { animation: none !important; }
+  main { padding: 0 !important; max-width: none !important; }
+  .break-inside-avoid { break-inside: avoid; }
+  @page { margin: 14mm; }
 }
