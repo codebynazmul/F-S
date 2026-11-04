@@ -45,10 +45,21 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Inter',
-               'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        // Inter for Latin text; Noto Sans Bengali fills in every Bangla character.
+        sans: ['var(--font-inter)', 'var(--font-bengali)', 'system-ui', '-apple-system',
+               'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco',
                'Consolas', 'monospace'],
+      },
+      fontSize: {
+        // Smallest text in the app is 13px so it stays readable on phones outdoors.
+        xs: ['0.8125rem', { lineHeight: '1.25rem' }],
+      },
+      minHeight: {
+        tap: '44px',
+      },
+      minWidth: {
+        tap: '44px',
       },
       borderRadius: {
         '4xl': '2rem',
