@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { BellRing, FileText, MapPin, X } from 'lucide-react';
+import { FileText, MapPin } from 'lucide-react';
 import { ALL_DISTRICTS } from '@/data/districts';
-import { DIVISIONS, divisionName, ALERT_TYPES } from '@/lib/options';
+import { DIVISIONS, divisionName } from '@/lib/options';
 import { pick } from '@/lib/i18n';
 import { useApp } from './AppProvider';
 import { primaryBtn } from './ui';
@@ -70,40 +70,6 @@ export default function TopBar() {
             <span className="text-amber-600 dark:text-amber-400 font-bold">{lang === 'bn' ? district.riskBn : district.risk}</span>
           </div>
         </div>
-      </div>
-
-      <AlertBanner />
-    </div>
-  );
-}
-
-/** Shows admin broadcasts for the division of the selected district. */
-function AlertBanner() {
-  const { t, lang, district, alerts, dismissedAlerts, dismissAlert } = useApp();
-  const active = alerts.filter(a => a.division === district.division && !dismissedAlerts.includes(a.id));
-  if (active.length === 0) return null;
-
-  return (
-    <div className="px-4 lg:px-8 pt-4">
-      <div className="max-w-7xl mx-auto space-y-2">
-        {active.slice(0, 3).map(a => (
-          <div key={a.id} role="alert" className="card-popup flex items-start gap-3 p-3.5 rounded-2xl border border-amber-500/40 bg-amber-500/15">
-            <BellRing className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-            <div className="flex-1 text-sm space-y-0.5">
-              <div className="font-black text-amber-700 dark:text-amber-300">
-                {pick(lang, ALERT_TYPES[a.type].label)} — {divisionName(a.division, lang)} {t('Division', 'বিভাগ')}
-              </div>
-              <div className="text-slate-800 dark:text-slate-100">{pick(lang, ALERT_TYPES[a.type].advice)}</div>
-              {a.note && <div className="text-slate-700 dark:text-slate-200 italic">{a.note}</div>}
-              <div className="text-xs text-slate-600 dark:text-slate-400">
-                {new Date(a.sentAt).toLocaleString(lang === 'bn' ? 'bn-BD' : 'en-GB')} · {a.sentBy}
-              </div>
-            </div>
-            <button type="button" onClick={() => dismissAlert(a.id)} className="btn-popup h-11 w-11 -m-2 flex items-center justify-center shrink-0 rounded-xl text-slate-500 hover:text-slate-900" aria-label={t('Dismiss alert', 'সতর্কতা বন্ধ করুন')}>
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-        ))}
       </div>
     </div>
   );

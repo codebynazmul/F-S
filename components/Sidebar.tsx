@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import {
-  BarChart3, ChevronRight, FileText, Globe, Layers, LogOut, Menu, Moon, Radio,
+  BarChart3, ChevronRight, FileText, Globe, Layers, LogOut, Menu, Moon, ShieldCheck,
   Sliders, SlidersHorizontal, Sprout, Sun, User as UserIcon, X, type LucideIcon,
 } from 'lucide-react';
 import { useApp } from './AppProvider';
@@ -19,7 +19,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'farm_profile', en: 'Farm & Soil Profile',       bn: 'খামার ও মাটির ল্যাব তথ্য',      icon: Layers },
   { id: 'user_account', en: 'My Account',                bn: 'আমার একাউন্ট ও প্রোফাইল',        icon: UserIcon },
   { id: 'settings',     en: 'Settings & Theme',          bn: 'সেটিংস ও থিম',                 icon: SlidersHorizontal },
-  { id: 'admin',        en: 'Admin Control & Broadcast', bn: 'অ্যাডমিন কন্ট্রোল ও সতর্কতা বোর্ড', icon: Radio, adminOnly: true },
+  { id: 'admin',        en: 'Admin Panel',               bn: 'অ্যাডমিন প্যানেল',               icon: ShieldCheck, adminOnly: true },
   { id: 'report',       en: 'Farm Action Dossier',       bn: 'কৃষক কর্মপরিকল্পনা রিপোর্ট',      icon: FileText },
 ];
 

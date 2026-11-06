@@ -37,9 +37,6 @@ The dashboard is split into tabs. They are listed in the side menu; on phones a 
 | **NASA Earth Data** | Live long-term climate averages for the district from NASA POWER: monthly rainfall, temperature, humidity, solar radiation, root-zone soil wetness and estimated evapotranspiration. |
 | **Farm & Soil Profile** | Enter farm size (bigha), soil texture, pH, organic matter and irrigation source. Recommendations update immediately. |
 | **Farm Action Dossier** | A printable plan with the crop schedule, water and urea savings, and soil tips. Copy the summary or save it as PDF. |
-| **Admin Control & Broadcast** | *(Admins only)* Send drought, salinity, flood or cold-wave advisories to a division. Farmers in that division see them as banners. |
-| **My Account / Settings** | Edit your name and phone number (shown on the report), switch between day and night themes, or clear saved data. The English / বাংলা toggle is always in the header. |
-
 ---
 
 ## Quick start
@@ -71,12 +68,23 @@ No environment variables or API keys are needed. The NASA POWER API is public an
 There is no backend yet, so sign-in is simulated in the browser:
 
 - **Phone + OTP** — enter a Bangladeshi mobile number (e.g. `1712345678`). No SMS is sent; the 6-digit code is shown on screen.
-- **Google** — signs you in as a demo farmer. No real OAuth takes place.
-- **Email + password** — any valid email with any password signs you in as a farmer. The demo admin account (`spiderx@gmail.com`) needs the admin password; ask the project owner for it. Only its SHA-256 hash is stored in [lib/auth.ts](lib/auth.ts).
-
-Admins go straight to the Admin tab. Everyone else goes through first-time setup.
 
 > ⚠️ All of these checks run in the browser and can be bypassed. Replace them with real authentication (NextAuth, Firebase Auth, Supabase, etc.) before storing any real farmer data.
+
+### Admin panel (demo)
+
+Sign in with ID **`admin`** and password **`admin`** (type `admin` in the email field). You go straight to the Admin Panel. A warning stays at the top until you change the default password under **Security**.
+
+| Section | What the admin can do |
+| --- | --- |
+| **Overview** | Total, active, new, blocked and admin counts; users by division and top districts; most recommended crops; sign-in methods; recent sign-ins. |
+| **Users** | Search and filter accounts; edit name and phone; block or unblock; make or remove admins; delete accounts; export the list as CSV. Admins cannot change their own account here. |
+| **Activity log** | Every admin sign-in, failed admin sign-in, sign-out and change, newest first (last 500). Filter by type or clear the log. |
+| **Security** | Change the signed-in admin's password (minimum 6 characters). |
+
+Promoted admins sign in with their own email and password. **Settings → Clear all saved data** deletes every account and resets the built-in admin password to `admin`.
+
+Because there is no server, the panel only sees accounts used in the same browser, and anyone with developer tools can edit the saved data, including making themselves admin.
 
 ---
 
@@ -139,16 +147,12 @@ Fetches climatology (`PRECTOTCORR`, `T2M`, `RH2M`, `ALLSKY_SFC_SW_DWN`, `GWETROO
 │   ├── not-found.tsx
 │   └── globals.css
 ├── components/
-│   ├── AppProvider.tsx     # Shared app state (user, district, farm, plans, alerts)
+│   ├── AppProvider.tsx     # Shared app state (user, district, farm, plans)
 │   ├── Dashboard.tsx       # Layout and tab switching
 │   ├── LoginScreen.tsx     # Phone OTP / Google / email sign-in (demo)
-│   ├── Onboarding.tsx      # Three-step first-time farm setup
-│   ├── Sidebar.tsx         # Main navigation menu
-│   ├── BottomNav.tsx       # Bottom tab bar on phones and small tablets
-│   ├── TopBar.tsx          # District picker, language toggle, alert banners
-│   ├── CropIcon.tsx        # Drawn crop icons and the crop picker
-│   ├── ServiceWorker.tsx   # Registers public/sw.js in production
+
 │   ├── ui.tsx              # Shared cards, buttons, input styles
+│   ├── admin/              # Admin panel sections (overview, users, activity, security)
 │   └── tabs/               # One file per dashboard tab
 ├── data/
 │   ├── crops.ts            # 8 crops: water use, nitrogen, tolerance, Bangla names
@@ -158,8 +162,8 @@ Fetches climatology (`PRECTOTCORR`, `T2M`, `RH2M`, `ALLSKY_SFC_SW_DWN`, `GWETROO
 │   ├── metrics.ts          # Plan scoring and soil organic matter projection
 │   ├── nasaPower.ts        # NASA POWER API hook
 │   ├── storage.ts          # localStorage-backed React state
-│   ├── auth.ts             # Demo sign-in helpers
-│   ├── options.ts          # Divisions, soil textures, irrigation types, alert types
+│   ├── auth.ts             # Demo sign-in, password hashing, built-in admin
+│   ├── options.ts          # Divisions, soil textures, irrigation types
 │   ├── i18n.ts             # English / Bangla helpers
 │   └── types.ts
 ├── public/
@@ -178,9 +182,6 @@ The `@/` import alias points to the project root.
 
 - **Crops** — rice (Boro and Aman), wheat, lentil, chickpea, mustard, maize and mungbean, in [data/crops.ts](data/crops.ts). To add a crop, add an entry to `CROP_DATABASE` and it becomes available in the plan editors. Optionally add a drawn icon for it in [components/CropIcon.tsx](components/CropIcon.tsx); without one it shows a plain tile. The automatic recommendation only uses the rules above, so a new crop is not recommended until you add a rule for it.
 - **Districts** — all 64 districts in [data/districts.ts](data/districts.ts), with coordinates used for the NASA POWER lookups.
-- **Saved state** — everything (user, language, theme, selected district and tab, farm profile, edited plans, admin alerts, dismissed alerts, whether setup is done) is kept in the browser's `localStorage` under keys starting with `fs-`. It is not shared between browsers or devices. **Settings → Clear all saved data** removes it and signs you out.
-
-Because alerts are stored per browser, an admin broadcast is only visible in the same browser that sent it. A shared backend is needed for it to reach other users.
 
 ---
 

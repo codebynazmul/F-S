@@ -91,7 +91,7 @@ export function Meter({ value, color = 'bg-sky-500', label }: { value: number; c
   );
 }
 
-export function Avatar({ initials, admin, size = 'sm' }: { initials: string; admin: boolean; size?: 'sm' | 'lg' }) {
+export function Avatar({ initials, admin = false, size = 'sm' }: { initials: string; admin?: boolean; size?: 'sm' | 'lg' }) {
   const dims = size === 'lg' ? 'text-4xl w-20 h-20 rounded-3xl shadow-lg' : 'text-sm w-9 h-9 rounded-xl';
   return (
     <span

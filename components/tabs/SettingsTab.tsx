@@ -10,8 +10,8 @@ export default function SettingsTab() {
   const { t, theme, setTheme } = useApp();
 
   const resetAll = () => {
-    if (!window.confirm(t('Delete all saved data on this device (profile, farm, plans, alerts) and sign out?',
-                          'এই ডিভাইসে সংরক্ষিত সব তথ্য (প্রোফাইল, খামার, পরিকল্পনা, সতর্কতা) মুছে লগআউট করবেন?'))) return;
+    if (!window.confirm(t('Delete all saved data on this device (profile, farm, plans) and sign out?',
+                          'এই ডিভাইসে সংরক্ষিত সব তথ্য (প্রোফাইল, খামার, পরিকল্পনা) মুছে লগআউট করবেন?'))) return;
     clearSavedData();
     window.location.reload();
   };
