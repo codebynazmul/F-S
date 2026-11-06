@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Eye, EyeOff, Info, KeyRound, Lock, LogIn, Mail, Phone, Send, User as UserIcon, UserPlus } from 'lucide-react';
-import { useApp } from './AppProvider';
+import { useApp, type AuthResult } from './AppProvider';
 import { LangToggle, primaryBtn } from './ui';
 import LegalModal, { type LegalDoc } from './LegalModal';
-import { DEMO_ADMIN_EMAIL, initialsOf, isAdminLogin, isValidBdMobile, isValidEmail, makeUser } from '@/lib/auth';
+import { BUILTIN_ADMIN_ID, MIN_PASSWORD_LENGTH, isValidBdMobile, isValidEmail } from '@/lib/auth';
 
 // Short, compressed background loop (about 1 MB). public/login-bg.jpg is shown until it plays,
 // and instead of it on slow connections, with data saver on, or when motion is reduced.
@@ -28,7 +28,7 @@ const fieldInput =
 type Mode = 'login' | 'otp' | 'signup' | 'forgot';
 
 export default function LoginScreen() {
-  const { t, signIn } = useApp();
+  const { t, authenticate, register } = useApp();
 
   const [mode, setMode] = useState<Mode>('login');
   const [name, setName] = useState('');
@@ -43,7 +43,41 @@ export default function LoginScreen() {
   const [busy, setBusy] = useState(false);
   const [legal, setLegal] = useState<LegalDoc | null>(null);
   const [showVideo, setShowVideo] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => { setShowVideo(canPlayVideo()); }, []);
+
+  // Start the background video ourselves. Browsers only autoplay muted video, and React
+  // doesn't always set `muted` before the browser decides, so the video can stay paused.
+  // If autoplay is still blocked, start it on the first tap or key press instead.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!showVideo || !video) return;
+    video.muted = true;
+    video.defaultMuted = true;
+
+    const play = () => {
+      if (video.paused) video.play().catch(() => {});
+    };
+    const events = ['pointerdown', 'keydown', 'touchstart'] as const;
+    const onInteract = () => {
+      play();
+      events.forEach(e => window.removeEventListener(e, onInteract));
+    };
+    events.forEach(e => window.addEventListener(e, onInteract, { passive: true }));
+    // Resume after switching back to this tab or returning with the Back button.
+    const onVisible = () => { if (document.visibilityState === 'visible') play(); };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('pageshow', play);
+    video.addEventListener('canplay', play);
+    play();
+
+    return () => {
+      events.forEach(e => window.removeEventListener(e, onInteract));
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('pageshow', play);
+      video.removeEventListener('canplay', play);
+    };
+  }, [showVideo]);
 
   const phoneDigits = phone.replace(/\D/g, '').replace(/^(880|0)/, '');
 
@@ -67,25 +101,38 @@ export default function LoginScreen() {
     setError('');
   };
 
+  /** Shows the right message for a failed sign-in. */
+  const showResult = (result: AuthResult) => {
+    if (result === 'blocked') {
+      setError(t('This account has been blocked by an administrator.', 'এই অ্যাকাউন্টটি অ্যাডমিন বন্ধ করে রেখেছেন।'));
+    } else if (result === 'wrong-password') {
+      setError(t('Incorrect password.', 'পাসওয়ার্ড সঠিক নয়।'));
+    } else if (result === 'exists') {
+      setError(t('An account with this email already exists. Please log in.', 'এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা আছে। লগইন করুন।'));
+    }
+  };
+
+  const run = async (attempt: () => Promise<AuthResult>) => {
+    setBusy(true);
+    setError('');
+    try {
+      showResult(await attempt());
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const verifyOtp = () => {
     if (otp !== sentCode) {
       setError(t('That code is not correct. Check the 6-digit code and try again.', 'কোডটি সঠিক নয়। ৬ সংখ্যার কোডটি আবার দেখে দিন।'));
       return;
     }
-    signIn(makeUser({
-      name: t('Farmer', 'কৃষক') + ` ${phoneDigits.slice(-4)}`,
-      email: '—',
-      phone: `+880 ${phoneDigits}`,
-      initials: 'FR',
-      role: 'farmer',
-    }));
+    run(() => authenticate({ kind: 'phone', phoneDigits }));
   };
 
   // Demo: replace these with real OAuth flows.
-  const googleLogin = () =>
-    signIn(makeUser({ name: 'Google Farmer', email: 'farmer@gmail.com', phone: '—', role: 'farmer' }));
-  const appleLogin = () =>
-    signIn(makeUser({ name: 'Apple Farmer', email: 'farmer@icloud.com', phone: '—', role: 'farmer' }));
+  const googleLogin = () => run(() => authenticate({ kind: 'social', provider: 'google' }));
+  const appleLogin = () => run(() => authenticate({ kind: 'social', provider: 'apple' }));
 
   /** Returns the cleaned email, or null after setting an error. */
   const checkEmail = (): string | null => {
@@ -97,30 +144,15 @@ export default function LoginScreen() {
     return mail;
   };
 
-  const emailLogin = async () => {
+  const emailLogin = () => {
     if (!email.trim() || !password) {
       setError(t('Please enter both email and password.', 'ইমেইল ও পাসওয়ার্ড দুটোই দিন।'));
       return;
     }
-    const mail = checkEmail();
-    if (!mail) return;
-    setBusy(true);
-    try {
-      if (await isAdminLogin(mail, password)) {
-        signIn(makeUser({ name: 'System Administrator', email: mail, phone: '—', initials: 'AD', role: 'admin' }));
-        return;
-      }
-      if (mail === DEMO_ADMIN_EMAIL) {
-        setError(t('Incorrect admin password.', 'অ্যাডমিন পাসওয়ার্ড সঠিক নয়।'));
-        return;
-      }
-      // Demo: any other email signs in as a farmer.
-      const local = mail.split('@')[0];
-      const guessed = local.replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      signIn(makeUser({ name: guessed, email: mail, phone: '—', initials: initialsOf(mail), role: 'farmer' }));
-    } finally {
-      setBusy(false);
-    }
+    // The built-in admin signs in with the ID "admin" instead of an email.
+    const isAdminId = email.trim().toLowerCase() === BUILTIN_ADMIN_ID;
+    if (!isAdminId && !checkEmail()) return;
+    run(() => authenticate({ kind: 'password', identifier: email, password }));
   };
 
   const signUp = () => {
@@ -130,16 +162,11 @@ export default function LoginScreen() {
     }
     const mail = checkEmail();
     if (!mail) return;
-    if (mail === DEMO_ADMIN_EMAIL) {
-      setError(t('This email is already registered. Please log in.', 'এই ইমেইল দিয়ে আগেই নিবন্ধন করা আছে। লগইন করুন।'));
-      return;
-    }
-    if (password.length < 6) {
+    if (password.length < MIN_PASSWORD_LENGTH) {
       setError(t('Password must be at least 6 characters.', 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।'));
       return;
     }
-    // Demo: no account store yet, so sign-up signs the new farmer straight in.
-    signIn(makeUser({ name: name.trim(), email: mail, phone: '—', role: 'farmer' }));
+    run(() => register(name, mail, password));
   };
 
   const sendReset = () => {
@@ -164,8 +191,11 @@ export default function LoginScreen() {
     <label className={fieldBox}>
       <Mail className="h-4 w-4 text-sky-500" />
       <input
-        type="email"
-        autoComplete="email"
+        type="text"
+        inputMode="email"
+        autoCapitalize="none"
+        spellCheck={false}
+        autoComplete={mode === 'signup' ? 'email' : 'username'}
         aria-label={t('Email', 'ইমেইল')}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
@@ -204,6 +234,7 @@ export default function LoginScreen() {
       <div className="fs-login-fallback" aria-hidden />
       {showVideo && (
         <video
+          ref={videoRef}
           className="fs-video-bg"
           autoPlay
           muted
@@ -324,7 +355,7 @@ export default function LoginScreen() {
                     <button
                       type="button"
                       onClick={verifyOtp}
-                      disabled={otp.length !== 6}
+                      disabled={busy || otp.length !== 6}
                       className={`flex-1 py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
                     >
                       <LogIn className="h-4 w-4" />
@@ -360,7 +391,7 @@ export default function LoginScreen() {
               {passwordField}
               <button
                 type="submit"
-                disabled={!name.trim() || !email.trim() || !password}
+                disabled={busy || !name.trim() || !email.trim() || !password}
                 className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
               >
                 <UserPlus className="h-4 w-4" />
@@ -427,11 +458,11 @@ export default function LoginScreen() {
               <Divider label={t('or', 'অথবা')} />
 
               <div className="space-y-3">
-                <button type="button" onClick={googleLogin} className={socialBtn}>
+                <button type="button" onClick={googleLogin} disabled={busy} className={`${socialBtn} disabled:opacity-60`}>
                   <GoogleLogo />
                   <span>{t('Continue with Google', 'গুগল দিয়ে চালিয়ে যান')}</span>
                 </button>
-                <button type="button" onClick={appleLogin} className={socialBtn}>
+                <button type="button" onClick={appleLogin} disabled={busy} className={`${socialBtn} disabled:opacity-60`}>
                   <AppleLogo />
                   <span>{t('Continue with Apple', 'অ্যাপল দিয়ে চালিয়ে যান')}</span>
                 </button>

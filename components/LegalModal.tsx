@@ -59,8 +59,8 @@ const PRIVACY: Section[] = [
   {
     title: ['What we store', 'আমরা কী সংরক্ষণ করি'],
     body: [
-      'Your name, email or phone number, farm profile, plans, alerts and settings are saved only in this browser on this device. Field Shift has no server or database, so this information is not sent to us.',
-      'আপনার নাম, ইমেইল বা ফোন নম্বর, খামারের তথ্য, পরিকল্পনা, সতর্কতা ও সেটিংস শুধু এই ডিভাইসের এই ব্রাউজারে সংরক্ষিত থাকে। ফিল্ড শিফটের কোনো সার্ভার বা ডেটাবেস নেই, তাই এই তথ্য আমাদের কাছে পাঠানো হয় না।',
+      'Your name, email or phone number, farm profile, plans and settings are saved only in this browser on this device. Field Shift has no server or database, so this information is not sent to us.',
+      'আপনার নাম, ইমেইল বা ফোন নম্বর, খামারের তথ্য, পরিকল্পনা ও সেটিংস শুধু এই ডিভাইসের এই ব্রাউজারে সংরক্ষিত থাকে। ফিল্ড শিফটের কোনো সার্ভার বা ডেটাবেস নেই, তাই এই তথ্য আমাদের কাছে পাঠানো হয় না।',
     ],
   },
   {

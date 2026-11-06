@@ -1,13 +1,58 @@
 export type Lang = 'en' | 'bn';
 export type Theme = 'day' | 'night';
 export type Role = 'farmer' | 'admin';
+export type SignInMethod = 'email' | 'phone' | 'google' | 'apple';
 
+/** The signed-in person for this browser session. */
 export interface User {
+  id: string;
   name: string;
   email: string;
   phone: string;
   initials: string;
   role: Role;
+}
+
+/** A registered account, as kept in this browser's account list. */
+export interface Account {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  method: SignInMethod;
+  role: Role;
+  blocked: boolean;
+  passwordHash?: string;
+  createdAt: number;
+  lastLoginAt: number;
+  loginCount: number;
+  /** Last district and farm this person used, for admin statistics. */
+  districtId?: string;
+  farm?: FarmProfile;
+}
+
+export type AdminAction =
+  | 'login'
+  | 'login_failed'
+  | 'logout'
+  | 'edit_user'
+  | 'block_user'
+  | 'unblock_user'
+  | 'delete_user'
+  | 'make_admin'
+  | 'remove_admin'
+  | 'change_password'
+  | 'export_users'
+  | 'clear_log';
+
+export interface AdminLogEntry {
+  id: string;
+  at: number;
+  /** Who did it (name or email). */
+  actor: string;
+  action: AdminAction;
+  /** Who or what it was done to. */
+  target?: string;
 }
 
 export type TabId =
@@ -44,17 +89,6 @@ export interface SimSettings {
   rainDelta: number;     // % change in rainfall
   tempDelta: number;     // °C increase
   irrigationCut: number; // % less irrigation water available
-}
-
-export type AlertType = 'drought' | 'salinity' | 'flood' | 'cold';
-
-export interface BroadcastAlert {
-  id: string;
-  division: string;
-  type: AlertType;
-  note: string;
-  sentAt: number;
-  sentBy: string;
 }
 
 /** A piece of text in both languages. */

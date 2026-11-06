@@ -1,4 +1,4 @@
-import type { AlertType, Bi, IrrigationType, SoilTexture } from './types';
+import type { Bi, IrrigationType, SoilTexture } from './types';
 
 export const DIVISIONS: { id: string; bn: string }[] = [
   { id: 'Dhaka', bn: 'ঢাকা' },
@@ -32,37 +32,6 @@ export const IRRIGATION_TYPES: { id: IrrigationType; en: string; bn: string; sup
   { id: 'canal',      en: 'Canal / River',     bn: 'খাল বা নদীর পানি', supplyCut: 10 },
   { id: 'rainfed',    en: 'Rainfed only',      bn: 'বৃষ্টি নির্ভর',     supplyCut: 40 },
 ];
-
-export const ALERT_TYPES: Record<AlertType, { label: Bi; advice: Bi }> = {
-  drought: {
-    label: { en: 'Drought & Groundwater Deficit', bn: 'খরা ও ভূগর্ভস্থ পানি সংকট' },
-    advice: {
-      en: 'Avoid extra Boro irrigation; switch to pulses and mustard.',
-      bn: 'বোরো ধানে অতিরিক্ত সেচ এড়িয়ে চলুন; ডাল ও সরিষা চাষ করুন।',
-    },
-  },
-  salinity: {
-    label: { en: 'Soil Salinity Surge', bn: 'লবণাক্ততা বৃদ্ধি' },
-    advice: {
-      en: 'Do not irrigate with river water at high tide; use salt-tolerant varieties.',
-      bn: 'জোয়ারের সময় নদীর পানি দিয়ে সেচ দেবেন না; লবণ-সহিষ্ণু জাত ব্যবহার করুন।',
-    },
-  },
-  flood: {
-    label: { en: 'Early Flash Flood', bn: 'আগাম পাহাড়ি ঢল ও বন্যা' },
-    advice: {
-      en: 'Harvest mature crops early and move seed and fertilizer to high ground.',
-      bn: 'পাকা ফসল দ্রুত কেটে ফেলুন এবং বীজ ও সার উঁচু জায়গায় সরিয়ে রাখুন।',
-    },
-  },
-  cold: {
-    label: { en: 'Cold Wave Advisory', bn: 'তীব্র শৈত্যপ্রবাহ ও কুয়াশা' },
-    advice: {
-      en: 'Protect seedbeds with polythene at night and drain cold water from fields.',
-      bn: 'রাতে বীজতলা পলিথিন দিয়ে ঢেকে রাখুন এবং জমি থেকে ঠান্ডা পানি সরিয়ে দিন।',
-    },
-  },
-};
 
 /** 1 bigha (33 decimals) in square metres and hectares. */
 export const BIGHA_M2 = 1337.8;
