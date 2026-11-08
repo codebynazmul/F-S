@@ -4,17 +4,27 @@ import React, { useMemo, useState } from 'react';
 import { Ban, Check, Download, Pencil, Search, ShieldCheck, ShieldOff, Trash2, UserCheck, X } from 'lucide-react';
 import type { Account } from '@/lib/types';
 import { useApp } from '../AppProvider';
-import { Avatar, SubCard, ghostBtn, inputClass, primaryBtn } from '../ui';
-import { initialsOf } from '@/lib/auth';
-import { METHOD_LABEL, contactOf, districtOf, downloadCsv, formatDate, formatTime } from './shared';
+import {
+  AdminAvatar, METHOD_LABEL, Pill, btnDanger, btnPrimary, btnQuiet, contactOf, districtOf,
+  downloadCsv, fieldClass, focusRing, formatDate, formatTime, panel, relativeTime,
+} from './shared';
 
-type Filter = 'all' | 'farmer' | 'admin' | 'blocked';
+export type UserFilter = 'all' | 'farmer' | 'admin' | 'blocked';
 
-export default function AdminUsers() {
-  const { t, user, accounts, admin } = useApp();
+/** Column layout shared by the header row and every user row on wide screens. */
+const COLS = 'lg:grid lg:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.1fr)_auto] lg:items-center lg:gap-4';
+
+export default function AdminUsers({ filter, onFilterChange }: { filter: UserFilter; onFilterChange: (f: UserFilter) => void }) {
+  const { t, n, user, accounts, admin } = useApp();
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState<Filter>('all');
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  const counts: Record<UserFilter, number> = {
+    all: accounts.length,
+    farmer: accounts.filter(a => a.role === 'farmer').length,
+    admin: accounts.filter(a => a.role === 'admin').length,
+    blocked: accounts.filter(a => a.blocked).length,
+  };
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -41,7 +51,7 @@ export default function AdminUsers() {
     admin.recordExport();
   };
 
-  const filters: { id: Filter; label: string }[] = [
+  const filters: { id: UserFilter; label: string }[] = [
     { id: 'all', label: t('All', 'সব') },
     { id: 'farmer', label: t('Farmers', 'কৃষক') },
     { id: 'admin', label: t('Admins', 'অ্যাডমিন') },
@@ -49,58 +59,95 @@ export default function AdminUsers() {
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-        <label className="flex-1 min-h-tap flex items-center gap-2 glass-subtle rounded-xl px-3 border border-sky-500/15">
-          <Search className="h-4 w-4 text-sky-500 shrink-0" aria-hidden />
+    <div className="space-y-5">
+      <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
+        <label className="relative flex-1">
+          <span className="sr-only">{t('Search users', 'ব্যবহারকারী খুঁজুন')}</span>
+          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" aria-hidden />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('Search name, email, phone or district', 'নাম, ইমেইল, ফোন বা জেলা খুঁজুন')}
-            aria-label={t('Search users', 'ব্যবহারকারী খুঁজুন')}
-            className="w-full bg-transparent outline-none text-sm font-bold py-2.5 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
+            className={`${fieldClass} pl-9`}
           />
         </label>
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value as Filter)}
-          aria-label={t('Filter users', 'ব্যবহারকারী ছাঁকুন')}
-          className={`${inputClass} sm:w-40`}
-        >
-          {filters.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
-        </select>
-        <button type="button" onClick={exportCsv} disabled={accounts.length === 0} className={`${ghostBtn} disabled:opacity-50`}>
-          <Download className="h-4 w-4" />{t('Export CSV', 'CSV ডাউনলোড')}
+
+        <div role="radiogroup" aria-label={t('Filter users', 'ব্যবহারকারী ছাঁকুন')}
+          className="grid grid-cols-4 lg:flex gap-1 p-1 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-surface-2)]">
+          {filters.map(f => {
+            const on = filter === f.id;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => onFilterChange(f.id)}
+                className={`min-h-[40px] px-3 rounded-lg text-sm font-semibold whitespace-nowrap flex items-center justify-center gap-1.5 transition-colors ${focusRing} ${
+                  on ? 'bg-[var(--bg-surface)] shadow-sm text-slate-900 dark:text-slate-50' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {f.label}
+                <span className="text-xs tabular-nums opacity-70 hidden sm:inline">{n(counts[f.id])}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <button type="button" onClick={exportCsv} disabled={accounts.length === 0} className={btnQuiet}>
+          <Download className="h-4 w-4" aria-hidden />{t('Export CSV', 'CSV ডাউনলোড')}
         </button>
       </div>
 
-      <p className="text-xs text-slate-600 dark:text-slate-400">
-        {t(`Showing ${shown.length} of ${accounts.length} users`, `${accounts.length} জনের মধ্যে ${shown.length} জন দেখানো হচ্ছে`)}
+      <p className="text-xs text-slate-500 dark:text-slate-400" aria-live="polite">
+        {t(`Showing ${shown.length} of ${accounts.length} users`, `${n(accounts.length)} জনের মধ্যে ${n(shown.length)} জন দেখানো হচ্ছে`)}
       </p>
 
       {shown.length === 0 ? (
-        <SubCard className="p-6 rounded-2xl text-center text-sm text-slate-600 dark:text-slate-400">
-          {accounts.length === 0
-            ? t('No one has signed up yet. Accounts appear here after someone signs in on this device.',
-                'এখনো কেউ নিবন্ধন করেনি। এই ডিভাইসে কেউ সাইন ইন করলে তার অ্যাকাউন্ট এখানে দেখাবে।')
-            : t('No users match your search.', 'আপনার খোঁজার সাথে কোনো ব্যবহারকারী মেলেনি।')}
-        </SubCard>
+        <div className={`${panel} p-10 text-center space-y-1`}>
+          <Search className="mx-auto h-6 w-6 text-slate-400" aria-hidden />
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            {accounts.length === 0
+              ? t('No one has signed up yet. Accounts appear here after someone signs in on this device.',
+                  'এখনো কেউ নিবন্ধন করেনি। এই ডিভাইসে কেউ সাইন ইন করলে তার অ্যাকাউন্ট এখানে দেখাবে।')
+              : t('No users match your search.', 'আপনার খোঁজার সাথে কোনো ব্যবহারকারী মেলেনি।')}
+          </p>
+        </div>
       ) : (
-        <ul className="space-y-3">
-          {shown.map(a => (
-            <UserRow
-              key={a.id}
-              account={a}
-              isSelf={a.id === user?.id}
-              editing={editingId === a.id}
-              onEdit={() => setEditingId(a.id)}
-              onDone={() => setEditingId(null)}
-            />
-          ))}
-        </ul>
+        <div className={`${panel} overflow-hidden`}>
+          <div className={`hidden ${COLS} px-5 py-3 border-b border-[var(--border-soft)] text-xs font-semibold text-slate-500 dark:text-slate-400`} aria-hidden>
+            <span>{t('User', 'ব্যবহারকারী')}</span>
+            <span>{t('District', 'জেলা')}</span>
+            <span>{t('Sign-in', 'সাইন-ইন')}</span>
+            <span>{t('Last seen', 'শেষ দেখা')}</span>
+            <span className="w-[12.5rem] text-right">{t('Actions', 'কাজ')}</span>
+          </div>
+          <ul>
+            {shown.map(a => (
+              <UserRow
+                key={a.id}
+                account={a}
+                isSelf={a.id === user?.id}
+                editing={editingId === a.id}
+                onEdit={() => setEditingId(a.id)}
+                onDone={() => setEditingId(null)}
+              />
+            ))}
+          </ul>
+        </div>
       )}
     </div>
+  );
+}
+
+/** On wide screens the actions show as icons; the label stays for screen readers and as a tooltip. */
+function Action({ icon: Icon, label, onClick, danger = false }: { icon: typeof Pencil; label: string; onClick: () => void; danger?: boolean }) {
+  return (
+    <button type="button" onClick={onClick} title={label} className={`${danger ? btnDanger : btnQuiet} lg:px-0`}>
+      <Icon className="h-4 w-4" aria-hidden />
+      <span className="lg:sr-only">{label}</span>
+    </button>
   );
 }
 
@@ -118,106 +165,96 @@ function UserRow({ account: a, isSelf, editing, onEdit, onDone }: {
   };
   const confirmThen = (message: string, fn: () => void) => { if (window.confirm(message)) fn(); };
 
-  const actionBtn = 'btn-popup min-h-tap px-3 rounded-xl glass-subtle border border-sky-500/15 text-xs font-bold flex items-center gap-1.5';
-
   return (
-    <li>
-      <SubCard className={`p-4 rounded-2xl space-y-3 ${a.blocked ? 'opacity-75' : ''}`}>
-        <div className="flex items-start gap-3">
-          <Avatar initials={initialsOf(a.name || a.email)} admin={a.role === 'admin'} />
-          <div className="flex-1 min-w-0 space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-black text-sm text-slate-900 dark:text-white">{a.name}</span>
-              {a.role === 'admin' && (
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold border bg-violet-500/15 text-violet-600 dark:text-violet-300 border-violet-500/25">
-                  {t('Admin', 'অ্যাডমিন')}
-                </span>
-              )}
-              {a.blocked && (
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold border bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30 flex items-center gap-1">
-                  <Ban className="h-3 w-3" aria-hidden />{t('Blocked', 'ব্লক করা')}
-                </span>
-              )}
-              {isSelf && <span className="text-[11px] font-bold text-slate-500">({t('you', 'আপনি')})</span>}
+    <li className={`px-5 py-4 border-b border-[var(--border-soft)] last:border-b-0 transition-colors hover:bg-[var(--accent-soft)] ${a.blocked ? 'bg-red-500/[0.04]' : ''}`}>
+      <div className={`${COLS} space-y-3 lg:space-y-0`}>
+        <div className="flex items-center gap-3 min-w-0">
+          <AdminAvatar name={a.name || a.email} admin={a.role === 'admin'} />
+          <div className="min-w-0 space-y-0.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className={`text-sm font-semibold truncate ${a.blocked ? 'text-slate-500 line-through decoration-slate-400/60' : 'text-slate-900 dark:text-slate-50'}`}>{a.name}</span>
+              {a.role === 'admin' && <Pill tone="ink" icon={ShieldCheck}>{t('Admin', 'অ্যাডমিন')}</Pill>}
+              {a.blocked && <Pill tone="red" icon={Ban}>{t('Blocked', 'ব্লক করা')}</Pill>}
+              {isSelf && <Pill tone="muted">{t('You', 'আপনি')}</Pill>}
             </div>
-            <div className="text-xs text-slate-600 dark:text-slate-400 break-all">
+            <div className="text-xs truncate text-slate-500 dark:text-slate-400">
               {contactOf(a)}{a.email !== '—' && a.phone !== '—' ? ` · ${a.phone}` : ''}
             </div>
-            <dl className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-slate-600 dark:text-slate-400">
-              <div><dt className="inline">{t('Sign-in', 'সাইন-ইন')}: </dt><dd className="inline font-bold">{t(...METHOD_LABEL[a.method])}</dd></div>
-              <div><dt className="inline">{t('District', 'জেলা')}: </dt><dd className="inline font-bold">{district ? (lang === 'bn' ? district.nameBn : district.name) : '—'}</dd></div>
-              <div><dt className="inline">{t('Joined', 'যোগদান')}: </dt><dd className="inline font-bold">{formatDate(a.createdAt, lang)}</dd></div>
-              <div><dt className="inline">{t('Last sign-in', 'শেষ সাইন-ইন')}: </dt><dd className="inline font-bold">{formatTime(a.lastLoginAt, lang)}</dd></div>
-              <div><dt className="inline">{t('Sign-ins', 'সাইন-ইন সংখ্যা')}: </dt><dd className="inline font-bold">{n(a.loginCount)}</dd></div>
-            </dl>
           </div>
         </div>
 
-        {editing ? (
-          <form className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2" onSubmit={(e) => { e.preventDefault(); save(); }}>
-            <input value={name} onChange={(e) => setName(e.target.value)} aria-label={t('Name', 'নাম')} placeholder={t('Name', 'নাম')} className={inputClass} />
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} aria-label={t('Phone', 'ফোন')} placeholder={t('Phone', 'ফোন')} className={inputClass} />
-            <div className="flex gap-2">
-              <button type="submit" className={`px-4 rounded-xl text-xs flex items-center gap-1.5 ${primaryBtn}`}>
-                <Check className="h-4 w-4" />{t('Save', 'সংরক্ষণ')}
-              </button>
-              <button type="button" onClick={onDone} className={actionBtn} aria-label={t('Cancel', 'বাতিল')}>
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </form>
-        ) : isSelf ? (
-          <p className="text-xs text-slate-600 dark:text-slate-400">
-            {t('You cannot change your own account here. Use My Account instead.', 'নিজের অ্যাকাউন্ট এখানে বদলানো যায় না। "আমার একাউন্ট" ব্যবহার করুন।')}
-          </p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={onEdit} className={`${actionBtn} text-sky-600 dark:text-sky-300`}>
-              <Pencil className="h-4 w-4" />{t('Edit', 'সম্পাদনা')}
+        <dl className="grid grid-cols-3 gap-3 lg:contents text-sm">
+          <div className="min-w-0">
+            <dt className="lg:sr-only text-xs text-slate-500">{t('District', 'জেলা')}</dt>
+            <dd className="truncate text-slate-700 dark:text-slate-300">{district ? (lang === 'bn' ? district.nameBn : district.name) : '—'}</dd>
+          </div>
+          <div className="min-w-0">
+            <dt className="lg:sr-only text-xs text-slate-500">{t('Sign-in', 'সাইন-ইন')}</dt>
+            <dd className="truncate text-slate-700 dark:text-slate-300">{t(...METHOD_LABEL[a.method])}</dd>
+          </div>
+          <div className="min-w-0" title={`${t('Joined', 'যোগদান')} ${formatDate(a.createdAt, lang)} · ${formatTime(a.lastLoginAt, lang)}`}>
+            <dt className="lg:sr-only text-xs text-slate-500">{t('Last seen', 'শেষ দেখা')}</dt>
+            <dd className="text-slate-700 dark:text-slate-300">
+              {relativeTime(a.lastLoginAt, lang)}
+              <span className="block text-xs tabular-nums text-slate-500">{t(`${n(a.loginCount)} sign-ins`, `${n(a.loginCount)} বার সাইন-ইন`)}</span>
+            </dd>
+          </div>
+        </dl>
+
+        <div className="flex flex-wrap gap-2 lg:justify-end lg:w-[12.5rem]">
+          {isSelf ? (
+            <p className="text-xs text-slate-500 dark:text-slate-400 lg:text-right">
+              {t('Edit yourself in My Account.', 'নিজের তথ্য "আমার একাউন্ট" থেকে বদলান।')}
+            </p>
+          ) : (
+            <>
+              <Action icon={Pencil} label={t('Edit', 'সম্পাদনা')} onClick={onEdit} />
+              {a.blocked ? (
+                <Action icon={UserCheck} label={t('Unblock', 'ব্লক তুলুন')} onClick={() => admin.setBlocked(a.id, false)} />
+              ) : (
+                <Action icon={Ban} label={t('Block', 'ব্লক')}
+                  onClick={() => confirmThen(t(`Block ${a.name}? They will be signed out and cannot sign in again until unblocked.`,
+                    `${a.name}-কে ব্লক করবেন? তিনি লগআউট হবেন এবং ব্লক না তোলা পর্যন্ত আর সাইন ইন করতে পারবেন না।`), () => admin.setBlocked(a.id, true))} />
+              )}
+              {a.role === 'admin' ? (
+                <Action icon={ShieldOff} label={t('Remove admin', 'অ্যাডমিন সরান')}
+                  onClick={() => confirmThen(t(`Remove admin rights from ${a.name}?`, `${a.name}-এর অ্যাডমিন ক্ষমতা সরাবেন?`), () => admin.setRole(a.id, 'farmer'))} />
+              ) : (
+                <Action icon={ShieldCheck} label={t('Make admin', 'অ্যাডমিন করুন')}
+                  onClick={() => confirmThen(t(`Make ${a.name} an admin? They will be able to manage every user.`,
+                    `${a.name}-কে অ্যাডমিন করবেন? তিনি সব ব্যবহারকারী পরিচালনা করতে পারবেন।`), () => admin.setRole(a.id, 'admin'))} />
+              )}
+              <Action icon={Trash2} danger label={t('Delete', 'মুছুন')}
+                onClick={() => confirmThen(t(`Delete ${a.name}'s account permanently? This cannot be undone.`,
+                  `${a.name}-এর অ্যাকাউন্ট স্থায়ীভাবে মুছবেন? এটি আর ফেরানো যাবে না।`), () => admin.deleteAccount(a.id))} />
+            </>
+          )}
+        </div>
+      </div>
+
+      {editing && (
+        <form
+          className="mt-4 pt-4 border-t border-[var(--border-soft)] grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 sm:items-end"
+          onSubmit={(e) => { e.preventDefault(); save(); }}
+        >
+          <label className="space-y-1.5">
+            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{t('Name', 'নাম')}</span>
+            <input value={name} onChange={(e) => setName(e.target.value)} className={fieldClass} autoFocus />
+          </label>
+          <label className="space-y-1.5">
+            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{t('Phone', 'ফোন')}</span>
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" className={fieldClass} />
+          </label>
+          <div className="flex gap-2">
+            <button type="submit" className={`${btnPrimary} flex-1 sm:flex-none`}>
+              <Check className="h-4 w-4" aria-hidden />{t('Save changes', 'পরিবর্তন সংরক্ষণ')}
             </button>
-            {a.blocked ? (
-              <button type="button" onClick={() => admin.setBlocked(a.id, false)} className={`${actionBtn} text-emerald-600 dark:text-emerald-400`}>
-                <UserCheck className="h-4 w-4" />{t('Unblock', 'ব্লক তুলুন')}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => confirmThen(t(`Block ${a.name}? They will be signed out and cannot sign in again until unblocked.`,
-                  `${a.name}-কে ব্লক করবেন? তিনি লগআউট হবেন এবং ব্লক না তোলা পর্যন্ত আর সাইন ইন করতে পারবেন না।`), () => admin.setBlocked(a.id, true))}
-                className={`${actionBtn} text-amber-600 dark:text-amber-400`}
-              >
-                <Ban className="h-4 w-4" />{t('Block', 'ব্লক')}
-              </button>
-            )}
-            {a.role === 'admin' ? (
-              <button
-                type="button"
-                onClick={() => confirmThen(t(`Remove admin rights from ${a.name}?`, `${a.name}-এর অ্যাডমিন ক্ষমতা সরাবেন?`), () => admin.setRole(a.id, 'farmer'))}
-                className={`${actionBtn} text-violet-600 dark:text-violet-300`}
-              >
-                <ShieldOff className="h-4 w-4" />{t('Remove admin', 'অ্যাডমিন সরান')}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => confirmThen(t(`Make ${a.name} an admin? They will be able to manage every user.`,
-                  `${a.name}-কে অ্যাডমিন করবেন? তিনি সব ব্যবহারকারী পরিচালনা করতে পারবেন।`), () => admin.setRole(a.id, 'admin'))}
-                className={`${actionBtn} text-violet-600 dark:text-violet-300`}
-              >
-                <ShieldCheck className="h-4 w-4" />{t('Make admin', 'অ্যাডমিন করুন')}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => confirmThen(t(`Delete ${a.name}'s account permanently? This cannot be undone.`,
-                `${a.name}-এর অ্যাকাউন্ট স্থায়ীভাবে মুছবেন? এটি আর ফেরানো যাবে না।`), () => admin.deleteAccount(a.id))}
-              className={`${actionBtn} text-red-600 dark:text-red-400`}
-            >
-              <Trash2 className="h-4 w-4" />{t('Delete', 'মুছুন')}
+            <button type="button" onClick={onDone} className={btnQuiet}>
+              <X className="h-4 w-4" aria-hidden />{t('Cancel', 'বাতিল')}
             </button>
           </div>
-        )}
-      </SubCard>
+        </form>
+      )}
     </li>
   );
 }
