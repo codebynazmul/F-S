@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { AlertTriangle, CheckCircle2, KeyRound, ShieldCheck } from 'lucide-react';
 import { MIN_PASSWORD_LENGTH } from '@/lib/auth';
 import { useApp } from '../AppProvider';
-import { BlockHead, DAY_MS, FootNote, btnPrimary, fieldClass, formatTime, panel, relativeTime } from './shared';
+import { BlockHead, FootNote, btnPrimary, fieldClass, formatTime, panel, relativeTime } from './shared';
 
 export default function AdminSecurity() {
-  const { t, n, lang, user, admin, adminLog, usingDefaultAdminPassword } = useApp();
+  const { t, lang, user, admin, adminLog, accounts } = useApp();
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -15,8 +15,9 @@ export default function AdminSecurity() {
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const lastChange = adminLog.find(e => e.action === 'change_password');
-  const failed = adminLog.filter(e => e.action === 'login_failed' && Date.now() - e.at < 7 * DAY_MS).length;
+  const self = accounts.find(a => a.id === user?.id);
+  const hasPassword = !self || self.method === 'email';
+  const lastChange = adminLog.find(e => e.action === 'change_password' && e.actor === user?.email);
 
   const submit = async () => {
     setDone(false);
@@ -33,10 +34,14 @@ export default function AdminSecurity() {
       return;
     }
     setBusy(true);
-    const ok = await admin.changePassword(current, next);
+    const result = await admin.changePassword(current, next);
     setBusy(false);
-    if (!ok) {
+    if (result === 'wrong-password') {
       setError(t('Your current password is incorrect.', 'বর্তমান পাসওয়ার্ড সঠিক নয়।'));
+      return;
+    }
+    if (result !== 'ok') {
+      setError(t('The password could not be changed. Please try again.', 'পাসওয়ার্ড পরিবর্তন করা যায়নি। আবার চেষ্টা করুন।'));
       return;
     }
     setError('');
@@ -66,6 +71,12 @@ export default function AdminSecurity() {
             </div>
           )}
 
+          {!hasPassword ? (
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              {t('You sign in with Google, so there is no Field Shift password to change. Manage your password in your Google account.',
+                 'আপনি গুগল দিয়ে সাইন ইন করেন, তাই ফিল্ড শিফটের আলাদা পাসওয়ার্ড নেই। পাসওয়ার্ড আপনার গুগল অ্যাকাউন্টে বদলান।')}
+            </p>
+          ) : (
           <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); submit(); }}>
             {/* Hidden username helps password managers save the right login. */}
             <input type="text" autoComplete="username" value={user?.email ?? ''} readOnly hidden />
@@ -89,35 +100,33 @@ export default function AdminSecurity() {
               {t('Change password', 'পাসওয়ার্ড পরিবর্তন করুন')}
             </button>
           </form>
+          )}
         </section>
 
         <section className={`${panel} p-5 sm:p-6 space-y-4`}>
           <BlockHead title={t('Account status', 'অ্যাকাউন্টের অবস্থা')} />
           <ul className="space-y-3 text-sm">
             <li className="flex items-start gap-3">
-              {usingDefaultAdminPassword
-                ? <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
-                : <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />}
+              <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />
               <div>
                 <div className="font-semibold text-slate-900 dark:text-slate-50">
-                  {usingDefaultAdminPassword ? t('Default password in use', 'ডিফল্ট পাসওয়ার্ড চালু') : t('Custom password set', 'নিজস্ব পাসওয়ার্ড দেওয়া আছে')}
+                  {hasPassword ? t('Signs in with email and password', 'ইমেইল ও পাসওয়ার্ড দিয়ে সাইন ইন') : t('Signs in with Google', 'গুগল দিয়ে সাইন ইন')}
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">
                   {lastChange
-                    ? <span title={formatTime(lastChange.at, lang)}>{t('Last changed', 'শেষ পরিবর্তন')} {relativeTime(lastChange.at, lang)}</span>
-                    : t('No change recorded in the activity log.', 'কার্যক্রম লগে কোনো পরিবর্তন নেই।')}
+                    ? <span title={formatTime(lastChange.at, lang)}>{t('Password last changed', 'পাসওয়ার্ড শেষ পরিবর্তন')} {relativeTime(lastChange.at, lang)}</span>
+                    : t('No password change recorded.', 'কোনো পাসওয়ার্ড পরিবর্তনের রেকর্ড নেই।')}
                 </div>
               </div>
             </li>
             <li className="flex items-start gap-3">
-              {failed > 0
-                ? <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
-                : <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />}
+              <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
               <div>
-                <div className="font-semibold text-slate-900 dark:text-slate-50">
-                  {t(`${failed} failed sign-in ${failed === 1 ? 'attempt' : 'attempts'}`, `${n(failed)}টি ব্যর্থ সাইন-ইন চেষ্টা`)}
+                <div className="font-semibold text-slate-900 dark:text-slate-50">{t('Failed sign-ins', 'ব্যর্থ সাইন-ইন')}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">
+                  {t('Supabase records these. See Authentication → Logs in the Supabase dashboard.',
+                     'এগুলো Supabase রাখে। Supabase ড্যাশবোর্ডে Authentication → Logs দেখুন।')}
                 </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">{t('In the last 7 days', 'গত ৭ দিনে')}</div>
               </div>
             </li>
           </ul>
@@ -125,8 +134,8 @@ export default function AdminSecurity() {
       </div>
 
       <FootNote>
-        {t('Demo: passwords are stored as SHA-256 hashes in this browser. "Clear all saved data" in Settings resets the built-in admin password to "admin".',
-           'ডেমো: পাসওয়ার্ড এই ব্রাউজারে SHA-256 হ্যাশ হিসেবে রাখা হয়। সেটিংসে "সব তথ্য মুছুন" দিলে বিল্ট-ইন অ্যাডমিন পাসওয়ার্ড আবার "admin" হয়ে যায়।')}
+        {t('Passwords are stored and checked by Supabase Auth. Field Shift never sees or saves them.',
+           'পাসওয়ার্ড Supabase Auth সংরক্ষণ ও যাচাই করে। ফিল্ড শিফট কখনো পাসওয়ার্ড দেখে বা রাখে না।')}
       </FootNote>
     </div>
   );

@@ -61,8 +61,10 @@ export const ACTION_LABEL: Record<AdminAction, [string, string]> = {
 /** Saves rows as a CSV file. */
 export function downloadCsv(filename: string, rows: (string | number)[][]) {
   const cell = (v: string | number) => {
-    const text = String(v);
-    return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    let text = String(v);
+    // Names are typed by users: stop Excel from running text like "=HYPERLINK(...)" as a formula.
+    if (typeof v === 'string' && /^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+    return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
   };
   // The BOM makes Excel open Bangla text correctly.
   const csv = '﻿' + rows.map(r => r.map(cell).join(',')).join('\n');
@@ -71,7 +73,8 @@ export function downloadCsv(filename: string, rows: (string | number)[][]) {
   link.href = url;
   link.download = filename;
   link.click();
-  URL.revokeObjectURL(url);
+  // Revoking right away can cancel the download in some browsers.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /* ------------------------------------------------------------------ */

@@ -109,8 +109,7 @@ export default function AdminUsers({ filter, onFilterChange }: { filter: UserFil
           <Search className="mx-auto h-6 w-6 text-slate-400" aria-hidden />
           <p className="text-sm text-slate-600 dark:text-slate-400">
             {accounts.length === 0
-              ? t('No one has signed up yet. Accounts appear here after someone signs in on this device.',
-                  'এখনো কেউ নিবন্ধন করেনি। এই ডিভাইসে কেউ সাইন ইন করলে তার অ্যাকাউন্ট এখানে দেখাবে।')
+              ? t('No one has signed up yet.', 'এখনো কেউ নিবন্ধন করেনি।')
               : t('No users match your search.', 'আপনার খোঁজার সাথে কোনো ব্যবহারকারী মেলেনি।')}
           </p>
         </div>
@@ -142,9 +141,11 @@ export default function AdminUsers({ filter, onFilterChange }: { filter: UserFil
 }
 
 /** On wide screens the actions show as icons; the label stays for screen readers and as a tooltip. */
-function Action({ icon: Icon, label, onClick, danger = false }: { icon: typeof Pencil; label: string; onClick: () => void; danger?: boolean }) {
+function Action({ icon: Icon, label, onClick, danger = false, disabled = false, hint }: {
+  icon: typeof Pencil; label: string; onClick: () => void; danger?: boolean; disabled?: boolean; hint?: string;
+}) {
   return (
-    <button type="button" onClick={onClick} title={label} className={`${danger ? btnDanger : btnQuiet} lg:px-0`}>
+    <button type="button" onClick={onClick} disabled={disabled} title={hint ?? label} className={`${danger ? btnDanger : btnQuiet} lg:px-0`}>
       <Icon className="h-4 w-4" aria-hidden />
       <span className="lg:sr-only">{label}</span>
     </button>
@@ -158,6 +159,13 @@ function UserRow({ account: a, isSelf, editing, onEdit, onDone }: {
   const [name, setName] = useState(a.name);
   const [phone, setPhone] = useState(a.phone === '—' ? '' : a.phone);
   const district = districtOf(a);
+
+  // Start each edit from the saved values, not from a cancelled earlier edit.
+  const startEdit = () => {
+    setName(a.name);
+    setPhone(a.phone === '—' ? '' : a.phone);
+    onEdit();
+  };
 
   const save = () => {
     admin.updateAccount(a.id, { name: name.trim() || a.name, phone: phone.trim() || '—' });
@@ -208,7 +216,7 @@ function UserRow({ account: a, isSelf, editing, onEdit, onDone }: {
             </p>
           ) : (
             <>
-              <Action icon={Pencil} label={t('Edit', 'সম্পাদনা')} onClick={onEdit} />
+              <Action icon={Pencil} label={t('Edit', 'সম্পাদনা')} onClick={startEdit} />
               {a.blocked ? (
                 <Action icon={UserCheck} label={t('Unblock', 'ব্লক তুলুন')} onClick={() => admin.setBlocked(a.id, false)} />
               ) : (
@@ -224,9 +232,9 @@ function UserRow({ account: a, isSelf, editing, onEdit, onDone }: {
                   onClick={() => confirmThen(t(`Make ${a.name} an admin? They will be able to manage every user.`,
                     `${a.name}-কে অ্যাডমিন করবেন? তিনি সব ব্যবহারকারী পরিচালনা করতে পারবেন।`), () => admin.setRole(a.id, 'admin'))} />
               )}
-              <Action icon={Trash2} danger label={t('Delete', 'মুছুন')}
-                onClick={() => confirmThen(t(`Delete ${a.name}'s account permanently? This cannot be undone.`,
-                  `${a.name}-এর অ্যাকাউন্ট স্থায়ীভাবে মুছবেন? এটি আর ফেরানো যাবে না।`), () => admin.deleteAccount(a.id))} />
+              {/* Deleting a sign-in account needs the server-side admin function (coming next). */}
+              <Action icon={Trash2} danger disabled label={t('Delete', 'মুছুন')} onClick={() => {}}
+                hint={t('Deleting accounts is coming soon. Block the account for now.', 'অ্যাকাউন্ট মোছার সুবিধা শীঘ্রই আসছে। আপাতত ব্লক করুন।')} />
             </>
           )}
         </div>

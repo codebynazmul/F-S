@@ -20,6 +20,7 @@ Built by **SPIDERX** for the NASA Space Apps Challenge.
 - [Data and saved state](#data-and-saved-state)
 - [Limitations](#limitations)
 - [Tech stack](#tech-stack)
+- [Planned backend (Supabase)](#planned-backend-supabase)
 - [Contributing](#contributing)
 - [Acknowledgements](#acknowledgements)
 
@@ -203,6 +204,125 @@ The `@/` import alias points to the project root.
 - Inter and Noto Sans Bengali fonts via `next/font`
 - [lucide-react](https://lucide.dev/) icons
 - [NASA POWER API](https://power.larc.nasa.gov/)
+
+---
+
+## Planned backend (Supabase)
+
+> **Status: planned, not built yet.** The app currently has no server. This section describes the backend we intend to add to replace demo sign-in, browser-only storage and direct NASA calls from the browser.
+
+**How it works:** NASA APIs → Supabase Edge Functions (fetch, filter, process) → Supabase Postgres (only the observations and predictions the app needs). We never store raw NASA files or responses. The app reads from our database, so it never waits on NASA and keeps working if a NASA service is slow or down.
+
+### Architecture
+
+![Field Shift backend on Supabase](docs/diagrams/supabase-architecture.png)
+
+*Interactive version: [docs/diagrams/supabase-architecture.html](docs/diagrams/supabase-architecture.html)*
+
+### NASA data sources
+
+| API | What we take | Key | How often | Level | Stored as |
+|---|---|---|---|---|---|
+| [NASA POWER](https://power.larc.nasa.gov/api/temporal/daily/point) | Daily rain, min/max temperature (frost), solar radiation, surface and root-zone wetness; 30-year monthly climatology | None | Daily; climatology yearly | District | `climate_normals`, `observations` |
+| [MODIS Web Service (ORNL DAAC)](https://modis.ornl.gov/rst/api/v1/) | NDVI vegetation health (MOD13Q1, 16-day), land surface temperature (MOD11A2, 8-day), evapotranspiration (MOD16A2, 8-day) | None | Weekly | District | `observations` |
+| [AppEEARS](https://appeears.earthdatacloud.nasa.gov/api/) | SMAP L4 root-zone and surface soil moisture, NASADEM elevation. *Later:* HLS NDVI and ECOSTRESS evapotranspiration per farm, once the app collects a farm's GPS point | Earthdata Login (free) | SMAP weekly; elevation once | District | `observations` |
+| [NASA GIBS (WMTS)](https://gibs.earthdata.nasa.gov/wmts/) | Ready-made satellite map tiles | None | On view | — | **Not stored.** The browser loads tiles directly for the map. |
+| [CMR Search](https://cmr.earthdata.nasa.gov/search/) *(later)* | GPM IMERG rainfall, GRACE-FO groundwater | Earthdata Login | Monthly | District | `observations` |
+
+Notes:
+- **AppEEARS is asynchronous.** A request becomes a task that can take minutes to hours, so each hourly call of `sync-appeears` first collects finished tasks, then starts new ones when due. One task covers all 64 districts, and the results come back as CSV.
+- **CMR returns data files** (HDF5/NetCDF), not values. Processing them is too heavy for Edge Functions, so if we add it, it runs as a separate scheduled worker (for example a Python job on GitHub Actions) that writes the same `observations` rows.
+- **Recent NASA data arrives a few days late**, and some values come back as `-999` (missing). The functions skip these.
+
+### Edge Functions
+
+| Function | Runs | What it does |
+|---|---|---|
+| [`sync-power`](supabase/functions/sync-power/index.ts) | Every 10 min, 00:00–02:59 UTC; each district daily, climatology yearly | Fetches 8 districts per call, drops missing values, computes monthly rain, ET0, 30-day rain against normal, hot days and cold nights |
+| [`sync-modis`](supabase/functions/sync-modis/index.ts) | Every 10 min, 03:00–05:59 UTC; each district weekly | Median NDVI, land surface temperature and evapotranspiration in a 5 × 5 km box around each district point |
+| [`sync-appeears`](supabase/functions/sync-appeears/index.ts) | Hourly | Collects finished AppEEARS tasks, then submits the weekly SMAP task and the one-time elevation task; task IDs live in `sync_runs` |
+| [`predict-risk`](supabase/functions/predict-risk/index.ts) | Daily at 06:15 UTC | Turns the latest observations into drought, flood, heat, cold, salinity and crop-stress levels (simple, documented rules) and writes `predictions` |
+| `admin-actions` *(not built yet)* | Called from the admin tab | Checks `role = admin`, then uses the service key to delete users or re-run a sync |
+
+Long jobs process districts in batches (for example 8 per run) so each run stays inside the Edge Function time limit. Progress is recorded in `sync_runs`.
+
+### What we store
+
+| Store | Don't store |
+|---|---|
+| Processed values, one row per metric per district or farm | Raw NASA JSON, CSV bundles or data files |
+| The latest value plus about 12 weeks of history for trend charts; a weekly cleanup deletes older rows | Satellite images and map tiles |
+| Climate averages per district (64 rows) | Data for places no farm is in |
+| Latest risk predictions per district and farm | Old predictions after they expire |
+| Each farmer's saved plan, with a copy of the climate data it used | |
+
+NASA-derived data stays at roughly 10,000 rows (64 districts × about 12 metrics × 12 weeks, plus farm-level rows), no matter how much NASA data exists.
+
+### Tables
+
+![Field Shift database tables](docs/diagrams/supabase-data-model.png)
+
+*Interactive version: [docs/diagrams/supabase-data-model.html](docs/diagrams/supabase-data-model.html)*
+
+| Table | Main columns | Purpose |
+|---|---|---|
+| `profiles` | id (→ auth.users), name, email, phone, language (en/bn), role (farmer / admin), blocked | User details and roles; a database trigger creates the row at sign-up |
+| `farms` | id, user_id, district_id, area, irrigation, soil, lat, lng | Farm profiles |
+| `plans` | id, farm_id, plan (jsonb), risks (jsonb), climate_snapshot (jsonb), created_at | Saved rotation plans |
+| `districts` | id (e.g. `dhaka`), name, name_bn, division, lat, lng, soil, baseline rainfall and temp, risk, risk_bn | Moved from `data/districts.ts` so admins can edit it |
+| `climate_normals` | district_id, monthly_rain_mm[12], monthly_wetness[12], temp_mean, humidity, solar_mj, et0_mm_day, fetched_at | 30-year NASA POWER averages |
+| `observations` | id, district_id or farm_id, source (power / modis / smap / hls / ecostress / nasadem), metric, value, observed_at | Processed measurements from every NASA source |
+| `predictions` | id, district_id or farm_id, kind (drought / flood / heat / frost / crop_stress), level, valid_until, computed_at | Risk levels from `predict-risk` |
+| `sync_runs` | id, job, status, task_id, rows_updated, error, started_at | Sync health and AppEEARS tasks, shown in the admin panel |
+| `activity_log` | id, actor_id, action, target, created_at | Admin activity feed (not in the diagram) |
+
+### Access rules (RLS)
+
+- `districts`, `climate_normals`, and district-level `observations` and `predictions`: anyone can read; only Edge Functions (service key) can write.
+- `farms`, `plans`, and farm-level `observations` and `predictions`: only the owner (`user_id = auth.uid()`); admins can read all.
+- `profiles`: users can edit their own name, phone and language, but **not `role`**. Only `admin-actions` can change roles.
+- `activity_log` and `sync_runs`: admins only.
+- The admin tab is hidden for non-admins, but that is only cosmetic. The real protection is these rules plus the role check in `admin-actions`.
+
+### Secrets
+
+| Secret | Used by | Where it lives |
+|---|---|---|
+| `EARTHDATA_USERNAME`, `EARTHDATA_PASSWORD` | `appeears-submit`, `appeears-collect` (and the CMR worker later) | Supabase function secrets: `supabase secrets set ...` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Edge Functions only | Provided by Supabase inside functions |
+
+POWER, MODIS and GIBS need no key. Never put secrets in a `NEXT_PUBLIC_` variable or commit them to git.
+
+### Database setup
+
+The schema lives in [supabase/migrations/](supabase/migrations/): `20261108120000_init_schema.sql` (tables, access rules, triggers), `20261108120100_seed_districts.sql` (the 64 districts from `data/districts.ts`) `20261108130000_auth_tracking.sql` (sign-in details for the admin panel, activity log rules, blocking) and `20261109090000_farm_sync_and_satellite.sql` (one farm per account, a latest-value view, keeping elevation). Apply them in that order, either by pasting each into the Supabase SQL editor or with `npx supabase db push` after `npx supabase link`.
+
+### Deploying the NASA sync
+
+The four functions are in [supabase/functions/](supabase/functions/). Each is a single file.
+
+1. Set the secrets (pick a long random `CRON_SECRET`; the Earthdata login is your free NASA Earthdata account):
+   `npx supabase secrets set CRON_SECRET=<secret> EARTHDATA_USERNAME=<user> EARTHDATA_PASSWORD=<password> --project-ref <ref>`
+2. Deploy each with JWT checks off (the functions check `CRON_SECRET` themselves):
+   `npx supabase functions deploy sync-power --no-verify-jwt --project-ref <ref>`, then the same for `sync-modis`, `sync-appeears` and `predict-risk`. You can also paste each file into the dashboard's function editor and turn off "Enforce JWT verification".
+3. Fill in your project URL and the same `CRON_SECRET` in [supabase/setup/schedule-sync.sql](supabase/setup/schedule-sync.sql) and run it in the SQL editor. It is safe to run again. Don't commit your real values.
+
+The first fill takes a day or two of scheduled runs: NASA POWER finishes the first morning, MODIS over two mornings, and AppEEARS tasks take a few hours. To start sooner, run `select public.call_edge_function('sync-power');` a few times. Check progress with `select job, status, rows_updated, error, started_at from sync_runs order by started_at desc;`.
+
+### Migration from the current code
+
+| Now | After |
+|---|---|
+| `lib/nasaPower.ts` called NASA POWER from the browser | **Done:** removed. `sync-power` fetches NASA; [lib/climate.ts](lib/climate.ts) reads `climate_normals` and `observations`, and recommendations use NASA rainfall and temperature |
+| [lib/recommend.ts](lib/recommend.ts) detects risks and builds plans in the browser | **Done:** current risk levels come from `predict-risk` and show on the NASA and Rotation tabs; the rotation itself is still built in the browser (using NASA climate averages) so it works offline |
+| [lib/auth.ts](lib/auth.ts) demo sign-in with a built-in admin | **Done:** Supabase Auth (email, email code, Google) plus `profiles.role` |
+| [lib/storage.ts](lib/storage.ts) keeps farms and plans in localStorage | **Done:** [components/useFarmSync.ts](components/useFarmSync.ts) saves the farm to `farms` (one per account) and plan changes to `plans`, keeps localStorage as the offline copy, and uploads offline edits when back online |
+| `components/admin/*` reads browser data | Reads users, activity and sync status from Supabase; changes go through `admin-actions` |
+
+### Notes
+
+- **Sign-in:** email (code or magic link) and Google, both free. The phone + SMS login on the current screen will be removed, since SMS costs money per message.
+- **Free tier pausing.** Free Supabase projects pause after about a week without visits, and scheduled syncs do not run while paused.
 
 ---
 

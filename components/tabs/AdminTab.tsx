@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { AlertTriangle, ArrowRight, BarChart3, History, KeyRound, ShieldCheck, Users, type LucideIcon } from 'lucide-react';
+import { AlertTriangle, BarChart3, History, KeyRound, RefreshCw, ShieldCheck, Users, X, type LucideIcon } from 'lucide-react';
 import { useApp } from '../AppProvider';
 import { Card } from '../ui';
 import AdminOverview from '../admin/AdminOverview';
@@ -20,7 +20,8 @@ const SECTIONS: { id: Section; en: string; bn: string; icon: LucideIcon }[] = [
 ];
 
 export default function AdminTab() {
-  const { t, n, lang, user, isAdmin, accounts, adminLog, usingDefaultAdminPassword } = useApp();
+  const { t, n, lang, user, isAdmin, accounts, adminLog, adminError, clearAdminError, admin } = useApp();
+  const [reloading, setReloading] = useState(false);
   const [section, setSection] = useState<Section>('overview');
   const [userFilter, setUserFilter] = useState<UserFilter>('all');
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -61,8 +62,17 @@ export default function AdminTab() {
               <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
                 {t('Manage Field Shift', 'ফিল্ড শিফট পরিচালনা')}
               </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                {t('Signed in as', 'লগইন করেছেন')} <span className="font-semibold text-slate-900 dark:text-slate-50">{user.name}</span>
+              <p className="text-sm text-slate-600 dark:text-slate-400 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span>{t('Signed in as', 'লগইন করেছেন')} <span className="font-semibold text-slate-900 dark:text-slate-50">{user.name}</span></span>
+                <button
+                  type="button"
+                  disabled={reloading}
+                  onClick={async () => { setReloading(true); await admin.reload(); setReloading(false); }}
+                  className={`inline-flex items-center gap-1 text-xs font-semibold text-sky-700 dark:text-sky-300 hover:underline disabled:opacity-60 rounded ${focusRing}`}
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${reloading ? 'animate-spin' : ''}`} aria-hidden />
+                  {reloading ? t('Refreshing…', 'হালনাগাদ হচ্ছে…') : t('Refresh', 'হালনাগাদ করুন')}
+                </button>
               </p>
             </div>
 
@@ -76,20 +86,18 @@ export default function AdminTab() {
             </dl>
           </div>
 
-          {usingDefaultAdminPassword && (
-            <div role="alert" className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-2xl border border-amber-500/40 bg-amber-500/10">
-              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" aria-hidden />
-              <p className="flex-1 text-sm text-amber-900 dark:text-amber-100">
-                {t('You are using the default admin password. Change it so others cannot sign in as admin.',
-                   'আপনি ডিফল্ট অ্যাডমিন পাসওয়ার্ড ব্যবহার করছেন। অন্য কেউ যেন অ্যাডমিন হিসেবে ঢুকতে না পারে, তাই এটি বদলে নিন।')}
+          {adminError && (
+            <div role="alert" className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-2xl border border-red-500/40 bg-red-500/10">
+              <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 shrink-0" aria-hidden />
+              <p className="flex-1 text-sm text-red-900 dark:text-red-100">
+                {t('The last change could not be saved: ', 'শেষ পরিবর্তনটি সংরক্ষণ করা যায়নি: ')}{adminError}
               </p>
               <button
                 type="button"
-                onClick={() => setSection('security')}
-                className={`group inline-flex items-center justify-center gap-1.5 min-h-tap px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold shrink-0 transition-[transform,background-color] duration-150 hover:-translate-y-px active:scale-[0.97] ${focusRing}`}
+                onClick={clearAdminError}
+                className={`inline-flex items-center justify-center gap-1.5 min-h-tap px-4 rounded-xl border border-red-500/40 text-sm font-semibold shrink-0 ${focusRing}`}
               >
-                {t('Change password', 'পাসওয়ার্ড বদলান')}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                <X className="h-4 w-4" aria-hidden />{t('Dismiss', 'বন্ধ করুন')}
               </button>
             </div>
           )}

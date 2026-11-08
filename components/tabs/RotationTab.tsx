@@ -11,12 +11,15 @@ import { BIGHA_HA } from '@/lib/options';
 import { useApp } from '../AppProvider';
 import { Card, SubCard, ghostBtn, mutedText, titleText } from '../ui';
 import { CropIcon, CropPicker } from '../CropIcon';
+import { LEVEL_LABEL, LEVEL_STYLE, RISK_LABEL } from './NasaTab';
 
 export default function RotationTab() {
   const {
     t, n, lang, district, farm, recommendation, recommendedPlan, isCustomPlan, setRecommendedCrop,
-    resetRecommendedPlan, traditionalPlan, setTraditionalCrop, resetTraditionalPlan, tradMetrics, recMetrics,
+    resetRecommendedPlan, traditionalPlan, setTraditionalCrop, resetTraditionalPlan, tradMetrics, recMetrics, climateSource, climate,
   } = useApp();
+  // Medium and high risks right now, from the predict-risk function.
+  const alerts = (climate?.predictions ?? []).filter(p => p.level !== 'low');
 
   const waterSaved = tradMetrics.totalWaterMm - recMetrics.totalWaterMm;
   const waterSavedPct = tradMetrics.totalWaterMm > 0 ? Math.round((waterSaved / tradMetrics.totalWaterMm) * 100) : 0;
@@ -61,8 +64,19 @@ export default function RotationTab() {
                   {t('Climate-Adaptive Recommended Rotation', 'জলবায়ু সহনশীল প্রস্তাবিত ফসল পর্যায়ক্রম')}
                 </h3>
                 <p className="text-xs font-medium text-sky-600 dark:text-sky-300">
-                  {t(`Calibrated for ${district.name} agro-ecology`, `${district.nameBn} জেলার মাটির জন্য বিশেষভাবে সাজানো`)}
+                  {climateSource === 'nasa'
+                    ? t(`Calibrated for ${district.name} with NASA POWER climate data`, `নাসা POWER জলবায়ু তথ্য দিয়ে ${district.nameBn} জেলার জন্য সাজানো`)
+                    : t(`Calibrated for ${district.name} with the district baseline (NASA data not loaded)`, `জেলার মূল তথ্য দিয়ে ${district.nameBn} জেলার জন্য সাজানো (নাসার তথ্য লোড হয়নি)`)}
                 </p>
+                {alerts.length > 0 && (
+                  <ul className="mt-1.5 flex flex-wrap gap-1.5" aria-label={t('Current risks from NASA data', 'নাসা তথ্য অনুযায়ী বর্তমান ঝুঁকি')}>
+                    {alerts.map(p => (
+                      <li key={p.kind} className={`text-xs font-bold px-2 py-0.5 rounded-full border ${LEVEL_STYLE[p.level]}`}>
+                        {t(...RISK_LABEL[p.kind])}: {t(...LEVEL_LABEL[p.level])}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
             {isCustomPlan ? (

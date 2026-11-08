@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Eye, EyeOff, Info, KeyRound, Lock, LogIn, Mail, Phone, Send, User as UserIcon, UserPlus } from 'lucide-react';
-import { useApp, type AuthResult } from './AppProvider';
+import { ArrowLeft, CheckCircle2, Eye, EyeOff, Info, KeyRound, Lock, LogIn, Mail, Save, Send, User as UserIcon, UserPlus } from 'lucide-react';
+import type { AuthError } from '@supabase/supabase-js';
+import { useApp } from './AppProvider';
 import { LangToggle, primaryBtn } from './ui';
 import LegalModal, { type LegalDoc } from './LegalModal';
-import { BUILTIN_ADMIN_ID, MIN_PASSWORD_LENGTH, isValidBdMobile, isValidEmail } from '@/lib/auth';
+import { MIN_PASSWORD_LENGTH, isValidEmail } from '@/lib/auth';
+import { redirectUrl, supabase } from '@/lib/supabase';
 
 // Short, compressed background loop (about 1 MB). public/login-bg.jpg is shown until it plays,
 // and instead of it on slow connections, with data saver on, or when motion is reduced.
@@ -25,20 +27,19 @@ const fieldBox = 'min-h-tap flex items-center gap-2 glass-subtle rounded-xl px-3
 const fieldInput =
   'w-full bg-transparent outline-none font-bold text-sm text-slate-900 dark:text-white placeholder:text-slate-400';
 
-type Mode = 'login' | 'otp' | 'signup' | 'forgot';
+type Mode = 'login' | 'code' | 'signup' | 'forgot';
 
 export default function LoginScreen() {
-  const { t, authenticate, register } = useApp();
+  const { t, authNotice, clearAuthNotice } = useApp();
 
   const [mode, setMode] = useState<Mode>('login');
   const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState('');
-  const [sentCode, setSentCode] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [resetSent, setResetSent] = useState(false);
+  const [info, setInfo] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [legal, setLegal] = useState<LegalDoc | null>(null);
@@ -79,60 +80,52 @@ export default function LoginScreen() {
     };
   }, [showVideo]);
 
-  const phoneDigits = phone.replace(/\D/g, '').replace(/^(880|0)/, '');
-
   const switchMode = (next: Mode) => {
     setMode(next);
     setError('');
-    setSentCode(null);
-    setOtp('');
-    setResetSent(false);
+    setInfo('');
+    setCodeSent(false);
+    setCode('');
     setShowPassword(false);
+    clearAuthNotice();
   };
 
-  const sendOtp = () => {
-    if (!isValidBdMobile(phoneDigits)) {
-      setError(t('Enter a valid Bangladeshi mobile number, e.g. 1712345678.', 'সঠিক মোবাইল নম্বর দিন, যেমন ১৭১২৩৪৫৬৭৮।'));
-      return;
-    }
-    // Demo: no SMS gateway yet, so the code is shown on screen.
-    setSentCode(String(Math.floor(100000 + Math.random() * 900000)));
-    setOtp('');
-    setError('');
-  };
-
-  /** Shows the right message for a failed sign-in. */
-  const showResult = (result: AuthResult) => {
-    if (result === 'blocked') {
-      setError(t('This account has been blocked by an administrator.', 'এই অ্যাকাউন্টটি অ্যাডমিন বন্ধ করে রেখেছেন।'));
-    } else if (result === 'wrong-password') {
-      setError(t('Incorrect password.', 'পাসওয়ার্ড সঠিক নয়।'));
-    } else if (result === 'exists') {
-      setError(t('An account with this email already exists. Please log in.', 'এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা আছে। লগইন করুন।'));
+  /** Turns a Supabase error into a message for the person. */
+  const explain = (e: AuthError): string => {
+    switch (e.code) {
+      case 'invalid_credentials':
+        return t('Incorrect email or password.', 'ইমেইল বা পাসওয়ার্ড সঠিক নয়।');
+      case 'email_not_confirmed':
+        return t('Please confirm your email first. Check your inbox for the link we sent.', 'আগে ইমেইল নিশ্চিত করুন। পাঠানো লিংকটি ইনবক্সে দেখুন।');
+      case 'otp_expired':
+        return t('That code is wrong or has expired. Request a new one.', 'কোডটি ভুল বা মেয়াদ শেষ। নতুন কোড নিন।');
+      case 'over_email_send_rate_limit':
+      case 'over_request_rate_limit':
+        return t('Too many attempts. Please wait a minute and try again.', 'অনেকবার চেষ্টা হয়েছে। এক মিনিট পরে আবার চেষ্টা করুন।');
+      case 'weak_password':
+        return t('Please choose a stronger password.', 'আরও শক্ত পাসওয়ার্ড দিন।');
+      default:
+        return e.message || t('Something went wrong. Please try again.', 'কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।');
     }
   };
 
-  const run = async (attempt: () => Promise<AuthResult>) => {
+  /** Runs a Supabase call, showing its error if it fails. Returns true on success. */
+  const run = async (attempt: () => Promise<AuthError | null>) => {
     setBusy(true);
     setError('');
+    setInfo('');
+    clearAuthNotice();
     try {
-      showResult(await attempt());
+      const err = await attempt();
+      if (err) setError(explain(err));
+      return !err;
+    } catch {
+      setError(t('Could not reach the server. Check your internet connection.', 'সার্ভারে পৌঁছানো যায়নি। ইন্টারনেট সংযোগ দেখুন।'));
+      return false;
     } finally {
       setBusy(false);
     }
   };
-
-  const verifyOtp = () => {
-    if (otp !== sentCode) {
-      setError(t('That code is not correct. Check the 6-digit code and try again.', 'কোডটি সঠিক নয়। ৬ সংখ্যার কোডটি আবার দেখে দিন।'));
-      return;
-    }
-    run(() => authenticate({ kind: 'phone', phoneDigits }));
-  };
-
-  // Demo: replace these with real OAuth flows.
-  const googleLogin = () => run(() => authenticate({ kind: 'social', provider: 'google' }));
-  const appleLogin = () => run(() => authenticate({ kind: 'social', provider: 'apple' }));
 
   /** Returns the cleaned email, or null after setting an error. */
   const checkEmail = (): string | null => {
@@ -145,17 +138,35 @@ export default function LoginScreen() {
   };
 
   const emailLogin = () => {
-    if (!email.trim() || !password) {
-      setError(t('Please enter both email and password.', 'ইমেইল ও পাসওয়ার্ড দুটোই দিন।'));
-      return;
-    }
-    // The built-in admin signs in with the ID "admin" instead of an email.
-    const isAdminId = email.trim().toLowerCase() === BUILTIN_ADMIN_ID;
-    if (!isAdminId && !checkEmail()) return;
-    run(() => authenticate({ kind: 'password', identifier: email, password }));
+    const mail = checkEmail();
+    if (!mail || !password) return;
+    run(async () => (await supabase.auth.signInWithPassword({ email: mail, password })).error);
   };
 
-  const signUp = () => {
+  const sendCode = async () => {
+    const mail = checkEmail();
+    if (!mail) return;
+    const ok = await run(async () => (await supabase.auth.signInWithOtp({
+      email: mail,
+      options: { shouldCreateUser: true, emailRedirectTo: redirectUrl() },
+    })).error);
+    if (ok) {
+      setCodeSent(true);
+      setInfo(t(`We sent a sign-in code to ${mail}. It also contains a link you can tap instead.`,
+                `${mail} ঠিকানায় একটি কোড পাঠানো হয়েছে। চাইলে ইমেইলের লিংকেও ট্যাপ করতে পারেন।`));
+    }
+  };
+
+  const verifyCode = () => {
+    const mail = checkEmail();
+    if (!mail || code.length < 6) return;
+    run(async () => (await supabase.auth.verifyOtp({ email: mail, token: code, type: 'email' })).error);
+  };
+
+  const googleLogin = () =>
+    run(async () => (await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectUrl() } })).error);
+
+  const signUp = async () => {
     if (!name.trim()) {
       setError(t('Please enter your name.', 'আপনার নাম দিন।'));
       return;
@@ -166,19 +177,49 @@ export default function LoginScreen() {
       setError(t('Password must be at least 6 characters.', 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।'));
       return;
     }
-    run(() => register(name, mail, password));
+    let needsConfirm = false;
+    let exists = false;
+    const ok = await run(async () => {
+      const { data, error: err } = await supabase.auth.signUp({
+        email: mail,
+        password,
+        options: { data: { full_name: name.trim() }, emailRedirectTo: redirectUrl() },
+      });
+      // Supabase hides whether an email is taken: an existing account comes back with no identities.
+      exists = !!data.user && (data.user.identities?.length ?? 0) === 0;
+      needsConfirm = !data.session;
+      return err;
+    });
+    if (!ok) return;
+    if (exists) {
+      setError(t('An account with this email already exists. Please log in.', 'এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা আছে। লগইন করুন।'));
+    } else if (needsConfirm) {
+      setInfo(t(`Almost done! We sent a confirmation link to ${mail}. Open it to finish signing up.`,
+                `প্রায় শেষ! ${mail} ঠিকানায় একটি নিশ্চিতকরণ লিংক পাঠানো হয়েছে। নিবন্ধন শেষ করতে লিংকটি খুলুন।`));
+    }
   };
 
-  const sendReset = () => {
-    if (!checkEmail()) return;
-    // Demo: no email service yet.
-    setError('');
-    setResetSent(true);
+  const sendReset = async () => {
+    const mail = checkEmail();
+    if (!mail) return;
+    const ok = await run(async () => (await supabase.auth.resetPasswordForEmail(mail, { redirectTo: redirectUrl() })).error);
+    if (ok) {
+      setInfo(t(`If an account exists for ${mail}, we sent it a link to reset the password.`,
+                `${mail} ঠিকানায় অ্যাকাউন্ট থাকলে পাসওয়ার্ড রিসেটের লিংক পাঠানো হয়েছে।`));
+    }
   };
+
+  const notice =
+    authNotice === 'blocked'
+      ? t('This account has been blocked by an administrator.', 'এই অ্যাকাউন্টটি অ্যাডমিন বন্ধ করে রেখেছেন।')
+      : authNotice === 'profile-error'
+        ? t('Could not load your account. Check your internet connection and try again.', 'আপনার অ্যাকাউন্ট লোড করা যায়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।')
+        : '';
+  const shownError = error || notice;
 
   const titles: Record<Mode, string> = {
     login: t('Log in to Field Shift', 'ফিল্ড শিফটে লগইন করুন'),
-    otp: t('Log in with verification code', 'যাচাই কোড দিয়ে লগইন'),
+    code: t('Log in with an email code', 'ইমেইল কোড দিয়ে লগইন'),
     signup: t('Create your account', 'নতুন অ্যাকাউন্ট খুলুন'),
     forgot: t('Reset your password', 'পাসওয়ার্ড রিসেট করুন'),
   };
@@ -264,9 +305,15 @@ export default function LoginScreen() {
             <h2 className="text-2xl font-black tracking-tight">{titles[mode]}</h2>
           </div>
 
-          {error && (
+          {shownError && (
             <div role="alert" className="text-sm font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
-              {error}
+              {shownError}
+            </div>
+          )}
+          {info && (
+            <div role="status" className="text-sm flex items-start gap-1.5 rounded-lg px-3 py-2 bg-sky-500/10 border border-sky-500/25 text-sky-700 dark:text-sky-200">
+              <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+              <span>{info}</span>
             </div>
           )}
 
@@ -279,8 +326,8 @@ export default function LoginScreen() {
                 <button type="button" onClick={() => switchMode('forgot')} className={linkBtn}>
                   {t('Forgot password', 'পাসওয়ার্ড ভুলে গেছেন')}
                 </button>
-                <button type="button" onClick={() => switchMode('otp')} className={`${linkBtn} text-right`}>
-                  {t('Login with verification code', 'যাচাই কোড দিয়ে লগইন')}
+                <button type="button" onClick={() => switchMode('code')} className={`${linkBtn} text-right`}>
+                  {t('Email me a code instead', 'পাসওয়ার্ড ছাড়া, ইমেইল কোডে লগইন')}
                 </button>
               </div>
               <button
@@ -294,74 +341,69 @@ export default function LoginScreen() {
             </form>
           )}
 
-          {/* Phone + OTP log in */}
-          {mode === 'otp' && (
-            <section className="space-y-3">
+          {/* Email code log in (also creates the account on first use) */}
+          {mode === 'code' && (
+            <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); if (codeSent) verifyCode(); else sendCode(); }}>
               <label className={fieldBox}>
-                <Phone className="h-4 w-4 text-sky-500" />
-                <span className="font-bold text-slate-600 dark:text-slate-300 text-sm">+880</span>
+                <Mail className="h-4 w-4 text-sky-500" />
                 <input
-                  type="tel"
-                  inputMode="numeric"
-                  autoComplete="tel-national"
-                  aria-label={t('Mobile number', 'মোবাইল নম্বর')}
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' && !sentCode) sendOtp(); }}
-                  disabled={!!sentCode}
-                  placeholder="1XXXXXXXXX"
+                  type="email"
+                  inputMode="email"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  autoComplete="email"
+                  aria-label={t('Email', 'ইমেইল')}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={codeSent}
+                  placeholder={t('Enter your email', 'আপনার ইমেইল দিন')}
                   className={fieldInput}
                 />
               </label>
 
-              {!sentCode ? (
-                <button type="button" onClick={sendOtp} className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 ${primaryBtn}`}>
+              {!codeSent ? (
+                <button type="submit" disabled={busy || !email.trim()}
+                  className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}>
                   <Send className="h-4 w-4" />
-                  <span>{t('Send code', 'কোড পাঠান')}</span>
+                  <span>{busy ? t('Sending…', 'পাঠানো হচ্ছে…') : t('Send code', 'কোড পাঠান')}</span>
                 </button>
               ) : (
                 <>
-                  <div className="text-sm flex items-start gap-1.5 rounded-lg px-3 py-2 bg-sky-500/10 border border-sky-500/25 text-sky-700 dark:text-sky-200">
-                    <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                    <span>
-                      {t('Demo mode — SMS is not connected yet. Your code is ', 'ডেমো মোড — এসএমএস এখনো যুক্ত নয়। আপনার কোড ')}
-                      <strong className="font-mono tracking-widest">{sentCode}</strong>
-                    </span>
-                  </div>
                   <label className={fieldBox}>
                     <Lock className="h-4 w-4 text-sky-500" />
                     <input
                       type="text"
                       inputMode="numeric"
                       autoComplete="one-time-code"
-                      aria-label={t('6-digit code', '৬ সংখ্যার কোড')}
-                      maxLength={6}
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                      onKeyDown={(e) => { if (e.key === 'Enter') verifyOtp(); }}
-                      placeholder={t('6-digit code', '৬ সংখ্যার কোড')}
+                      aria-label={t('Code from the email', 'ইমেইলের কোড')}
+                      maxLength={8}
+                      value={code}
+                      onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                      placeholder={t('Code from the email', 'ইমেইলের কোড')}
                       className={`${fieldInput} tracking-widest`}
                     />
                   </label>
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={() => { setSentCode(null); setError(''); }}
+                      onClick={() => { setCodeSent(false); setCode(''); setError(''); setInfo(''); }}
                       className="btn-popup min-h-tap min-w-tap px-3 rounded-xl glass-subtle text-sm font-bold flex items-center justify-center gap-1"
-                      aria-label={t('Change number', 'নম্বর পরিবর্তন')}
+                      aria-label={t('Change email', 'ইমেইল পরিবর্তন')}
                     >
                       <ArrowLeft className="h-4 w-4" />
                     </button>
                     <button
-                      type="button"
-                      onClick={verifyOtp}
-                      disabled={busy || otp.length !== 6}
+                      type="submit"
+                      disabled={busy || code.length < 6}
                       className={`flex-1 py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
                     >
                       <LogIn className="h-4 w-4" />
-                      <span>{t('Log in', 'লগইন')}</span>
+                      <span>{busy ? t('Checking…', 'যাচাই হচ্ছে…') : t('Log in', 'লগইন')}</span>
                     </button>
                   </div>
+                  <button type="button" onClick={sendCode} disabled={busy} className={`${linkBtn} w-full text-center`}>
+                    {t('Send a new code', 'নতুন কোড পাঠান')}
+                  </button>
                 </>
               )}
               <div className="text-center">
@@ -369,7 +411,7 @@ export default function LoginScreen() {
                   {t('Login with password', 'পাসওয়ার্ড দিয়ে লগইন')}
                 </button>
               </div>
-            </section>
+            </form>
           )}
 
           {/* Sign up */}
@@ -395,7 +437,7 @@ export default function LoginScreen() {
                 className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
               >
                 <UserPlus className="h-4 w-4" />
-                <span>{t('Sign up', 'নিবন্ধন করুন')}</span>
+                <span>{busy ? t('Creating account…', 'অ্যাকাউন্ট খোলা হচ্ছে…') : t('Sign up', 'নিবন্ধন করুন')}</span>
               </button>
             </form>
           )}
@@ -403,16 +445,7 @@ export default function LoginScreen() {
           {/* Forgot password */}
           {mode === 'forgot' && (
             <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); sendReset(); }}>
-              {resetSent ? (
-                <div role="status" className="text-sm flex items-start gap-1.5 rounded-lg px-3 py-2 bg-sky-500/10 border border-sky-500/25 text-sky-700 dark:text-sky-200">
-                  <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                  <span>
-                    {t('Demo mode — email is not connected yet. In the full app, a reset link would be sent to ',
-                       'ডেমো মোড — ইমেইল এখনো যুক্ত নয়। পূর্ণ সংস্করণে রিসেট লিংক পাঠানো হবে ')}
-                    <strong>{email.trim()}</strong>
-                  </span>
-                </div>
-              ) : (
+              {!info && (
                 <>
                   <p className="text-sm text-slate-700 dark:text-slate-300 text-center">
                     {t('Enter your email and we will send you a link to reset your password.',
@@ -421,7 +454,7 @@ export default function LoginScreen() {
                   {emailField}
                   <button
                     type="submit"
-                    disabled={!email.trim()}
+                    disabled={busy || !email.trim()}
                     className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
                   >
                     <Send className="h-4 w-4" />
@@ -462,10 +495,6 @@ export default function LoginScreen() {
                   <GoogleLogo />
                   <span>{t('Continue with Google', 'গুগল দিয়ে চালিয়ে যান')}</span>
                 </button>
-                <button type="button" onClick={appleLogin} disabled={busy} className={`${socialBtn} disabled:opacity-60`}>
-                  <AppleLogo />
-                  <span>{t('Continue with Apple', 'অ্যাপল দিয়ে চালিয়ে যান')}</span>
-                </button>
               </div>
             </>
           )}
@@ -485,6 +514,85 @@ export default function LoginScreen() {
   );
 }
 
+/** Shown after someone opens a password-reset link: they choose a new password here. */
+export function NewPasswordScreen() {
+  const { t, finishPasswordRecovery } = useApp();
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const save = async () => {
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      setError(t('Password must be at least 6 characters.', 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।'));
+      return;
+    }
+    if (password !== confirm) {
+      setError(t('The two passwords do not match.', 'পাসওয়ার্ড দুটি মেলেনি।'));
+      return;
+    }
+    setBusy(true);
+    const { error: err } = await supabase.auth.updateUser({ password });
+    setBusy(false);
+    if (err) {
+      setError(err.code === 'same_password'
+        ? t('Choose a password different from your old one.', 'পুরোনোটির থেকে আলাদা পাসওয়ার্ড দিন।')
+        : err.message);
+      return;
+    }
+    setError('');
+    setDone(true);
+  };
+
+  const input = (id: string, label: string, value: string, onChange: (v: string) => void) => (
+    <label htmlFor={id} className={fieldBox}>
+      <KeyRound className="h-4 w-4 text-sky-500" />
+      <input id={id} type="password" autoComplete="new-password" aria-label={label} placeholder={label}
+        value={value} onChange={(e) => onChange(e.target.value)} className={fieldInput} />
+    </label>
+  );
+
+  return (
+    <div className="min-h-screen flex flex-col font-sans antialiased text-slate-900 dark:text-slate-100">
+      <div className="fs-login-fallback" aria-hidden />
+      <main className="fs-login-wrap flex-1 flex items-center justify-center p-4 lg:p-12">
+        <div className="fs-login-card rounded-4xl p-8 lg:p-10 w-full max-w-md space-y-5 card-popup">
+          <div className="text-center space-y-3">
+            <img src="/logo-sm.png" alt="Field Shift logo" className="h-16 w-16 rounded-full object-cover shadow-xl mx-auto ring-4 ring-white/40" />
+            <h2 className="text-2xl font-black tracking-tight">{t('Choose a new password', 'নতুন পাসওয়ার্ড দিন')}</h2>
+          </div>
+
+          {error && (
+            <div role="alert" className="text-sm font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">{error}</div>
+          )}
+
+          {done ? (
+            <div className="space-y-4">
+              <div role="status" className="text-sm font-bold flex items-center gap-2 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2">
+                <CheckCircle2 className="h-4 w-4" />{t('Your password has been changed.', 'আপনার পাসওয়ার্ড পরিবর্তন হয়েছে।')}
+              </div>
+              <button type="button" onClick={finishPasswordRecovery}
+                className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 ${primaryBtn}`}>
+                <LogIn className="h-4 w-4" />{t('Continue to Field Shift', 'ফিল্ড শিফটে যান')}
+              </button>
+            </div>
+          ) : (
+            <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save(); }}>
+              {input('np-new', t('New password', 'নতুন পাসওয়ার্ড'), password, setPassword)}
+              {input('np-confirm', t('Confirm new password', 'নতুন পাসওয়ার্ড আবার দিন'), confirm, setConfirm)}
+              <button type="submit" disabled={busy || !password || !confirm}
+                className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}>
+                <Save className="h-4 w-4" />{busy ? t('Saving…', 'সংরক্ষণ হচ্ছে…') : t('Save new password', 'নতুন পাসওয়ার্ড সংরক্ষণ')}
+              </button>
+            </form>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
+
 function GoogleLogo() {
   return (
     <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden>
@@ -492,14 +600,6 @@ function GoogleLogo() {
       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-    </svg>
-  );
-}
-
-function AppleLogo() {
-  return (
-    <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M16.37 12.73c-.03-2.65 2.16-3.92 2.26-3.99-1.23-1.8-3.15-2.05-3.83-2.08-1.63-.17-3.18.96-4.01.96-.83 0-2.1-.94-3.46-.91-1.78.03-3.42 1.04-4.34 2.63-1.85 3.21-.47 7.96 1.33 10.56.88 1.27 1.93 2.71 3.3 2.65 1.33-.05 1.83-.86 3.43-.86 1.6 0 2.05.86 3.45.83 1.43-.02 2.33-1.29 3.2-2.57 1.01-1.47 1.42-2.9 1.45-2.97-.03-.01-2.77-1.06-2.78-4.25zM13.73 4.94c.73-.89 1.23-2.12 1.09-3.35-1.05.04-2.33.7-3.08 1.59-.68.78-1.27 2.04-1.11 3.24 1.17.09 2.37-.6 3.1-1.48z" />
     </svg>
   );
 }
