@@ -10,19 +10,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // DAY theme — light sky blue + white
-        sky: {
-          50:  "#F0F9FF",
-          100: "#E0F2FE",
-          200: "#BAE6FD",
-          300: "#7DD3FC",
-          400: "#38BDF8",
-          500: "#0EA5E9",
-          600: "#0284C7",
-          700: "#0369A1",
-          800: "#075985",
-          900: "#0C4A6E",
-        },
+        // Accent scale. The class name stays "sky" so existing markup keeps working,
+        // but the values come from CSS variables in globals.css: deep teal in the
+        // app, and the original sky blue inside the admin panel (.fs-classic).
+        sky: Object.fromEntries(
+          [50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map(k => [k, `rgb(var(--sky-${k}) / <alpha-value>)`])
+        ),
         // NIGHT theme — deep dark gray
         graphite: {
           50:  "#F1F5F9",
@@ -46,9 +39,9 @@ module.exports = {
       },
       fontFamily: {
         // Inter for Latin text; Noto Sans Bengali fills in every Bangla character.
-        sans: ['var(--font-inter)', 'var(--font-bengali)', 'system-ui', '-apple-system',
-               'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco',
+        // --font-ui is set in globals.css (Instrument Sans; Inter inside the admin panel).
+        sans: ['var(--font-ui)', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
+        mono: ['var(--font-dm-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco',
                'Consolas', 'monospace'],
       },
       fontSize: {

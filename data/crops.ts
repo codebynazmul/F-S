@@ -19,6 +19,10 @@ export interface CropInfo {
   droughtTolerance: string;
   growingPeriodDays: number;
   carbonScore: number;
+  /** Typical income for Bangladeshi farmers, 0–10 (relative, not a live market price). */
+  incomeScore: number;
+  /** Value of straw, stalks or haulm as cattle fodder, 0–10. */
+  forageScore: number;
 }
 
 export const CROP_DATABASE: Record<string, CropInfo> = {
@@ -41,7 +45,9 @@ export const CROP_DATABASE: Record<string, CropInfo> = {
     heatTolerance: 'Medium',
     droughtTolerance: 'Low',
     growingPeriodDays: 145,
-    carbonScore: 3
+    carbonScore: 3,
+    incomeScore: 7,
+    forageScore: 6
   },
   rice_aman: {
     id: 'rice_aman',
@@ -62,7 +68,9 @@ export const CROP_DATABASE: Record<string, CropInfo> = {
     heatTolerance: 'High',
     droughtTolerance: 'Medium',
     growingPeriodDays: 130,
-    carbonScore: 4
+    carbonScore: 4,
+    incomeScore: 6,
+    forageScore: 6
   },
   wheat: {
     id: 'wheat',
@@ -83,7 +91,9 @@ export const CROP_DATABASE: Record<string, CropInfo> = {
     heatTolerance: 'Low',
     droughtTolerance: 'Medium',
     growingPeriodDays: 110,
-    carbonScore: 5
+    carbonScore: 5,
+    incomeScore: 5,
+    forageScore: 4
   },
   lentil: {
     id: 'lentil',
@@ -104,7 +114,9 @@ export const CROP_DATABASE: Record<string, CropInfo> = {
     heatTolerance: 'Medium',
     droughtTolerance: 'High',
     growingPeriodDays: 95,
-    carbonScore: 8
+    carbonScore: 8,
+    incomeScore: 7,
+    forageScore: 4
   },
   chickpea: {
     id: 'chickpea',
@@ -125,7 +137,9 @@ export const CROP_DATABASE: Record<string, CropInfo> = {
     heatTolerance: 'High',
     droughtTolerance: 'High',
     growingPeriodDays: 100,
-    carbonScore: 8
+    carbonScore: 8,
+    incomeScore: 6,
+    forageScore: 3
   },
   mustard: {
     id: 'mustard',
@@ -146,7 +160,9 @@ export const CROP_DATABASE: Record<string, CropInfo> = {
     heatTolerance: 'Medium',
     droughtTolerance: 'Medium',
     growingPeriodDays: 80,
-    carbonScore: 6
+    carbonScore: 6,
+    incomeScore: 6,
+    forageScore: 3
   },
   maize: {
     id: 'maize',
@@ -167,7 +183,9 @@ export const CROP_DATABASE: Record<string, CropInfo> = {
     heatTolerance: 'High',
     droughtTolerance: 'Medium',
     growingPeriodDays: 120,
-    carbonScore: 7
+    carbonScore: 7,
+    incomeScore: 8,
+    forageScore: 8
   },
   mungbean: {
     id: 'mungbean',
@@ -188,6 +206,8 @@ export const CROP_DATABASE: Record<string, CropInfo> = {
     heatTolerance: 'High',
     droughtTolerance: 'High',
     growingPeriodDays: 65,
-    carbonScore: 9
+    carbonScore: 9,
+    incomeScore: 6,
+    forageScore: 6
   }
 };

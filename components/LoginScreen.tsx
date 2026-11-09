@@ -23,9 +23,9 @@ function canPlayVideo(): boolean {
   return true;
 }
 
-const fieldBox = 'min-h-tap flex items-center gap-2 glass-subtle rounded-xl px-3 py-2.5';
+const fieldBox = 'fs-field min-h-tap flex items-center gap-2.5 rounded-xl px-3.5 py-2.5';
 const fieldInput =
-  'w-full bg-transparent outline-none font-bold text-sm text-slate-900 dark:text-white placeholder:text-slate-400';
+  'w-full bg-transparent outline-none text-[0.9375rem] text-slate-900 dark:text-white placeholder:text-slate-400';
 
 type Mode = 'login' | 'code' | 'signup' | 'forgot';
 
@@ -224,13 +224,13 @@ export default function LoginScreen() {
     forgot: t('Reset your password', 'পাসওয়ার্ড রিসেট করুন'),
   };
 
-  const linkBtn = 'text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 transition-colors';
+  const linkBtn = 'min-h-tap text-sm font-medium text-sky-700 dark:text-sky-300 hover:underline underline-offset-4 transition-colors';
   const socialBtn =
-    'btn-popup min-h-tap w-full flex items-center justify-center gap-3 py-3 px-5 rounded-2xl glass-subtle border border-sky-500/25 hover:border-sky-500/50 font-bold text-sm';
+    'btn-popup min-h-tap w-full flex items-center justify-center gap-3 py-3 px-5 rounded-xl bg-[var(--bg-surface)] border border-sky-600/15 hover:border-sky-600/40 font-medium text-sm';
 
   const emailField = (
     <label className={fieldBox}>
-      <Mail className="h-4 w-4 text-sky-500" />
+      <Mail className="h-4 w-4 text-slate-400" />
       <input
         type="text"
         inputMode="email"
@@ -248,7 +248,7 @@ export default function LoginScreen() {
 
   const passwordField = (
     <div className={fieldBox}>
-      <KeyRound className="h-4 w-4 text-sky-500" />
+      <KeyRound className="h-4 w-4 text-slate-400" />
       <input
         type={showPassword ? 'text' : 'password'}
         autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
@@ -271,47 +271,52 @@ export default function LoginScreen() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col font-sans antialiased text-slate-900 dark:text-slate-100">
-      <div className="fs-login-fallback" aria-hidden />
-      {showVideo && (
-        <video
-          ref={videoRef}
-          className="fs-video-bg"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster="/login-bg.jpg"
-          aria-hidden
-          onError={() => setShowVideo(false)}
-        >
-          <source src={VIDEO_URL} type="video/mp4" onError={() => setShowVideo(false)} />
-        </video>
-      )}
-
-      <header className="fs-login-header fs-login-header-wrap px-6 lg:px-12 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img src="/logo-sm.png" alt="" className="h-12 w-12 rounded-full object-cover shadow-md" />
-          <h1 className="text-xl lg:text-2xl font-black tracking-tight">{t('Field Shift', 'ফিল্ড শিফট')}</h1>
+    <div className="min-h-screen lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] font-sans antialiased text-slate-900 dark:text-slate-100">
+      <section className="fs-login-media min-h-[40vh] lg:min-h-screen lg:sticky lg:top-0 flex flex-col justify-between gap-8 p-5 sm:p-8 lg:p-12 text-white">
+        {showVideo && (
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            poster="/login-bg.jpg"
+            aria-hidden
+            onError={() => setShowVideo(false)}
+          >
+            <source src={VIDEO_URL} type="video/mp4" onError={() => setShowVideo(false)} />
+          </video>
+        )}
+        <div className="fs-login-media-copy flex items-center gap-3">
+          <img src="/logo-sm.png" alt="" className="h-10 w-10 rounded-xl object-cover" />
+          <span className="fs-display text-xl">{t('Field Shift', 'ফিল্ড শিফট')}</span>
         </div>
-        <LangToggle />
-      </header>
+        <div className="fs-login-media-copy max-w-xl space-y-4">
+          <h1 className="fs-display text-[2rem] sm:text-[2.75rem] lg:text-[3.5rem] text-white">
+            {t('Crop rotations that use less water, for farms in Bangladesh.', 'কম পানিতে ফসল পর্যায়ক্রম, বাংলাদেশের খামারের জন্য।')}
+          </h1>
+          <p className="text-[0.9375rem] lg:text-base text-white/85 max-w-md leading-relaxed">
+            {t('All 64 districts, with NASA POWER climate data, in Bangla and English.', '৬৪টি জেলা, নাসা POWER জলবায়ু তথ্যসহ, বাংলা ও ইংরেজিতে।')}
+          </p>
+        </div>
+      </section>
 
-      <main className="fs-login-wrap flex-1 flex items-center justify-center p-4 lg:p-12">
-        <div className="fs-login-card rounded-4xl p-8 lg:p-10 w-full max-w-md space-y-5 card-popup">
-          <div className="text-center space-y-3">
-            <img src="/logo-sm.png" alt="Field Shift logo" className="h-16 w-16 rounded-full object-cover shadow-xl mx-auto ring-4 ring-white/40" />
-            <h2 className="text-2xl font-black tracking-tight">{titles[mode]}</h2>
-          </div>
+      <main className="fs-login-panel flex flex-col lg:min-h-screen">
+        <div className="flex justify-end px-5 pt-5 sm:px-8 lg:px-12 lg:pt-8">
+          <LangToggle />
+        </div>
+        <div className="flex-1 flex items-center justify-center px-5 py-8 sm:px-8 lg:px-12">
+        <div className="w-full max-w-[400px] space-y-5 card-popup">
+          <h2 className="fs-display text-[1.75rem] lg:text-[2rem]">{titles[mode]}</h2>
 
           {shownError && (
-            <div role="alert" className="text-sm font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
+            <div role="alert" className="text-sm text-red-700 dark:text-red-300 bg-red-500/[0.06] border border-red-500/25 rounded-xl px-3.5 py-2.5">
               {shownError}
             </div>
           )}
           {info && (
-            <div role="status" className="text-sm flex items-start gap-1.5 rounded-lg px-3 py-2 bg-sky-500/10 border border-sky-500/25 text-sky-700 dark:text-sky-200">
+            <div role="status" className="text-sm flex items-start gap-1.5 rounded-xl px-3.5 py-2.5 bg-sky-600/[0.06] border border-sky-600/20 text-sky-800 dark:text-sky-200">
               <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
               <span>{info}</span>
             </div>
@@ -333,7 +338,7 @@ export default function LoginScreen() {
               <button
                 type="submit"
                 disabled={busy || !email.trim() || !password}
-                className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
+                className={`w-full py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
               >
                 <LogIn className="h-4 w-4" />
                 <span>{busy ? t('Logging in…', 'লগইন হচ্ছে…') : t('Log in', 'লগইন')}</span>
@@ -345,7 +350,7 @@ export default function LoginScreen() {
           {mode === 'code' && (
             <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); if (codeSent) verifyCode(); else sendCode(); }}>
               <label className={fieldBox}>
-                <Mail className="h-4 w-4 text-sky-500" />
+                <Mail className="h-4 w-4 text-slate-400" />
                 <input
                   type="email"
                   inputMode="email"
@@ -363,14 +368,14 @@ export default function LoginScreen() {
 
               {!codeSent ? (
                 <button type="submit" disabled={busy || !email.trim()}
-                  className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}>
+                  className={`w-full py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}>
                   <Send className="h-4 w-4" />
                   <span>{busy ? t('Sending…', 'পাঠানো হচ্ছে…') : t('Send code', 'কোড পাঠান')}</span>
                 </button>
               ) : (
                 <>
                   <label className={fieldBox}>
-                    <Lock className="h-4 w-4 text-sky-500" />
+                    <Lock className="h-4 w-4 text-slate-400" />
                     <input
                       type="text"
                       inputMode="numeric"
@@ -387,7 +392,7 @@ export default function LoginScreen() {
                     <button
                       type="button"
                       onClick={() => { setCodeSent(false); setCode(''); setError(''); setInfo(''); }}
-                      className="btn-popup min-h-tap min-w-tap px-3 rounded-xl glass-subtle text-sm font-bold flex items-center justify-center gap-1"
+                      className="btn-popup min-h-tap min-w-tap px-3 rounded-xl border border-sky-600/15 bg-[var(--bg-surface)] text-sm font-medium flex items-center justify-center gap-1"
                       aria-label={t('Change email', 'ইমেইল পরিবর্তন')}
                     >
                       <ArrowLeft className="h-4 w-4" />
@@ -395,7 +400,7 @@ export default function LoginScreen() {
                     <button
                       type="submit"
                       disabled={busy || code.length < 6}
-                      className={`flex-1 py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
+                      className={`flex-1 py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
                     >
                       <LogIn className="h-4 w-4" />
                       <span>{busy ? t('Checking…', 'যাচাই হচ্ছে…') : t('Log in', 'লগইন')}</span>
@@ -418,7 +423,7 @@ export default function LoginScreen() {
           {mode === 'signup' && (
             <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); signUp(); }}>
               <label className={fieldBox}>
-                <UserIcon className="h-4 w-4 text-sky-500" />
+                <UserIcon className="h-4 w-4 text-slate-400" />
                 <input
                   type="text"
                   autoComplete="name"
@@ -434,7 +439,7 @@ export default function LoginScreen() {
               <button
                 type="submit"
                 disabled={busy || !name.trim() || !email.trim() || !password}
-                className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
+                className={`w-full py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
               >
                 <UserPlus className="h-4 w-4" />
                 <span>{busy ? t('Creating account…', 'অ্যাকাউন্ট খোলা হচ্ছে…') : t('Sign up', 'নিবন্ধন করুন')}</span>
@@ -455,7 +460,7 @@ export default function LoginScreen() {
                   <button
                     type="submit"
                     disabled={busy || !email.trim()}
-                    className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
+                    className={`w-full py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
                   >
                     <Send className="h-4 w-4" />
                     <span>{t('Send reset link', 'রিসেট লিংক পাঠান')}</span>
@@ -479,7 +484,7 @@ export default function LoginScreen() {
               <button
                 type="button"
                 onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}
-                className="font-bold underline underline-offset-2 text-slate-900 dark:text-white hover:text-sky-600 dark:hover:text-sky-400"
+                className="min-h-tap font-medium text-sky-700 dark:text-sky-300 underline underline-offset-4"
               >
                 {mode === 'login' ? t('Sign up', 'নিবন্ধন করুন') : t('Log in', 'লগইন')}
               </button>
@@ -501,11 +506,12 @@ export default function LoginScreen() {
 
           <p className="text-xs text-center text-slate-500 dark:text-slate-400 leading-relaxed">
             {t('By continuing, you agree to our ', 'চালিয়ে যাওয়ার মাধ্যমে আপনি আমাদের ')}
-            <button type="button" onClick={() => setLegal('terms')} className="underline underline-offset-2 text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400">{t('Terms of Service', 'সেবার শর্তাবলি')}</button>
+            <button type="button" onClick={() => setLegal('terms')} className="underline underline-offset-2 text-slate-700 dark:text-slate-300 hover:text-sky-700 dark:hover:text-sky-300">{t('Terms of Service', 'সেবার শর্তাবলি')}</button>
             {t(' and ', ' এবং ')}
             <button type="button" onClick={() => setLegal('privacy')} className="underline underline-offset-2 text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400">{t('Privacy Policy', 'গোপনীয়তা নীতি')}</button>
             {t('.', '-তে সম্মত হচ্ছেন।')}
           </p>
+        </div>
         </div>
       </main>
 
@@ -547,33 +553,32 @@ export function NewPasswordScreen() {
 
   const input = (id: string, label: string, value: string, onChange: (v: string) => void) => (
     <label htmlFor={id} className={fieldBox}>
-      <KeyRound className="h-4 w-4 text-sky-500" />
+      <KeyRound className="h-4 w-4 text-slate-400" />
       <input id={id} type="password" autoComplete="new-password" aria-label={label} placeholder={label}
         value={value} onChange={(e) => onChange(e.target.value)} className={fieldInput} />
     </label>
   );
 
   return (
-    <div className="min-h-screen flex flex-col font-sans antialiased text-slate-900 dark:text-slate-100">
-      <div className="fs-login-fallback" aria-hidden />
-      <main className="fs-login-wrap flex-1 flex items-center justify-center p-4 lg:p-12">
-        <div className="fs-login-card rounded-4xl p-8 lg:p-10 w-full max-w-md space-y-5 card-popup">
-          <div className="text-center space-y-3">
-            <img src="/logo-sm.png" alt="Field Shift logo" className="h-16 w-16 rounded-full object-cover shadow-xl mx-auto ring-4 ring-white/40" />
-            <h2 className="text-2xl font-black tracking-tight">{t('Choose a new password', 'নতুন পাসওয়ার্ড দিন')}</h2>
+    <div className="fs-login-panel min-h-screen flex flex-col font-sans antialiased text-slate-900 dark:text-slate-100">
+      <main className="flex-1 flex items-center justify-center p-5 lg:p-12">
+        <div className="glass rounded-[var(--radius-card)] p-6 sm:p-10 w-full max-w-md space-y-5 card-popup">
+          <div className="space-y-4">
+            <img src="/logo-sm.png" alt="Field Shift logo" className="h-11 w-11 rounded-xl object-cover" />
+            <h1 className="fs-display text-[1.75rem]">{t('Choose a new password', 'নতুন পাসওয়ার্ড দিন')}</h1>
           </div>
 
           {error && (
-            <div role="alert" className="text-sm font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">{error}</div>
+            <div role="alert" className="text-sm text-red-700 dark:text-red-300 bg-red-500/[0.06] border border-red-500/25 rounded-xl px-3.5 py-2.5">{error}</div>
           )}
 
           {done ? (
             <div className="space-y-4">
-              <div role="status" className="text-sm font-bold flex items-center gap-2 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2">
+              <div role="status" className="text-sm flex items-center gap-2 text-emerald-800 dark:text-emerald-300 bg-emerald-500/[0.07] border border-emerald-500/25 rounded-xl px-3.5 py-2.5">
                 <CheckCircle2 className="h-4 w-4" />{t('Your password has been changed.', 'আপনার পাসওয়ার্ড পরিবর্তন হয়েছে।')}
               </div>
               <button type="button" onClick={finishPasswordRecovery}
-                className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 ${primaryBtn}`}>
+                className={`w-full py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 ${primaryBtn}`}>
                 <LogIn className="h-4 w-4" />{t('Continue to Field Shift', 'ফিল্ড শিফটে যান')}
               </button>
             </div>
@@ -582,7 +587,7 @@ export function NewPasswordScreen() {
               {input('np-new', t('New password', 'নতুন পাসওয়ার্ড'), password, setPassword)}
               {input('np-confirm', t('Confirm new password', 'নতুন পাসওয়ার্ড আবার দিন'), confirm, setConfirm)}
               <button type="submit" disabled={busy || !password || !confirm}
-                className={`w-full py-3 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}>
+                className={`w-full py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}>
                 <Save className="h-4 w-4" />{busy ? t('Saving…', 'সংরক্ষণ হচ্ছে…') : t('Save new password', 'নতুন পাসওয়ার্ড সংরক্ষণ')}
               </button>
             </form>
@@ -607,9 +612,9 @@ function GoogleLogo() {
 function Divider({ label }: { label: string }) {
   return (
     <div className="relative flex items-center py-1">
-      <div className="flex-grow border-t border-sky-500/15" />
-      <span className="mx-4 text-slate-600 dark:text-slate-400 text-sm font-bold">{label}</span>
-      <div className="flex-grow border-t border-sky-500/15" />
+      <div className="flex-grow border-t border-sky-600/10" />
+      <span className="mx-4 text-slate-500 dark:text-slate-400 text-sm">{label}</span>
+      <div className="flex-grow border-t border-sky-600/10" />
     </div>
   );
 }

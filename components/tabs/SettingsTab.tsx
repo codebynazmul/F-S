@@ -20,29 +20,29 @@ export default function SettingsTab() {
 
   return (
     <div className="space-y-6 card-rise">
-      <Card className="rounded-4xl p-6 lg:p-8 shadow-xl space-y-6">
+      <Card className="rounded-[var(--radius-card)] p-6 lg:p-8 space-y-6">
         <TabHeader
           icon={SlidersHorizontal}
           badge={t('Settings & Preferences', 'সেটিংস ও পছন্দ')}
           title={t('Theme & Language', 'থিম ও ভাষা পছন্দ')}
-          description={t('Day mode uses a light sky-blue and white theme. Night mode switches to deep dark gray, which is easier on the eyes at night.',
-                         'দিনের মুডে আকাশি নীল ও সাদা থিম থাকে; রাতের মুডে গাঢ় ধূসর থিম চালু হয়, যা রাতে চোখের জন্য আরামদায়ক।')}
+          description={t('Day mode uses deep teal on a paper-white ground. Night mode switches to a dark teal-black, which is easier on the eyes at night.',
+                         'দিনের মুডে সাদাটে জমিনে গাঢ় টিল রং থাকে; রাতের মুডে গাঢ় টিল-কালো থিম চালু হয়, যা রাতে চোখের জন্য আরামদায়ক।')}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ThemeCard
             active={theme === 'day'} onClick={() => setTheme('day')}
             icon={<Sun className="h-4 w-4 text-amber-500" />}
-            title={t('Day Mode', 'দিন মুড')} subtitle={t('Light Sky Blue + White', 'আকাশি নীল + সাদা')}
-            swatches={['#F0F9FF', '#7DD3FC', '#0284C7', '#FFFFFF']}
-            style={{ background: 'linear-gradient(135deg, #F0F9FF 0%, #FFFFFF 100%)', color: '#0F172A' }}
+            title={t('Day Mode', 'দিন মুড')} subtitle={t('Teal on paper', 'সাদাটে জমিনে টিল')}
+            swatches={['#F7F9F8', '#FFFFFF', '#7DBCBC', '#06525C']}
+            style={{ background: '#F7F9F8', color: '#0D2A2E' }}
           />
           <ThemeCard
             active={theme === 'night'} onClick={() => setTheme('night')}
             icon={<Moon className="h-4 w-4 text-amber-300" />}
-            title={t('Night Mode', 'রাত মুড')} subtitle={t('Deep Dark Gray', 'গাঢ় ধূসর থিম')}
-            swatches={['#161819', '#1F2937', '#38BDF8', '#0B0F14']}
-            style={{ background: 'linear-gradient(135deg, #161819 0%, #1F2937 100%)', color: '#F1F5F9' }}
+            title={t('Night Mode', 'রাত মুড')} subtitle={t('Dark teal-black', 'গাঢ় টিল-কালো')}
+            swatches={['#0C1517', '#121E21', '#1D8088', '#7CC9CD']}
+            style={{ background: '#0C1517', color: '#EEF4F3' }}
           />
         </div>
 
@@ -57,7 +57,7 @@ export default function SettingsTab() {
             {t('Your preferences are stored in this browser. Your farm profile and plans are also saved to your account, so clearing this device does not delete them.',
                'আপনার পছন্দ এই ব্রাউজারে সংরক্ষিত থাকে। খামারের তথ্য ও পরিকল্পনা আপনার অ্যাকাউন্টেও সংরক্ষিত থাকে, তাই এই ডিভাইস থেকে মুছলে সেগুলো মুছে যায় না।')}
           </p>
-          <button type="button" onClick={resetAll} className="btn-popup min-h-tap text-sm font-bold flex items-center gap-1.5 text-red-600 dark:text-red-400 px-4 rounded-xl border border-red-500/30">
+          <button type="button" onClick={resetAll} className="btn-popup min-h-tap text-sm font-medium flex items-center gap-1.5 text-red-700 dark:text-red-400 px-4 rounded-xl border border-red-500/30 hover:bg-red-500/5">
             <Trash2 className="h-4 w-4" />{t('Clear all saved data', 'সব সংরক্ষিত তথ্য মুছুন')}
           </button>
         </div>
@@ -76,12 +76,12 @@ function ThemeCard({ active, onClick, icon, title, subtitle, swatches, style }: 
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`btn-popup p-5 rounded-2xl border text-left ${active ? 'border-sky-500 ring-2 ring-sky-500/30 shadow-md' : 'border-sky-500/15 hover:border-sky-500/40'}`}
+      className={`btn-popup p-5 rounded-2xl border text-left ${active ? 'border-sky-600 shadow-[inset_0_0_0_1px_rgb(var(--sky-600))]' : 'border-sky-600/15 hover:border-sky-600/40'}`}
       style={style}
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-black flex items-center gap-2" style={{ color: style.color }}>{icon}{title}</span>
-        {active && <CheckCircle2 className="h-5 w-5 text-sky-500" />}
+        <span className="text-sm font-semibold flex items-center gap-2" style={{ color: style.color }}>{icon}{title}</span>
+        {active && <CheckCircle2 className="h-5 w-5" style={{ color: style.color }} />}
       </div>
       <p className="text-xs opacity-80" style={{ color: style.color }}>{subtitle}</p>
       <div className="mt-3 flex gap-1.5">

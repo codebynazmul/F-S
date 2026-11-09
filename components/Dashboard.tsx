@@ -34,24 +34,29 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex font-sans antialiased text-slate-900 dark:text-slate-100">
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-16 focus:z-[90] focus:px-3 focus:py-2 focus:rounded-lg focus:bg-sky-600 focus:text-white">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-16 lg:focus:left-[19rem] focus:z-[90] focus:px-3 focus:py-2 focus:rounded-lg focus:bg-sky-600 focus:text-white">
         {t('Skip to content', 'মূল অংশে যান')}
       </a>
       <Sidebar />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="fs-content flex-1 flex flex-col min-w-0 lg:ml-72">
         <TopBar />
 
-        <main id="main" className="p-4 lg:p-8 space-y-6 max-w-7xl w-full mx-auto flex-1">
-          <Tab key={activeTab} />
+        <main id="main" className="px-4 py-6 sm:px-6 lg:px-10 lg:py-10 space-y-6 max-w-[1240px] w-full mx-auto flex-1">
+          {/* The admin panel keeps its original look (see .fs-classic in globals.css). */}
+          {activeTab === 'admin' ? (
+            <div className="fs-classic space-y-6"><Tab key={activeTab} /></div>
+          ) : (
+            <Tab key={activeTab} />
+          )}
         </main>
 
-        <footer className="no-print glass-subtle border-x-0 border-b-0 py-6 px-4 lg:px-8 mt-auto mb-[calc(64px+env(safe-area-inset-bottom))] lg:mb-0 text-xs text-slate-600 dark:text-slate-400">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center">
+        <footer className="no-print border-t border-sky-600/10 py-6 px-4 sm:px-6 lg:px-10 mt-auto mb-[calc(64px+env(safe-area-inset-bottom))] lg:mb-0 text-xs text-slate-500 dark:text-slate-400">
+          <div className="max-w-[1240px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
             <div>
-              <span className="font-bold text-slate-900 dark:text-white">Field Shift</span> · {t('Developed by SPIDERX', 'ডেভেলপড বাই SPIDERX')}
+              <span className="font-medium text-slate-800 dark:text-white">Field Shift</span> · {t('Developed by SPIDERX', 'ডেভেলপড বাই SPIDERX')}
             </div>
-            <div className="text-xs">
+            <div>
               {t('Climate data: NASA POWER · Built for NASA Space Apps Challenge', 'জলবায়ু তথ্য: নাসা POWER · নাসা স্পেস অ্যাপস চ্যালেঞ্জের জন্য তৈরি')}
             </div>
           </div>

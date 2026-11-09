@@ -73,37 +73,37 @@ export default function Onboarding() {
   };
 
   const optionClass = (active: boolean) =>
-    `btn-popup min-h-tap w-full flex items-center gap-3 p-3 rounded-2xl border text-left ${
-      active ? 'border-sky-500 bg-sky-500/10 ring-2 ring-sky-500/30' : 'border-sky-500/15 glass-subtle hover:border-sky-500/40'
+    `btn-popup min-h-tap w-full flex items-center gap-3 p-3.5 rounded-xl border text-left ${
+      active ? 'border-sky-600 bg-sky-600/[0.06] shadow-[inset_0_0_0_1px_rgb(var(--sky-600))]' : 'border-sky-600/15 bg-[var(--bg-surface)] hover:border-sky-600/40'
     }`;
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="glass-bar border-b border-sky-500/15 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+      <header className="border-b border-sky-600/10 px-4 sm:px-8 py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <img src="/logo-sm.png" alt="" className="h-10 w-10 rounded-full object-cover" />
-          <span className="text-lg font-black">{t('Field Shift', 'ফিল্ড শিফট')}</span>
+          <img src="/logo-sm.png" alt="" className="h-10 w-10 rounded-xl object-cover" />
+          <span className="fs-display text-lg">{t('Field Shift', 'ফিল্ড শিফট')}</span>
         </div>
         <LangToggle />
       </header>
 
-      <main className="flex-1 flex items-start sm:items-center justify-center p-4 sm:p-8">
-        <Card className="w-full max-w-xl rounded-4xl p-5 sm:p-8 space-y-6 card-rise">
+      <main className="flex-1 flex items-start sm:items-center justify-center px-4 py-6 sm:p-10">
+        <Card className="w-full max-w-2xl rounded-[var(--radius-card)] p-5 sm:p-10 space-y-7 card-rise">
           <div className="space-y-3">
-            <p className="text-sm font-bold text-sky-600 dark:text-sky-300">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
               {t(`Welcome, ${user?.name ?? ''}! Let's set up your farm.`, `স্বাগতম, ${user?.name ?? ''}! চলুন আপনার খামারের তথ্য দিই।`)}
             </p>
             {/* Progress */}
             <div className="flex items-center gap-2" aria-hidden>
               {steps.map((_, i) => (
-                <div key={i} className={`h-2 flex-1 rounded-full transition-colors ${i <= step ? 'bg-sky-500' : 'bg-slate-400/25'}`} />
+                <div key={i} className={`h-1 flex-1 rounded-full transition-colors duration-300 ${i <= step ? 'bg-sky-600' : 'bg-slate-500/15'}`} />
               ))}
             </div>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="fs-eyebrow">
               {t(`Step ${step + 1} of ${steps.length}`, `ধাপ ${step + 1} / ${steps.length}`)}
             </p>
-            <h1 className="text-xl sm:text-2xl font-black flex items-center gap-2">
-              {React.createElement(steps[step].icon, { className: 'h-6 w-6 text-sky-500 shrink-0' })}
+            <h1 className="fs-display text-[1.75rem] sm:text-[2.25rem] flex items-center gap-3">
+              {React.createElement(steps[step].icon, { className: 'h-7 w-7 text-sky-600 dark:text-sky-400 shrink-0' })}
               {steps[step].title}
             </h1>
           </div>
@@ -127,8 +127,8 @@ export default function Onboarding() {
                   ))}
                 </select>
               </div>
-              <div className="p-4 rounded-2xl glass-subtle text-sm space-y-1">
-                <div className="font-black text-sky-700 dark:text-sky-300 flex items-center gap-1.5">
+              <div className="p-4 rounded-xl glass-subtle text-sm space-y-1">
+                <div className="font-medium text-sky-800 dark:text-sky-300 flex items-center gap-1.5">
                   <MapPin className="h-4 w-4" />{lang === 'bn' ? district.nameBn : district.name}, {divisionName(district.division, lang)}
                 </div>
                 <div className="text-slate-600 dark:text-slate-400">
@@ -150,7 +150,7 @@ export default function Onboarding() {
                   return (
                     <button key={s.id} type="button" role="radio" aria-checked={active} onClick={() => updateFarm({ texture: s.id })} className={optionClass(active)}>
                       <span className="flex-1">
-                        <span className="block text-sm font-bold">{lang === 'bn' ? s.bn : s.en}</span>
+                        <span className="block text-sm font-medium">{lang === 'bn' ? s.bn : s.en}</span>
                         <span className="block text-xs text-slate-500 dark:text-slate-400">{lang === 'bn' ? SOIL_HINTS[s.id].bn : SOIL_HINTS[s.id].en}</span>
                       </span>
                       {active && <Check className="h-5 w-5 text-sky-600 dark:text-sky-300 shrink-0" />}
@@ -173,10 +173,10 @@ export default function Onboarding() {
                   const Icon = IRRIGATION_ICONS[i.id];
                   return (
                     <button key={i.id} type="button" role="radio" aria-checked={active} onClick={() => updateFarm({ irrigation: i.id })} className={optionClass(active)}>
-                      <span className="h-10 w-10 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-300 flex items-center justify-center shrink-0">
+                      <span className="h-10 w-10 rounded-lg bg-sky-600/10 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0">
                         <Icon className="h-5 w-5" />
                       </span>
-                      <span className="flex-1 text-sm font-bold">{lang === 'bn' ? i.bn : i.en}</span>
+                      <span className="flex-1 text-sm font-medium">{lang === 'bn' ? i.bn : i.en}</span>
                       {active && <Check className="h-5 w-5 text-sky-600 dark:text-sky-300 shrink-0" />}
                     </button>
                   );
@@ -195,13 +195,13 @@ export default function Onboarding() {
             </div>
           )}
 
-          <div className="flex items-center justify-between gap-3 pt-2 border-t border-sky-500/10">
+          <div className="flex items-center justify-between gap-3 pt-5 border-t border-sky-600/10">
             {step > 0 ? (
               <button type="button" onClick={() => setStep(s => s - 1)} className={`${ghostBtn} text-sm`}>
                 <ArrowLeft className="h-4 w-4" />{t('Back', 'পেছনে')}
               </button>
             ) : (
-              <button type="button" onClick={finishOnboarding} className="min-h-tap px-3 text-sm font-bold text-slate-600 dark:text-slate-400 hover:underline">
+              <button type="button" onClick={finishOnboarding} className="min-h-tap px-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:underline underline-offset-4">
                 {t('Skip for now', 'এখন নয়')}
               </button>
             )}

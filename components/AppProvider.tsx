@@ -5,28 +5,25 @@ import { ALL_DISTRICTS, type DistrictData } from '@/data/districts';
 import { CROP_DATABASE } from '@/data/crops';
 import { usePersistentState } from '@/lib/storage';
 import { calculatePlanMetrics, type PlanMetrics } from '@/lib/metrics';
-import { recommendPlan, type Recommendation } from '@/lib/recommend';
+import { recommendPlan, type Recommendation, type Strategy } from '@/lib/recommend';
+import { DEFAULT_FARM, PRIORITIES } from '@/lib/options';
 import { formatNum, localDigits, tr } from '@/lib/i18n';
 import { accountFromProfile, userFromProfile } from '@/lib/auth';
 import { supabase, type ProfileRow } from '@/lib/supabase';
 import { loadDistrictClimate, type ClimateStatus, type DistrictClimate } from '@/lib/climate';
 import { useFarmSync, type FarmSyncStatus } from './useFarmSync';
 import type {
-  Account, AdminAction, AdminLogEntry, FarmProfile, IrrigationType, Lang, Role, SimSettings, SoilTexture, TabId, Theme, User,
+  Account, AdminAction, AdminLogEntry, FarmProfile, IrrigationType, Lang, Priority, Role, SimSettings, SoilTexture, TabId, Theme, User,
 } from '@/lib/types';
 
-export const DEFAULT_FARM: FarmProfile = {
-  sizeBigha: 8.5,
-  texture: 'clay_loam',
-  ph: 6.5,
-  organicMatter: 1.2,
-  irrigation: 'deep_tw',
-};
+export { DEFAULT_FARM };
 export const DEFAULT_SIM: SimSettings = { rainDelta: -25, tempDelta: 1.5, irrigationCut: 35 };
 export const DEFAULT_TRADITIONAL = ['rice_boro', 'rice_aman', 'rice_boro', 'rice_aman'];
 
 const isPlan = (v: unknown): v is string[] =>
   Array.isArray(v) && v.length === 4 && v.every(id => typeof id === 'string' && id in CROP_DATABASE);
+const isPriorityList = (v: unknown): v is Priority[] =>
+  Array.isArray(v) && v.every(p => PRIORITIES.some(x => x.id === p));
 const isTheme = (v: unknown): v is Theme => v === 'day' || v === 'night';
 const isLang = (v: unknown): v is Lang => v === 'en' || v === 'bn';
 const isDistrictId = (v: unknown): v is string => ALL_DISTRICTS.some(d => d.id === v);
@@ -115,6 +112,13 @@ interface AppState {
   setSim: React.Dispatch<React.SetStateAction<SimSettings>>;
 
   recommendation: Recommendation;
+  /** What the farmer cares about most; ranks the strategies. Empty = balanced. */
+  priorities: Priority[];
+  togglePriority: (p: Priority) => void;
+  /** The strategy that matches the plan in use, or null when the farmer edited it. */
+  chosenStrategy: Strategy | null;
+  /** Use one of the suggested strategies as the plan. */
+  applyStrategy: (plan: string[]) => void;
   recommendedPlan: string[];
   isCustomPlan: boolean;
   setRecommendedCrop: (season: number, cropId: string) => void;
@@ -177,7 +181,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [onboarded, setOnboarded, l9] = usePersistentState<boolean>('onboarded', false, (v): v is boolean => typeof v === 'boolean');
   // Offline copy of NASA data per district, so recommendations still use it without internet.
   const [climateCache, setClimateCache, l10] = usePersistentState<Record<string, DistrictClimate>>('climate', {}, isRecord);
-  const prefsReady = l1 && l2 && l3 && l4 && l5 && l6 && l7 && l8 && l9 && l10;
+  const [priorities, setPriorities, l11] = usePersistentState<Priority[]>('priorities', [], isPriorityList);
+  const prefsReady = l1 && l2 && l3 && l4 && l5 && l6 && l7 && l8 && l9 && l10 && l11;
 
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   const [authReady, setAuthReady] = useState(false);
@@ -235,10 +240,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Fill in any farm fields missing from older saved data.
   const safeFarm = useMemo(() => ({ ...DEFAULT_FARM, ...farm }), [farm]);
 
-  const recommendation = useMemo(() => recommendPlan(district, safeFarm), [district, safeFarm]);
+  const recommendation = useMemo(
+    () => recommendPlan(district, safeFarm, { climate, priorities, currentPlan: traditionalPlan }),
+    [district, safeFarm, climate, priorities, traditionalPlan]
+  );
   const override = planOverrides[district.id];
   const recommendedPlan = isPlan(override) ? override : recommendation.plan;
   const isCustomPlan = isPlan(override) && override.join() !== recommendation.plan.join();
+  const chosenStrategy = recommendation.strategies.find(s => s.plan.join() === recommendedPlan.join()) ?? null;
 
   const tradMetrics = useMemo(() => calculatePlanMetrics(traditionalPlan, district, safeFarm), [traditionalPlan, district, safeFarm]);
   const recMetrics = useMemo(() => calculatePlanMetrics(recommendedPlan, district, safeFarm), [recommendedPlan, district, safeFarm]);
@@ -512,6 +521,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     sim, setSim,
 
     recommendation,
+    priorities,
+    togglePriority: (p) => setPriorities(prev => (prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p])),
+    chosenStrategy,
+    applyStrategy: (plan) => setPlanOverrides(prev => ({ ...prev, [district.id]: plan })),
     recommendedPlan,
     isCustomPlan,
     setRecommendedCrop: (season, cropId) =>

@@ -35,7 +35,7 @@ export default function FarmProfileTab() {
 
   return (
     <div className="space-y-6 card-rise">
-      <Card className="p-6 rounded-4xl space-y-6 shadow-xl">
+      <Card className="p-6 rounded-[var(--radius-card)] space-y-6">
         <TabHeader
           icon={Layers}
           title={t('Farm Profile & Soil Lab Values', 'খামার ও মাটির ল্যাব টেস্ট তথ্য')}
@@ -45,7 +45,7 @@ export default function FarmProfileTab() {
             <>
               <span role="status" className="contents">
                 {savedFlash && (
-                  <span className="card-popup min-h-tap flex items-center gap-1.5 px-3 rounded-xl text-sm font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15">
+                  <span className="card-popup min-h-tap flex items-center gap-1.5 px-3 rounded-xl text-sm font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-500/15">
                     <CheckCircle2 className="h-4 w-4" />{t('Saved', 'সংরক্ষিত')}
                   </span>
                 )}
@@ -90,7 +90,7 @@ export default function FarmProfileTab() {
           </div>
 
           <SubCard className="p-4 rounded-2xl space-y-2">
-            <div className="flex justify-between gap-2 text-sm font-bold">
+            <div className="flex justify-between gap-2 text-sm font-medium">
               <label htmlFor="farm-ph">{t('Soil pH', 'মাটির pH')}</label>
               <span>{n(farm.ph, 1)} · {phLabel}</span>
             </div>
@@ -101,7 +101,7 @@ export default function FarmProfileTab() {
           </SubCard>
 
           <SubCard className="p-4 rounded-2xl space-y-2">
-            <div className="flex justify-between gap-2 text-sm font-bold">
+            <div className="flex justify-between gap-2 text-sm font-medium">
               <label htmlFor="farm-som">{t('Organic Matter', 'জৈব পদার্থ')}</label>
               <span>{n(farm.organicMatter, 1)}% · {somLabel}</span>
             </div>
@@ -112,7 +112,7 @@ export default function FarmProfileTab() {
           </SubCard>
 
           <SubCard className="p-4 rounded-2xl text-sm space-y-1">
-            <div className={`font-bold ${titleText}`}>{t('Where do I get these values?', 'এই তথ্য কোথায় পাব?')}</div>
+            <div className={`font-medium ${titleText}`}>{t('Where do I get these values?', 'এই তথ্য কোথায় পাব?')}</div>
             <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
               {t('Your Upazila Agriculture Office or SRDI (Soil Resource Development Institute) can test a soil sample. If you have no test yet, keep the defaults.',
                  'উপজেলা কৃষি অফিস বা মৃত্তিকা সম্পদ উন্নয়ন ইনস্টিটিউট (SRDI) মাটি পরীক্ষা করে দিতে পারে। পরীক্ষা না থাকলে ডিফল্ট মান রাখুন।')}
@@ -121,7 +121,7 @@ export default function FarmProfileTab() {
         </div>
 
         <SubCard className="p-5 rounded-2xl space-y-3">
-          <h3 className="text-base font-black flex items-center gap-2 text-sky-600 dark:text-sky-300">
+          <h3 className="text-base font-semibold flex items-center gap-2 text-sky-600 dark:text-sky-300">
             <Lightbulb className="h-5 w-5" />{t('Soil management advice', 'মাটি ব্যবস্থাপনা পরামর্শ')}
           </h3>
           <ul className="space-y-2 text-sm leading-relaxed">

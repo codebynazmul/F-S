@@ -125,11 +125,11 @@ export default function LegalModal({ doc, onClose }: { doc: LegalDoc; onClose: (
         aria-modal="true"
         aria-labelledby="legal-title"
         onClick={(e) => e.stopPropagation()}
-        className={`${isNight ? 'glass-strong' : 'glass'} card-popup rounded-4xl w-full max-w-lg max-h-[85vh] flex flex-col text-slate-900 dark:text-slate-100`}
+        className={`${isNight ? 'glass-strong' : 'glass'} card-popup rounded-[var(--radius-card)] w-full max-w-lg max-h-[85vh] flex flex-col text-slate-900 dark:text-slate-100`}
       >
         <div className="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-sky-500/15">
           <Icon className="h-5 w-5 text-sky-500 shrink-0" />
-          <h2 id="legal-title" className="text-xl font-black tracking-tight flex-1">{title}</h2>
+          <h2 id="legal-title" className="text-xl font-semibold tracking-tight flex-1">{title}</h2>
           <button
             ref={closeRef}
             type="button"
@@ -147,7 +147,7 @@ export default function LegalModal({ doc, onClose }: { doc: LegalDoc; onClose: (
           </p>
           {sections.map((s, i) => (
             <section key={i} className="space-y-1">
-              <h3 className="text-sm font-black text-slate-800 dark:text-slate-100">
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
                 {i + 1}. {t(s.title[0], s.title[1])}
               </h3>
               <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{t(s.body[0], s.body[1])}</p>

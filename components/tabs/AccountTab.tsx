@@ -35,15 +35,15 @@ export default function AccountTab() {
 
   return (
     <div className="space-y-6 card-rise">
-      <Card className="rounded-4xl p-6 lg:p-8 shadow-xl space-y-6">
+      <Card className="rounded-[var(--radius-card)] p-6 lg:p-8 space-y-6">
         <TabHeader
           icon={UserIcon}
           badge={t('User Account Management', 'ব্যবহারকারী একাউন্ট ব্যবস্থাপনা')}
           title={t('Profile Settings', 'প্রোফাইল তথ্য')}
           description={t('Your name and phone number appear on your farm action report.', 'আপনার নাম ও মোবাইল নম্বর কর্মপরিকল্পনা রিপোর্টে দেখাবে।')}
           actions={
-            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${admin
-              ? 'bg-violet-500/15 text-violet-600 dark:text-violet-300 border-violet-500/25'
+            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${admin
+              ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/25'
               : 'bg-sky-500/15 text-sky-600 dark:text-sky-300 border-sky-500/25'}`}>
               {admin ? t('Admin Role', 'অ্যাডমিন একাউন্ট') : t('Farmer Role', 'কৃষক একাউন্ট')}
             </span>
@@ -54,11 +54,11 @@ export default function AccountTab() {
           <SubCard className="p-5 rounded-2xl flex flex-col items-center justify-center text-center space-y-3">
             <Avatar initials={user.initials} admin={admin} size="lg" />
             <div>
-              <span className="text-sm font-bold block">{user.name}</span>
+              <span className="text-sm font-medium block">{user.name}</span>
               <span className="text-xs text-slate-600 dark:text-slate-400">{user.email}</span>
             </div>
             <FarmSyncNote status={farmSyncStatus} />
-            <button type="button" onClick={signOut} className="btn-popup min-h-tap text-sm font-bold flex items-center gap-1.5 text-red-600 dark:text-red-400 px-4 rounded-xl border border-red-500/30">
+            <button type="button" onClick={signOut} className="btn-popup min-h-tap text-sm font-medium flex items-center gap-1.5 text-red-600 dark:text-red-400 px-4 rounded-xl border border-red-500/30">
               <LogOut className="h-4 w-4" />{t('Sign Out', 'লগআউট')}
             </button>
           </SubCard>
@@ -68,14 +68,14 @@ export default function AccountTab() {
               <label htmlFor="acc-name" className={labelClass}>{t('Full Name', 'পূর্ণ নাম')}</label>
               <div className={fieldBox}>
                 <UserIcon className="h-4 w-4 text-sky-500" />
-                <input id="acc-name" type="text" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-transparent outline-none text-sm font-bold" />
+                <input id="acc-name" type="text" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-transparent outline-none text-sm font-medium" />
               </div>
             </div>
             <div>
               <label htmlFor="acc-phone" className={labelClass}>{t('Phone Number', 'মোবাইল নম্বর')}</label>
               <div className={fieldBox}>
                 <Phone className="h-4 w-4 text-sky-500" />
-                <input id="acc-phone" type="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+880 1XXXXXXXXX" className="w-full bg-transparent outline-none text-sm font-bold font-mono" />
+                <input id="acc-phone" type="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+880 1XXXXXXXXX" className="w-full bg-transparent outline-none text-sm font-medium font-mono" />
               </div>
             </div>
             <div>
@@ -91,12 +91,12 @@ export default function AccountTab() {
                 <span>{t('Save Profile Changes', 'সংরক্ষণ করুন')}</span>
               </button>
               {failed && (
-                <span role="alert" className="text-sm text-red-600 dark:text-red-400 font-bold">
+                <span role="alert" className="text-sm text-red-600 dark:text-red-400 font-medium">
                   {t('Could not save. Check your internet connection.', 'সংরক্ষণ করা যায়নি। ইন্টারনেট সংযোগ দেখুন।')}
                 </span>
               )}
               {saved && (
-                <span role="status" className="text-sm text-emerald-600 dark:text-emerald-300 font-bold flex items-center gap-1.5 card-popup">
+                <span role="status" className="text-sm text-emerald-600 dark:text-emerald-300 font-medium flex items-center gap-1.5 card-popup">
                   <CheckCircle2 className="h-4 w-4" />{t('Profile updated!', 'সফলভাবে আপডেট হয়েছে!')}
                 </span>
               )}

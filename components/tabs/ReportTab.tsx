@@ -11,7 +11,7 @@ import { Card, SubCard, TabHeader, ghostBtn, primaryBtn, titleText } from '../ui
 import { CropIcon } from '../CropIcon';
 
 export default function ReportTab() {
-  const { t, n, lang, user, district, farm, recommendedPlan, recommendation, isCustomPlan, recMetrics, tradMetrics } = useApp();
+  const { t, n, lang, user, district, farm, recommendedPlan, recommendation, chosenStrategy, isCustomPlan, recMetrics, tradMetrics } = useApp();
   const [copied, setCopied] = useState(false);
   if (!user) return null;
 
@@ -29,12 +29,16 @@ export default function ReportTab() {
   const summaryText = [
     `Field Shift — ${t('Farm Adaptation Plan', 'খামার অভিযোজন পরিকল্পনা')}: ${districtName}`,
     `${t('Farmer', 'কৃষক')}: ${user.name} (${user.phone}) · ${today}`,
+    `${t('Strategy', 'কৌশল')}: ${chosenStrategy ? pick(lang, chosenStrategy.name) : t('Edited by farmer', 'কৃষকের পরিবর্তিত')}`,
     '',
     ...crops.map((c, i) => `${t(`S${i + 1}`, `মৌসুম ${i + 1}`)}: ${lang === 'bn' ? c.nameBn : c.name} — ${n(c.growingPeriodDays)} ${t('days', 'দিন')}, ${n(c.waterMm)} ${t('mm', 'মিমি')}`),
     '',
     `${t('Water saved', 'পানি সাশ্রয়')}: ${n(waterSavedM3)} m³/${t('year', 'বছর')}`,
     `${t('Urea saved', 'ইউরিয়া সাশ্রয়')}: ~${n(ureaKg)} ${t('kg', 'কেজি')}/${t('year', 'বছর')}`,
     `${t('Soil health', 'মাটির স্বাস্থ্য')}: ${n(recMetrics.soilScore)}/${n(100)} (${t('was', 'আগে')} ${n(tradMetrics.soilScore)})`,
+    '',
+    `${t('Check before sowing', 'বোনার আগে যাচাই করুন')}:`,
+    ...(chosenStrategy?.checks ?? []).map(c => `- ${pick(lang, c)}`),
   ].join('\n');
 
   const copy = async () => {
@@ -47,7 +51,7 @@ export default function ReportTab() {
 
   return (
     <div className="space-y-6 card-rise print-area">
-      <Card className="p-6 lg:p-8 rounded-4xl space-y-6 shadow-2xl">
+      <Card className="p-6 lg:p-8 rounded-[var(--radius-card)] space-y-6">
         <TabHeader
           icon={FileText}
           badge={t('Farmer Decision Dossier', 'কৃষক পরামর্শ ও কর্মপরিকল্পনা দলিল')}
@@ -74,29 +78,31 @@ export default function ReportTab() {
         </div>
 
         <div className="space-y-3">
-          <h3 className="font-bold text-sm text-sky-600 dark:text-sky-300">
+          <h3 className="font-medium text-sm text-sky-600 dark:text-sky-300">
             {t('4-Season Crop Schedule', '৪-মৌসুমের ফসল রোপণ সূচি')}
-            {isCustomPlan && <span className="ml-2 text-xs font-normal text-slate-600 dark:text-slate-400">({t('edited by you', 'আপনার পরিবর্তিত')})</span>}
+            {chosenStrategy
+              ? <span className="ml-2 text-xs font-normal text-slate-600 dark:text-slate-400">({pick(lang, chosenStrategy.name)}{isCustomPlan ? `, ${t('chosen by you', 'আপনার বাছাই')}` : ''})</span>
+              : <span className="ml-2 text-xs font-normal text-slate-600 dark:text-slate-400">({t('edited by you', 'আপনার পরিবর্তিত')})</span>}
           </h3>
           {crops.map((c, idx) => (
             <SubCard key={idx} className="p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 break-inside-avoid">
               <div className="flex items-start gap-3">
                 <div className="relative shrink-0">
                   <CropIcon id={c.id} size={44} />
-                  <span className="absolute -top-1.5 -left-1.5 h-6 w-6 rounded-lg font-black text-xs flex items-center justify-center bg-sky-600 text-white">{n(idx + 1)}</span>
+                  <span className="absolute -top-1.5 -left-1.5 h-6 w-6 rounded-lg font-semibold text-xs flex items-center justify-center bg-sky-600 text-white">{n(idx + 1)}</span>
                 </div>
                 <div>
-                  <div className={`font-bold text-sm ${titleText}`}>{lang === 'bn' ? c.nameBn : c.name}</div>
+                  <div className={`font-medium text-sm ${titleText}`}>{lang === 'bn' ? c.nameBn : c.name}</div>
                   <div className="text-sm text-slate-600 dark:text-slate-400">
                     {t(`~${c.growingPeriodDays} days · Roots: ${c.rootingDepth}`, `জীবনকাল: ~${c.growingPeriodDays} দিন · শিকড়: ${c.rootingDepthBn}`)}
                   </div>
-                  {!isCustomPlan && recommendation.reasons[idx] && (
-                    <div className="text-sm mt-1 leading-relaxed text-slate-700 dark:text-slate-300">{pick(lang, recommendation.reasons[idx])}</div>
+                  {chosenStrategy?.reasons[idx] && (
+                    <div className="text-sm mt-1 leading-relaxed text-slate-700 dark:text-slate-300">{pick(lang, chosenStrategy.reasons[idx])}</div>
                   )}
                 </div>
               </div>
               <div className="sm:text-right text-sm shrink-0">
-                <span className={`font-bold ${c.nBalanceKgHa > 0 ? 'text-emerald-600 dark:text-emerald-300' : 'text-amber-600 dark:text-amber-400'}`}>
+                <span className={`font-medium ${c.nBalanceKgHa > 0 ? 'text-emerald-600 dark:text-emerald-300' : 'text-amber-600 dark:text-amber-400'}`}>
                   {signed(c.nBalanceKgHa, 0, lang)} {t('kg N/ha', 'কেজি N/হে.')}
                 </span>
                 <span className="block text-sm text-cyan-600 dark:text-cyan-300">{n(c.waterMm)} {t('mm', 'মিমি')}</span>
@@ -111,16 +117,38 @@ export default function ReportTab() {
           <Fact big label={t('Soil health score', 'মাটির স্বাস্থ্য স্কোর')} value={`${n(recMetrics.soilScore)}/${n(100)}`} sub={`${t('Current practice', 'প্রচলিত')}: ${n(tradMetrics.soilScore)}/${n(100)}`} />
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <SubCard className="p-4 rounded-2xl space-y-2 break-inside-avoid border border-amber-500/25">
+            <h3 className="font-medium text-sm text-amber-700 dark:text-amber-400">{t('Check with your agriculture officer before sowing', 'বোনার আগে কৃষি কর্মকর্তার সাথে যাচাই করুন')}</h3>
+            <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
+              {(chosenStrategy?.checks.length ? chosenStrategy.checks : [{
+                en: 'This plan was edited by hand, so it has no automatic checks. Review every crop with your agriculture officer.',
+                bn: 'এই পরিকল্পনা হাতে পরিবর্তন করা, তাই স্বয়ংক্রিয় যাচাই নেই। প্রতিটি ফসল কৃষি কর্মকর্তার সাথে মিলিয়ে নিন।',
+              }]).map((c, i) => <li key={i}>{pick(lang, c)}</li>)}
+            </ul>
+          </SubCard>
+          <SubCard className="p-4 rounded-2xl space-y-2 break-inside-avoid">
+            <h3 className="font-medium text-sm text-sky-600 dark:text-sky-300">{t('What this plan is based on', 'এই পরিকল্পনা যে তথ্যের উপর ভিত্তি করে')}</h3>
+            <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
+              {recommendation.evidence.map((e, i) => <li key={i}>{pick(lang, e.text)}</li>)}
+            </ul>
+            <h3 className="font-medium text-sm text-sky-600 dark:text-sky-300 pt-1">{t('Information gaps', 'তথ্যের ঘাটতি')}</h3>
+            <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
+              {recommendation.gaps.map((g, i) => <li key={i}>{pick(lang, g)}</li>)}
+            </ul>
+          </SubCard>
+        </div>
+
         <SubCard className="p-4 rounded-2xl space-y-2 break-inside-avoid">
-          <h3 className="font-bold text-sm text-sky-600 dark:text-sky-300">{t('Soil management actions', 'মাটি ব্যবস্থাপনা করণীয়')}</h3>
+          <h3 className="font-medium text-sm text-sky-600 dark:text-sky-300">{t('Soil management actions', 'মাটি ব্যবস্থাপনা করণীয়')}</h3>
           <ul className="list-disc pl-5 text-sm leading-relaxed space-y-1">
             {tips.map((tip, i) => <li key={i}>{pick(lang, tip)}</li>)}
           </ul>
         </SubCard>
 
         <p className="text-xs text-slate-600 dark:text-slate-400 border-t border-sky-500/10 pt-3">
-          {t('Generated by Field Shift (developed by SPIDERX). Figures are planning estimates from a screening model and district averages. Consult your Upazila Agriculture Officer before making major changes.',
-             'ফিল্ড শিফট (ডেভেলপড বাই SPIDERX) দ্বারা তৈরি। সংখ্যাগুলো মডেল ও জেলার গড় তথ্যের ভিত্তিতে পরিকল্পনামূলক অনুমান। বড় পরিবর্তনের আগে উপজেলা কৃষি কর্মকর্তার পরামর্শ নিন।')}
+          {t('Generated by Field Shift (developed by SPIDERX). Figures are planning estimates from a screening model, NASA data and district averages. This plan supports your judgment; it does not replace it. Consult your Upazila Agriculture Officer before making major changes.',
+             'ফিল্ড শিফট (ডেভেলপড বাই SPIDERX) দ্বারা তৈরি। সংখ্যাগুলো মডেল, নাসার তথ্য ও জেলার গড় তথ্যের ভিত্তিতে পরিকল্পনামূলক অনুমান। এই পরিকল্পনা আপনার সিদ্ধান্তে সাহায্য করে, এর বিকল্প নয়। বড় পরিবর্তনের আগে উপজেলা কৃষি কর্মকর্তার পরামর্শ নিন।')}
         </p>
       </Card>
     </div>
@@ -131,7 +159,7 @@ function Fact({ label, value, sub, big }: { label: string; value: string; sub?: 
   return (
     <SubCard className="p-3.5 rounded-2xl break-inside-avoid">
       <div className="text-xs text-slate-500 dark:text-slate-400">{label}</div>
-      <div className={`${big ? 'text-xl' : 'text-sm'} font-black ${titleText}`}>{value}</div>
+      <div className={`${big ? 'text-xl' : 'text-sm'} font-semibold ${titleText}`}>{value}</div>
       {sub && <div className="text-xs text-slate-500 dark:text-slate-400">{sub}</div>}
     </SubCard>
   );

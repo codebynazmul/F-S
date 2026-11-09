@@ -1,10 +1,9 @@
 'use client';
 
 import React from 'react';
-import { FileText, MapPin } from 'lucide-react';
+import { CloudRain, FileText, Layers, MapPin, TriangleAlert } from 'lucide-react';
 import { ALL_DISTRICTS } from '@/data/districts';
 import { DIVISIONS, divisionName } from '@/lib/options';
-import { pick } from '@/lib/i18n';
 import { useApp } from './AppProvider';
 import { primaryBtn } from './ui';
 
@@ -13,28 +12,25 @@ export default function TopBar() {
 
   return (
     <div className="no-print">
-      <header className="glass-bar border-b border-sky-500/15 sticky top-0 z-30 pl-16 pr-4 lg:pl-20 lg:pr-8 py-2.5">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <header className="glass-bar border-b border-sky-600/10 sticky top-0 z-30 pl-[4.25rem] pr-4 sm:pr-6 lg:px-10 py-2.5">
+        <div className="max-w-[1240px] mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-sm font-bold hidden sm:inline text-slate-600 dark:text-slate-300">
-              {t('Selected District:', 'নির্বাচিত জেলা:')}
-            </span>
-            <span className="text-base font-extrabold flex items-center gap-1.5 text-sky-600 dark:text-sky-300">
-              <MapPin className="h-5 w-5 shrink-0" />
+            <MapPin className="h-[18px] w-[18px] shrink-0 text-sky-700 dark:text-sky-300" aria-hidden />
+            <span className="text-base font-medium truncate text-slate-900 dark:text-white">
               {lang === 'bn' ? district.nameBn : district.name}
             </span>
-            <span className="hidden md:inline text-xs px-2 py-0.5 rounded-full border bg-sky-500/10 text-sky-600 dark:text-sky-300 border-sky-500/25">
-              {divisionName(district.division, lang)} {t('Division', 'বিভাগ')}
+            <span className="hidden md:inline text-sm text-slate-500 dark:text-slate-400 truncate">
+              · {divisionName(district.division, lang)} {t('Division', 'বিভাগ')}
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <label className="sr-only" htmlFor="district-select">{t('Choose district', 'জেলা নির্বাচন করুন')}</label>
             <select
               id="district-select"
               value={district.id}
               onChange={(e) => setDistrictId(e.target.value)}
-              className="min-h-tap text-sm font-bold rounded-xl px-3 py-2 border glass-subtle border-sky-500/25 outline-none cursor-pointer max-w-[200px] sm:max-w-[240px] text-slate-800 dark:text-slate-100"
+              className="fs-field min-h-tap text-sm font-medium rounded-xl pl-3 pr-8 py-2 outline-none cursor-pointer max-w-[170px] sm:max-w-[240px] text-slate-800 dark:text-slate-100"
             >
               {DIVISIONS.map(div => {
                 const list = ALL_DISTRICTS.filter(d => d.division === div.id);
@@ -47,29 +43,33 @@ export default function TopBar() {
                 );
               })}
             </select>
-            <button type="button" onClick={() => setActiveTab('report')} className={`hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm ${primaryBtn}`}>
+            <button type="button" onClick={() => setActiveTab('report')} className={`hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl text-sm ${primaryBtn}`}>
               <FileText className="h-4 w-4" />
-              <span>{t('Dossier', 'রিপোর্ট')}</span>
+              <span>{t('Open dossier', 'রিপোর্ট দেখুন')}</span>
             </button>
           </div>
         </div>
       </header>
 
-      <div className="glass-subtle px-4 lg:px-8 py-2.5 border-x-0 border-t-0">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-400">{t('Soil:', 'মাটি:')}</span>
-            <strong className="text-slate-900 dark:text-slate-50">{district.soil}</strong>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-400">{t('Rainfall:', 'বৃষ্টিপাত:')}</span>
-            <strong className="text-sky-600 dark:text-sky-300">{n(district.rainfall)} {t('mm/yr', 'মিমি/বছর')}</strong>
+      {/* District facts strip */}
+      <div className="border-b border-sky-600/10 px-4 sm:px-6 lg:px-10 py-2.5 overflow-x-auto">
+        <dl className="max-w-[1240px] mx-auto flex items-center gap-x-6 gap-y-1 text-sm whitespace-nowrap">
+          <div className="flex items-center gap-1.5">
+            <Layers className="h-4 w-4 text-slate-400" aria-hidden />
+            <dt className="text-slate-500 dark:text-slate-400">{t('Soil', 'মাটি')}</dt>
+            <dd className="font-medium text-slate-900 dark:text-slate-50">{district.soil}</dd>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-slate-600 dark:text-slate-400">{t('Primary Risk:', 'প্রধান ঝুঁকি:')}</span>
-            <span className="text-amber-600 dark:text-amber-400 font-bold">{lang === 'bn' ? district.riskBn : district.risk}</span>
+            <CloudRain className="h-4 w-4 text-slate-400" aria-hidden />
+            <dt className="text-slate-500 dark:text-slate-400">{t('Rainfall', 'বৃষ্টিপাত')}</dt>
+            <dd className="font-medium font-mono text-[0.8125rem] text-sky-700 dark:text-sky-300">{n(district.rainfall)} {t('mm/yr', 'মিমি/বছর')}</dd>
           </div>
-        </div>
+          <div className="flex items-center gap-1.5">
+            <TriangleAlert className="h-4 w-4 text-amber-500" aria-hidden />
+            <dt className="text-slate-500 dark:text-slate-400">{t('Main risk', 'প্রধান ঝুঁকি')}</dt>
+            <dd className="font-medium text-amber-700 dark:text-amber-400">{lang === 'bn' ? district.riskBn : district.risk}</dd>
+          </div>
+        </dl>
       </div>
     </div>
   );
