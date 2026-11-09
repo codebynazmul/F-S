@@ -19,7 +19,7 @@ export default function NasaTab() {
 
   return (
     <div className="space-y-6 card-rise">
-      <Card className="p-6 rounded-4xl space-y-6 shadow-xl">
+      <Card className="p-6 rounded-[var(--radius-card)] space-y-6">
         <TabHeader
           icon={Globe}
           title={t('NASA Earth Data', 'নাসা আর্থ পর্যবেক্ষণ')}
@@ -57,7 +57,7 @@ export default function NasaTab() {
 
         {showBaseline && (
           <SubCard className="p-5 rounded-2xl text-sm space-y-3 border border-amber-500/30">
-            <div className="flex items-center gap-2 font-bold text-amber-600 dark:text-amber-400">
+            <div className="flex items-center gap-2 font-medium text-amber-600 dark:text-amber-400">
               {climateStatus === 'error' ? <WifiOff className="h-5 w-5 shrink-0" /> : <Database className="h-5 w-5 shrink-0" />}
               {climateStatus === 'error'
                 ? t('Could not load NASA data. Showing the district baseline instead.', 'নাসার তথ্য লোড করা যায়নি। জেলার মূল তথ্য দেখানো হচ্ছে।')
@@ -104,7 +104,7 @@ export default function NasaTab() {
             {climate?.satellite && <SatelliteCard sat={climate.satellite} />}
 
             <SubCard className="p-5 rounded-2xl space-y-3">
-              <h3 className={`text-base font-black ${titleText}`}>{t('Monthly rainfall and soil wetness', 'মাসিক বৃষ্টিপাত ও মাটির আর্দ্রতা')}</h3>
+              <h3 className={`fs-display text-[1.125rem] lg:text-[1.25rem] ${titleText}`}>{t('Monthly rainfall and soil wetness', 'মাসিক বৃষ্টিপাত ও মাটির আর্দ্রতা')}</h3>
               <MonthlyChart rain={data.monthlyRainMm} wet={data.monthlyWetness} labels={lang === 'bn' ? MONTHS_BN : MONTHS_EN} />
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 {dryMonthsText(data.monthlyRainMm, lang)}
@@ -153,14 +153,14 @@ function RiskCard({ predictions }: { predictions: Prediction[] }) {
   return (
     <SubCard className="p-5 rounded-2xl space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className={`text-base font-black ${titleText} flex items-center gap-2`}>
+        <h3 className={`fs-display text-[1.125rem] lg:text-[1.25rem] ${titleText} flex items-center gap-2`}>
           <AlertTriangle className="h-4 w-4 text-amber-500" />{t('Current risk levels', 'বর্তমান ঝুঁকির মাত্রা')}
         </h3>
         <span className="text-xs text-slate-500 dark:text-slate-400">{t(`Valid until ${until}`, `${until} পর্যন্ত প্রযোজ্য`)}</span>
       </div>
       <ul className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {sorted.map(p => (
-          <li key={p.kind} className={`rounded-xl border px-3 py-2 flex items-center justify-between gap-2 text-sm font-bold ${LEVEL_STYLE[p.level]}`}>
+          <li key={p.kind} className={`rounded-xl border px-3 py-2 flex items-center justify-between gap-2 text-sm font-medium ${LEVEL_STYLE[p.level]}`}>
             <span>{t(...RISK_LABEL[p.kind])}</span>
             <span className="text-xs">{t(...LEVEL_LABEL[p.level])}</span>
           </li>
@@ -187,7 +187,7 @@ function SatelliteCard({ sat }: { sat: Satellite }) {
     : t('Bare soil, water or built-up land', 'খালি মাটি, পানি বা বসতি');
   return (
     <SubCard className="p-5 rounded-2xl space-y-3">
-      <h3 className={`text-base font-black ${titleText} flex items-center gap-2`}>
+      <h3 className={`fs-display text-[1.125rem] lg:text-[1.25rem] ${titleText} flex items-center gap-2`}>
         <SatelliteIcon className="h-4 w-4 text-sky-500" />{t('Satellite view (5 × 5 km around the district point)', 'স্যাটেলাইট তথ্য (জেলা বিন্দুর চারপাশে ৫ × ৫ কিমি)')}
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -223,7 +223,7 @@ function RecentCard({ recent: r }: { recent: RecentConditions }) {
   return (
     <SubCard className="p-5 rounded-2xl space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className={`text-base font-black ${titleText}`}>{t('Last 30 days', 'গত ৩০ দিন')}</h3>
+        <h3 className={`fs-display text-[1.125rem] lg:text-[1.25rem] ${titleText}`}>{t('Last 30 days', 'গত ৩০ দিন')}</h3>
         <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
           <CalendarClock className="h-3.5 w-3.5" />{t(`Up to ${end} (NASA data arrives a few days late)`, `${end} পর্যন্ত (নাসার তথ্য কয়েক দিন দেরিতে আসে)`)}
         </span>
@@ -300,7 +300,7 @@ function MonthlyChart({ rain, wet, labels }: { rain: number[]; wet: number[]; la
                 <div className={`w-full rounded-t-md transition-all duration-500 ${active === i ? 'bg-cyan-600' : 'bg-cyan-500'}`}
                      style={{ height: `${(r / top) * 100}%`, minHeight: 2 }} />
                 {active === i && (
-                  <span className={`card-popup absolute bottom-full mb-1 z-10 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-bold glass-strong shadow-lg text-left ${
+                  <span className={`card-popup absolute bottom-full mb-1 z-10 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-medium glass-strong text-left ${
                     i < 3 ? 'left-0' : i > 8 ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
                     <span className="block text-slate-900 dark:text-slate-50">{full[i]}</span>
                     <span className="block text-cyan-600 dark:text-cyan-300">{t('Rain', 'বৃষ্টি')}: {n(r)} {t('mm', 'মিমি')}</span>
@@ -317,7 +317,7 @@ function MonthlyChart({ rain, wet, labels }: { rain: number[]; wet: number[]; la
         <span className="w-11 shrink-0 text-xs text-right text-slate-500 dark:text-slate-400 leading-3">{t('wet', 'আর্দ্র')}</span>
         <div className="flex-1 flex gap-0.5 sm:gap-1.5">
           {wet.map((w, i) => (
-            <div key={i} className="flex-1 h-3 rounded-sm" style={{ background: `rgba(14,165,233,${w == null || !Number.isFinite(w) ? 0 : 0.15 + w * 0.85})` }} />
+            <div key={i} className="flex-1 h-3 rounded-sm" style={{ background: `rgb(var(--sky-600) / ${w == null || !Number.isFinite(w) ? 0 : 0.12 + w * 0.88})` }} />
           ))}
         </div>
       </div>
@@ -329,7 +329,7 @@ function MonthlyChart({ rain, wet, labels }: { rain: number[]; wet: number[]; la
       </div>
       <div className="flex flex-wrap gap-4 text-xs text-slate-600 dark:text-slate-400 pt-1">
         <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-cyan-500" />{t('Rain (mm per month)', 'বৃষ্টি (মাসে মিমি)')}</span>
-        <span className="flex items-center gap-1.5"><span className="h-3 w-5 rounded-sm" style={{ background: 'linear-gradient(90deg, rgba(14,165,233,.15), rgba(14,165,233,1))' }} />{t('Soil wetness (darker = wetter)', 'মাটির আর্দ্রতা (গাঢ় = বেশি ভেজা)')}</span>
+        <span className="flex items-center gap-1.5"><span className="h-3 w-5 rounded-sm" style={{ background: 'linear-gradient(90deg, rgb(var(--sky-600) / .12), rgb(var(--sky-600) / 1))' }} />{t('Soil wetness (darker = wetter)', 'মাটির আর্দ্রতা (গাঢ় = বেশি ভেজা)')}</span>
         <span>{t('Tap a month for details.', 'বিস্তারিত দেখতে মাসে চাপুন।')}</span>
       </div>
     </div>
@@ -341,12 +341,12 @@ function Metric({ icon: Icon, color, source, value, label, sub }: {
 }) {
   return (
     <SubCard className="p-4 rounded-2xl">
-      <div className="flex items-center justify-between text-xs mb-1 text-slate-500 dark:text-slate-400 gap-2">
+      <div className="flex items-center justify-between text-xs mb-1 font-mono text-slate-500 dark:text-slate-400 gap-2">
         <span className="truncate">{source}</span>
         <Icon className={`h-5 w-5 shrink-0 ${color}`} />
       </div>
-      <div className={`text-xl sm:text-2xl font-black ${titleText}`}>{value}</div>
-      <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">{label}</div>
+      <div className={`fs-display text-[1.5rem] sm:text-[1.75rem] mt-2 ${titleText}`}>{value}</div>
+      <div className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</div>
       {sub && <div className="text-xs mt-1 text-slate-500 dark:text-slate-400">{sub}</div>}
     </SubCard>
   );
@@ -365,14 +365,14 @@ export function StatusPill({ status, hasData, updatedAt, onRetry }: {
     );
   }
   if (status === 'missing') {
-    return <span className="text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300 w-fit">{t('Not synced yet', 'এখনো সংগ্রহ হয়নি')}</span>;
+    return <span className="text-xs font-medium px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300 w-fit">{t('Not synced yet', 'এখনো সংগ্রহ হয়নি')}</span>;
   }
   if (hasData) {
     return (
-      <span className="text-xs font-bold px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 flex items-center gap-1.5 w-fit">
+      <span className="text-xs font-medium px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 flex items-center gap-1.5 w-fit">
         <Database className="h-4 w-4" />{date ? t(`Synced ${date}`, `সংগ্রহ ${date}`) : t('Synced', 'সংগ্রহ হয়েছে')}
       </span>
     );
   }
-  return <span className="text-xs font-bold px-3 py-1.5 rounded-xl glass-subtle w-fit">{t('Loading…', 'লোড হচ্ছে…')}</span>;
+  return <span className="text-xs font-medium px-3 py-1.5 rounded-xl glass-subtle w-fit">{t('Loading…', 'লোড হচ্ছে…')}</span>;
 }

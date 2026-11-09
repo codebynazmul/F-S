@@ -2,24 +2,27 @@
 
 import React from 'react';
 import {
-  AlertTriangle, Droplets, Info, Layers, RotateCcw, ShieldCheck, Sparkles, Sprout,
-  TrendingDown, TrendingUp, type LucideIcon,
+  AlertTriangle, CheckCircle2, ClipboardCheck, Droplets, Info, Layers, RotateCcw, Satellite, Scale, ShieldCheck,
+  Sparkles, Sprout, Target, TrendingDown, TrendingUp, type LucideIcon,
 } from 'lucide-react';
 import { getCrop } from '@/lib/metrics';
 import { pick, signed } from '@/lib/i18n';
-import { BIGHA_HA } from '@/lib/options';
+import { BIGHA_HA, PRIORITIES } from '@/lib/options';
+import { compareWithCurrent, type EvidenceSource, type RiskFlag, type Strategy } from '@/lib/recommend';
+import type { Priority } from '@/lib/types';
 import { useApp } from '../AppProvider';
-import { Card, SubCard, ghostBtn, mutedText, titleText } from '../ui';
+import { Card, SubCard, TabHeader, ghostBtn, mutedText, titleText } from '../ui';
 import { CropIcon, CropPicker } from '../CropIcon';
 import { LEVEL_LABEL, LEVEL_STYLE, RISK_LABEL } from './NasaTab';
 
 export default function RotationTab() {
   const {
-    t, n, lang, district, farm, recommendation, recommendedPlan, isCustomPlan, setRecommendedCrop,
+    t, n, lang, district, farm, recommendation, recommendedPlan, isCustomPlan, setRecommendedCrop, chosenStrategy,
     resetRecommendedPlan, traditionalPlan, setTraditionalCrop, resetTraditionalPlan, tradMetrics, recMetrics, climateSource, climate,
   } = useApp();
   // Medium and high risks right now, from the predict-risk function.
   const alerts = (climate?.predictions ?? []).filter(p => p.level !== 'low');
+  const best = recommendation.strategies[0];
 
   const waterSaved = tradMetrics.totalWaterMm - recMetrics.totalWaterMm;
   const waterSavedPct = tradMetrics.totalWaterMm > 0 ? Math.round((waterSaved / tradMetrics.totalWaterMm) * 100) : 0;
@@ -28,7 +31,17 @@ export default function RotationTab() {
 
   return (
     <div className="space-y-6 card-rise">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger">
+      <TabHeader
+        icon={Sprout}
+        badge={t(`Crop rotation · ${district.name}`, `ফসল পর্যায়ক্রম · ${district.nameBn}`)}
+        title={t('Your crop rotation plan', 'আপনার ফসল পর্যায়ক্রম পরিকল্পনা')}
+        description={t('Three seasons on the same field, ranked by what matters to you, compared with what you grow now.',
+                       'একই জমিতে তিন মৌসুম, আপনার অগ্রাধিকার অনুযায়ী সাজানো, বর্তমান চাষের সাথে তুলনা করে।')}
+      />
+
+      <PriorityPicker />
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
           icon={Sprout} color="sky" label={t('Soil Health Index', 'মাটির স্বাস্থ্য স্কোর')}
           value={`${n(recMetrics.soilScore)}/${n(100)}`} delta={recMetrics.soilScore - tradMetrics.soilScore}
@@ -40,7 +53,7 @@ export default function RotationTab() {
           note={t('Less groundwater pumping per year', 'বছরে কম ভূগর্ভস্থ পানি উত্তোলন')}
         />
         <StatCard
-          icon={Layers} color="indigo" label={t('Nitrogen Balance', 'প্রাকৃতিক নাইট্রোজেন সঞ্চয়')}
+          icon={Layers} color="emerald" label={t('Nitrogen Balance', 'প্রাকৃতিক নাইট্রোজেন সঞ্চয়')}
           value={`${signed(recMetrics.netNitrogen, 0, lang)} ${t('kg/ha', 'কেজি/হে.')}`}
           note={ureaSavedKg > 0
             ? t(`~${ureaSavedKg} kg less urea on your ${farm.sizeBigha} bigha`, `আপনার ${farm.sizeBigha} বিঘায় ~${ureaSavedKg} কেজি কম ইউরিয়া`)
@@ -53,25 +66,29 @@ export default function RotationTab() {
         />
       </div>
 
+      <StrategyTable />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recommended */}
-        <Card className="p-4 sm:p-5 rounded-4xl border-2 border-sky-500/40 space-y-4">
+        {/* Plan in use */}
+        <Card className="p-4 sm:p-6 rounded-[var(--radius-card)] !border-sky-600/40 space-y-4">
           <div className="flex flex-col-reverse sm:flex-row items-start justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-300"><Sparkles className="h-5 w-5" /></span>
+              <span className="p-2 rounded-lg bg-sky-600/10 text-sky-700 dark:text-sky-300"><Sparkles className="h-5 w-5" /></span>
               <div>
-                <h3 className={`font-extrabold text-sm lg:text-base ${titleText}`}>
-                  {t('Climate-Adaptive Recommended Rotation', 'জলবায়ু সহনশীল প্রস্তাবিত ফসল পর্যায়ক্রম')}
+                <h3 className={`font-medium text-base lg:text-[1.0625rem] ${titleText}`}>
+                  {chosenStrategy
+                    ? `${t('Your plan:', 'আপনার পরিকল্পনা:')} ${pick(lang, chosenStrategy.name)}`
+                    : t('Your plan (edited)', 'আপনার পরিকল্পনা (পরিবর্তিত)')}
                 </h3>
                 <p className="text-xs font-medium text-sky-600 dark:text-sky-300">
                   {climateSource === 'nasa'
-                    ? t(`Calibrated for ${district.name} with NASA POWER climate data`, `নাসা POWER জলবায়ু তথ্য দিয়ে ${district.nameBn} জেলার জন্য সাজানো`)
+                    ? t(`Calibrated for ${district.name} with NASA climate and satellite data`, `নাসার জলবায়ু ও স্যাটেলাইট তথ্য দিয়ে ${district.nameBn} জেলার জন্য সাজানো`)
                     : t(`Calibrated for ${district.name} with the district baseline (NASA data not loaded)`, `জেলার মূল তথ্য দিয়ে ${district.nameBn} জেলার জন্য সাজানো (নাসার তথ্য লোড হয়নি)`)}
                 </p>
                 {alerts.length > 0 && (
                   <ul className="mt-1.5 flex flex-wrap gap-1.5" aria-label={t('Current risks from NASA data', 'নাসা তথ্য অনুযায়ী বর্তমান ঝুঁকি')}>
                     {alerts.map(p => (
-                      <li key={p.kind} className={`text-xs font-bold px-2 py-0.5 rounded-full border ${LEVEL_STYLE[p.level]}`}>
+                      <li key={p.kind} className={`text-xs font-medium px-2 py-0.5 rounded-full border ${LEVEL_STYLE[p.level]}`}>
                         {t(...RISK_LABEL[p.kind])}: {t(...LEVEL_LABEL[p.level])}
                       </li>
                     ))}
@@ -81,11 +98,11 @@ export default function RotationTab() {
             </div>
             {isCustomPlan ? (
               <button type="button" onClick={resetRecommendedPlan} className={ghostBtn}>
-                <RotateCcw className="h-3.5 w-3.5" />{t('Reset', 'রিসেট')}
+                <RotateCcw className="h-3.5 w-3.5" />{t('Back to best match', 'সেরা মিলে ফিরুন')}
               </button>
             ) : (
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full border bg-sky-500/10 text-sky-600 dark:text-sky-300 border-sky-500/25 whitespace-nowrap">
-                {t('Top Recommendation', 'সর্বোত্তম পরামর্শ')}
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-sky-500/10 text-sky-600 dark:text-sky-300 border-sky-500/25 whitespace-nowrap">
+                {t('Best match', 'সেরা মিল')}
               </span>
             )}
           </div>
@@ -93,34 +110,40 @@ export default function RotationTab() {
           <PlanList plan={recommendedPlan} onChange={setRecommendedCrop} variant="rec" />
 
           <SubCard className="p-4 rounded-2xl text-sm space-y-2">
-            <div className="font-bold flex items-center gap-1.5 text-sky-600 dark:text-sky-300">
+            <div className="font-medium flex items-center gap-1.5 text-sky-600 dark:text-sky-300">
               <Info className="h-4 w-4" />
               <span>{t('Why this sequence?', 'কেন এই ফসল বিন্যাস?')}</span>
             </div>
-            {isCustomPlan ? (
-              <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                {t('You have edited this plan. Scores above reflect your changes. Press Reset to go back to the recommended sequence.',
-                   'আপনি পরিকল্পনাটি পরিবর্তন করেছেন। উপরের স্কোর আপনার পরিবর্তন অনুযায়ী। প্রস্তাবিত বিন্যাসে ফিরতে রিসেট চাপুন।')}
-              </p>
-            ) : (
+            {chosenStrategy ? (
               <ol className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 list-decimal pl-4 space-y-1">
-                {recommendation.reasons.map((r, i) => <li key={i}>{pick(lang, r)}</li>)}
+                {chosenStrategy.reasons.map((r, i) => <li key={i}>{pick(lang, r)}</li>)}
                 {waterSaved > 0 && (
                   <li>{t(`Cuts water demand by ${waterSaved.toLocaleString()} mm a year compared with the current plan.`,
                          `প্রচলিত পরিকল্পনার তুলনায় বছরে ${waterSaved.toLocaleString('en-US')} মিমি পানির চাহিদা কমায়।`)}</li>
                 )}
               </ol>
+            ) : (
+              <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                {t('You have edited this plan. Scores above reflect your changes. Press "Back to best match" to use the top-ranked strategy, or pick another one in the table above.',
+                   'আপনি পরিকল্পনাটি পরিবর্তন করেছেন। উপরের স্কোর আপনার পরিবর্তন অনুযায়ী। শীর্ষ কৌশলে ফিরতে "সেরা মিলে ফিরুন" চাপুন, অথবা উপরের তালিকা থেকে অন্য একটি বেছে নিন।')}
+              </p>
+            )}
+            {best && chosenStrategy && chosenStrategy.id !== best.id && (
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                {t(`For your priorities, "${best.name.en}" ranks higher (${best.match} vs ${chosenStrategy.match}).`,
+                   `আপনার অগ্রাধিকার অনুযায়ী "${best.name.bn}" বেশি উপযোগী (${best.match} বনাম ${chosenStrategy.match})।`)}
+              </p>
             )}
           </SubCard>
         </Card>
 
         {/* Traditional */}
-        <Card className="p-4 sm:p-5 rounded-4xl space-y-4">
+        <Card className="p-4 sm:p-5 rounded-[var(--radius-card)] space-y-4">
           <div className="flex flex-col-reverse sm:flex-row items-start justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-amber-500/15 text-amber-500"><AlertTriangle className="h-5 w-5" /></span>
+              <span className="p-2 rounded-lg bg-amber-500/10 text-amber-600"><AlertTriangle className="h-5 w-5" /></span>
               <div>
-                <h3 className={`font-extrabold text-sm lg:text-base ${titleText}`}>
+                <h3 className={`font-medium text-base lg:text-[1.0625rem] ${titleText}`}>
                   {t('Current Practice', 'কৃষকের প্রচলিত প্রথা')}
                 </h3>
                 <p className={`text-xs ${mutedText}`}>
@@ -136,7 +159,7 @@ export default function RotationTab() {
           <PlanList plan={traditionalPlan} onChange={setTraditionalCrop} variant="trad" />
 
           <SubCard className="p-4 rounded-2xl text-sm space-y-1.5 border border-amber-500/20">
-            <div className="font-bold flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+            <div className="font-medium flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
               <AlertTriangle className="h-4 w-4" />
               <span>{t('Vulnerability Assessment', 'ঝুঁকি মূল্যায়ন')}</span>
             </div>
@@ -150,14 +173,314 @@ export default function RotationTab() {
           </SubCard>
         </Card>
       </div>
+
+      <StrategyDetails />
+      <EvidencePanel />
+      <Disclaimer />
     </div>
+  );
+}
+
+// ---------- Priorities ----------
+
+function PriorityPicker() {
+  const { t, lang, priorities, togglePriority } = useApp();
+  return (
+    <Card className="p-4 sm:p-5 rounded-[var(--radius-card)] space-y-3">
+      <div>
+        <h2 className={`fs-display text-[1.25rem] lg:text-[1.5rem] ${titleText} flex items-center gap-2.5`}>
+          <Target className="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0" />
+          <span>{t('What matters most on your farm?', 'আপনার খামারে কোনটি সবচেয়ে জরুরি?')}</span>
+        </h2>
+        <p className={`text-sm mt-1 ${mutedText}`}>
+          {t('Pick one or more. The rotation strategies below are ranked by your choice. With nothing picked, every goal counts the same.',
+             'এক বা একাধিক বেছে নিন। নিচের কৌশলগুলো আপনার পছন্দ অনুযায়ী সাজানো হবে। কিছু না বাছলে সব লক্ষ্য সমান গুরুত্ব পায়।')}
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-2" role="group" aria-label={t('Your priorities', 'আপনার অগ্রাধিকার')}>
+        {PRIORITIES.map(p => {
+          const on = priorities.includes(p.id);
+          return (
+            <button
+              key={p.id}
+              type="button"
+              aria-pressed={on}
+              onClick={() => togglePriority(p.id)}
+              className={`btn-popup min-h-tap px-4 py-2 rounded-full text-sm font-medium border flex items-center gap-1.5 ${
+                on ? 'bg-sky-600 text-white border-sky-600' : 'border-sky-600/20 bg-[var(--bg-surface)] hover:border-sky-600/45 text-slate-800 dark:text-slate-100'
+              }`}
+            >
+              {on && <CheckCircle2 className="h-4 w-4" />}
+              {lang === 'bn' ? p.bn : p.en}
+            </button>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
+// ---------- Strategy comparison ----------
+
+const SCORE_COLUMNS: { id: Priority; en: string; bn: string }[] = [
+  { id: 'water', en: 'Water saving', bn: 'পানি সাশ্রয়' },
+  { id: 'soil', en: 'Soil health', bn: 'মাটির স্বাস্থ্য' },
+  { id: 'resilience', en: 'Climate resilience', bn: 'জলবায়ু সহনশীলতা' },
+  { id: 'income', en: 'Income', bn: 'আয়' },
+  { id: 'forage', en: 'Fodder', bn: 'পশুখাদ্য' },
+];
+
+const scoreColor = (v: number) =>
+  v >= 70 ? 'text-emerald-700 dark:text-emerald-300' : v >= 45 ? 'text-slate-800 dark:text-slate-100' : 'text-amber-700 dark:text-amber-400';
+
+function StrategyTable() {
+  const { t, n, lang, recommendation, recommendedPlan, priorities, applyStrategy } = useApp();
+  const rows: Strategy[] = [...recommendation.strategies, ...(recommendation.current ? [recommendation.current] : [])];
+  const bestId = recommendation.strategies[0]?.id;
+  const inUse = recommendedPlan.join();
+
+  return (
+    <Card className="p-4 sm:p-5 rounded-[var(--radius-card)] space-y-3">
+      <div>
+        <h2 className={`fs-display text-[1.25rem] lg:text-[1.5rem] ${titleText} flex items-center gap-2.5`}>
+          <Scale className="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0" />
+          <span>{t('Compare rotation strategies', 'ফসল পর্যায়ক্রমের কৌশল তুলনা')}</span>
+        </h2>
+        <p className={`text-sm mt-1 ${mutedText}`}>
+          {t(`${rows.length} rotations for ${recommendation.current ? 'your farm, including what you grow now' : 'your farm'}. Scores are 0–100, higher is better. "Match" weighs the scores by your priorities and drops for crops that don't suit local risks.`,
+             `আপনার খামারের জন্য ${rows.length}টি পর্যায়ক্রম${recommendation.current ? ', আপনার বর্তমান চাষসহ' : ''}। স্কোর ০–১০০, বেশি হলে ভালো। "মিল" আপনার অগ্রাধিকার অনুযায়ী স্কোর হিসাব করে, এবং স্থানীয় ঝুঁকিতে অনুপযুক্ত ফসল থাকলে কমে।`)}
+        </p>
+      </div>
+
+      <div className="overflow-x-auto -mx-1 px-1">
+        <table className="w-full min-w-[720px] text-sm border-separate border-spacing-y-1.5">
+          <thead>
+            <tr className="text-xs text-left text-slate-600 dark:text-slate-400">
+              <th scope="col" className="font-semibold px-2">{t('Strategy', 'কৌশল')}</th>
+              <th scope="col" className="font-semibold px-2 text-center">{t('Match', 'মিল')}</th>
+              {SCORE_COLUMNS.map(c => {
+                const picked = priorities.includes(c.id);
+                return (
+                  <th key={c.id} scope="col" className={`px-2 text-center ${picked ? 'font-semibold text-sky-700 dark:text-sky-300' : 'font-semibold'}`}>
+                    {lang === 'bn' ? c.bn : c.en}{picked && ' ★'}
+                  </th>
+                );
+              })}
+              <th scope="col" className="font-semibold px-2 text-center">{t('Water need', 'পানির চাহিদা')}</th>
+              <th scope="col" className="px-2"><span className="sr-only">{t('Action', 'কাজ')}</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(s => {
+              const current = s.id === 'current';
+              const using = !current && s.plan.join() === inUse;
+              return (
+                <tr key={s.id} className={current ? 'bg-amber-500/10' : using ? 'bg-sky-500/10' : 'bg-slate-400/5'}>
+                  <th scope="row" className="text-left font-normal p-2 rounded-l-xl align-middle">
+                    <div className={`font-medium ${titleText} flex flex-wrap items-center gap-1.5`}>
+                      {pick(lang, s.name)}
+                      {s.id === bestId && (
+                        <span className="text-[11px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                          {t('Best match', 'সেরা মিল')}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-1 mt-1" aria-label={s.plan.map(id => (lang === 'bn' ? getCrop(id).nameBn : getCrop(id).name)).join(', ')}>
+                      {s.plan.map((id, i) => <CropIcon key={i} id={id} size={22} />)}
+                    </div>
+                  </th>
+                  <td className="p-2 text-center align-middle">
+                    {current ? <span className={mutedText}>{n(s.match)}</span> : <strong className="text-base text-sky-700 dark:text-sky-300">{n(s.match)}</strong>}
+                  </td>
+                  {SCORE_COLUMNS.map(c => (
+                    <td key={c.id} className={`p-2 text-center align-middle font-medium ${scoreColor(s.scores[c.id])}`}>{n(s.scores[c.id])}</td>
+                  ))}
+                  <td className="p-2 text-center align-middle whitespace-nowrap">{n(s.metrics.totalWaterMm)} {t('mm', 'মিমি')}</td>
+                  <td className="p-2 rounded-r-xl align-middle text-right">
+                    {current ? (
+                      <span className="text-xs font-medium text-amber-700 dark:text-amber-400 whitespace-nowrap">{t('What you grow now', 'বর্তমান চাষ')}</span>
+                    ) : using ? (
+                      <span className="text-xs font-medium text-sky-700 dark:text-sky-300 whitespace-nowrap flex items-center justify-end gap-1">
+                        <CheckCircle2 className="h-4 w-4" />{t('In use', 'ব্যবহৃত')}
+                      </span>
+                    ) : (
+                      <button type="button" onClick={() => applyStrategy(s.plan)} className={`${ghostBtn} ml-auto whitespace-nowrap`}>
+                        {t('Use this plan', 'এটি ব্যবহার করুন')}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {recommendation.skipped.length > 0 && (
+        <ul className={`text-xs space-y-1 ${mutedText}`}>
+          {recommendation.skipped.map((s, i) => <li key={i}>• {pick(lang, s)}</li>)}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+// ---------- Why, benefits and checks ----------
+
+function StrategyDetails() {
+  const { t, lang, recommendation, recommendedPlan } = useApp();
+  const rows: Strategy[] = [...recommendation.strategies, ...(recommendation.current ? [recommendation.current] : [])];
+  const inUse = recommendedPlan.join();
+
+  return (
+    <Card className="p-4 sm:p-5 rounded-[var(--radius-card)] space-y-3">
+      <h2 className={`fs-display text-[1.25rem] lg:text-[1.5rem] ${titleText} flex items-center gap-2.5`}>
+        <ClipboardCheck className="h-5 w-5 text-teal-500 shrink-0" />
+        <span>{t('Why each strategy, its benefits, and what to check', 'প্রতিটি কৌশল কেন, এর সুবিধা, এবং কী যাচাই করবেন')}</span>
+      </h2>
+      <div className="space-y-2">
+        {rows.map(s => {
+          const { gains, costs } = compareWithCurrent(s, recommendation.current);
+          const open = s.id !== 'current' && s.plan.join() === inUse;
+          return (
+            <details key={s.id} open={open} className="glass-subtle rounded-2xl group">
+              <summary className="min-h-tap cursor-pointer list-none p-3.5 flex items-center justify-between gap-3">
+                <span className={`font-medium ${titleText}`}>{pick(lang, s.name)}</span>
+                <span className="text-xs font-medium text-sky-600 dark:text-sky-300 group-open:hidden">{t('Show', 'দেখুন')}</span>
+                <span className="text-xs font-medium text-sky-600 dark:text-sky-300 hidden group-open:inline">{t('Hide', 'লুকান')}</span>
+              </summary>
+              <div className="px-3.5 pb-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm leading-relaxed">
+                <section className="space-y-1.5">
+                  <h3 className="font-medium text-sky-700 dark:text-sky-300 flex items-center gap-1.5"><Info className="h-4 w-4" />{t('Why it was suggested', 'কেন প্রস্তাব করা হলো')}</h3>
+                  <p className="text-slate-700 dark:text-slate-300">{pick(lang, s.summary)}</p>
+                  {s.reasons.length > 0 && (
+                    <ol className="list-decimal pl-4 space-y-1 text-slate-700 dark:text-slate-300">
+                      {s.reasons.map((r, i) => (
+                        <li key={i}><strong>{lang === 'bn' ? getCrop(s.plan[i]).nameBn : getCrop(s.plan[i]).name}:</strong> {pick(lang, r)}</li>
+                      ))}
+                    </ol>
+                  )}
+                </section>
+                <section className="space-y-1.5">
+                  <h3 className="font-medium text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5"><TrendingUp className="h-4 w-4" />{t('Compared with what you grow now', 'বর্তমান চাষের তুলনায়')}</h3>
+                  {s.id === 'current' ? (
+                    <p className={mutedText}>{t('This is your current rotation, the baseline for the others.', 'এটি আপনার বর্তমান পর্যায়ক্রম, অন্যগুলোর তুলনার ভিত্তি।')}</p>
+                  ) : gains.length + costs.length === 0 ? (
+                    <p className={mutedText}>{t('About the same as your current rotation.', 'আপনার বর্তমান পর্যায়ক্রমের প্রায় সমান।')}</p>
+                  ) : (
+                    <ul className="space-y-1">
+                      {gains.map((g, i) => <li key={`g${i}`} className="flex gap-1.5"><CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-300" /><span>{pick(lang, g)}</span></li>)}
+                      {costs.map((c, i) => <li key={`c${i}`} className="flex gap-1.5"><TrendingDown className="h-4 w-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" /><span>{pick(lang, c)}</span></li>)}
+                    </ul>
+                  )}
+                </section>
+                <section className="space-y-1.5">
+                  <h3 className="font-medium text-amber-700 dark:text-amber-400 flex items-center gap-1.5"><AlertTriangle className="h-4 w-4" />{t('Check locally before using', 'ব্যবহারের আগে স্থানীয়ভাবে যাচাই করুন')}</h3>
+                  {s.checks.length === 0 ? (
+                    <p className={mutedText}>{t('No specific warnings. Still confirm with your agriculture officer.', 'নির্দিষ্ট কোনো সতর্কতা নেই। তবুও কৃষি কর্মকর্তার সাথে নিশ্চিত হন।')}</p>
+                  ) : (
+                    <ul className="list-disc pl-4 space-y-1 text-slate-700 dark:text-slate-300">
+                      {s.checks.map((c, i) => <li key={i}>{pick(lang, c)}</li>)}
+                    </ul>
+                  )}
+                </section>
+              </div>
+            </details>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
+// ---------- Evidence and gaps ----------
+
+const SOURCE_LABEL: Record<EvidenceSource, [string, string]> = {
+  nasa_power: ['NASA POWER', 'নাসা POWER'],
+  smap: ['NASA SMAP', 'নাসা SMAP'],
+  modis: ['NASA MODIS', 'নাসা MODIS'],
+  nasadem: ['NASADEM', 'NASADEM'],
+  risk_model: ['Risk levels (NASA data)', 'ঝুঁকির মাত্রা (নাসা তথ্য)'],
+  district: ['District profile', 'জেলার বিবরণ'],
+  farm: ['Your farm profile', 'আপনার খামারের তথ্য'],
+};
+
+const FLAG_LABEL: Record<RiskFlag, [string, string]> = {
+  drought: ['Drought', 'খরা'],
+  flood: ['Flood / waterlogging', 'বন্যা / জলাবদ্ধতা'],
+  heat: ['Heat', 'তাপ'],
+  cold: ['Cool winter', 'ঠান্ডা শীত'],
+  salinity: ['Salinity', 'লবণাক্ততা'],
+  cropStress: ['Crop stress', 'ফসলের চাপ'],
+};
+
+function EvidencePanel() {
+  const { t, lang, recommendation } = useApp();
+  const raised = (Object.keys(recommendation.risks) as RiskFlag[]).filter(k => recommendation.risks[k]);
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card className="p-4 sm:p-5 rounded-[var(--radius-card)] space-y-3">
+        <h2 className={`fs-display text-[1.25rem] lg:text-[1.5rem] ${titleText} flex items-center gap-2.5`}>
+          <Satellite className="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0" />
+          <span>{t('Evidence behind these suggestions', 'এই পরামর্শের পেছনের তথ্য')}</span>
+        </h2>
+        <p className={`text-sm ${mutedText}`}>
+          {raised.length > 0
+            ? `${t('Risks found:', 'পাওয়া ঝুঁকি:')} ${raised.map(k => t(...FLAG_LABEL[k])).join(', ')}.`
+            : t('No major risks found in the data.', 'তথ্যে বড় কোনো ঝুঁকি পাওয়া যায়নি।')}
+        </p>
+        <ul className="space-y-2">
+          {recommendation.evidence.map((e, i) => (
+            <li key={i} className="glass-subtle rounded-xl p-3 text-sm space-y-1">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-700 dark:text-sky-300">{t(...SOURCE_LABEL[e.source])}</span>
+                {e.raises.map(k => (
+                  <span key={k} className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-800 dark:text-amber-200">
+                    {t('Raises:', 'ঝুঁকি:')} {t(...FLAG_LABEL[k])}
+                  </span>
+                ))}
+              </div>
+              <p className="leading-relaxed text-slate-700 dark:text-slate-300">{pick(lang, e.text)}</p>
+            </li>
+          ))}
+        </ul>
+      </Card>
+
+      <Card className="p-4 sm:p-5 rounded-[var(--radius-card)] space-y-3">
+        <h2 className={`fs-display text-[1.25rem] lg:text-[1.5rem] ${titleText} flex items-center gap-2.5`}>
+          <Info className="h-5 w-5 text-amber-500 shrink-0" />
+          <span>{t('Information gaps', 'তথ্যের ঘাটতি')}</span>
+        </h2>
+        <p className={`text-sm ${mutedText}`}>
+          {t('What this advice cannot see. These are the places where local knowledge matters most.',
+             'এই পরামর্শ যা দেখতে পায় না। এখানেই স্থানীয় জ্ঞান সবচেয়ে বেশি দরকার।')}
+        </p>
+        <ul className="list-disc pl-5 space-y-1.5 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+          {recommendation.gaps.map((g, i) => <li key={i}>{pick(lang, g)}</li>)}
+        </ul>
+      </Card>
+    </div>
+  );
+}
+
+function Disclaimer() {
+  const { t } = useApp();
+  return (
+    <SubCard className="p-4 rounded-2xl text-sm leading-relaxed flex items-start gap-2 border border-sky-500/25">
+      <ShieldCheck className="h-5 w-5 text-sky-600 dark:text-sky-300 shrink-0 mt-0.5" />
+      <span>
+        {t('Field Shift helps you explore options. It does not replace your own experience or advice from your Upazila Agriculture Officer. Talk through the "Check locally" items with them before changing crops.',
+           'ফিল্ড শিফট আপনাকে বিকল্পগুলো ভেবে দেখতে সাহায্য করে। এটি আপনার নিজের অভিজ্ঞতা বা উপজেলা কৃষি কর্মকর্তার পরামর্শের বিকল্প নয়। ফসল বদলানোর আগে "স্থানীয়ভাবে যাচাই করুন" অংশগুলো তাঁর সাথে আলোচনা করুন।')}
+      </span>
+    </SubCard>
   );
 }
 
 const COLORS = {
   sky: { text: 'text-sky-600 dark:text-sky-300', bar: 'bg-sky-500', icon: 'text-sky-500' },
   cyan: { text: 'text-cyan-600 dark:text-cyan-300', bar: 'bg-cyan-500', icon: 'text-cyan-500' },
-  indigo: { text: 'text-indigo-600 dark:text-indigo-300', bar: 'bg-indigo-500', icon: 'text-indigo-500' },
+  emerald: { text: 'text-emerald-700 dark:text-emerald-300', bar: 'bg-emerald-500', icon: 'text-emerald-600' },
   teal: { text: 'text-teal-600 dark:text-teal-300', bar: 'bg-teal-500', icon: 'text-teal-500' },
 };
 
@@ -171,22 +494,21 @@ function StatCard({
   const c = COLORS[color];
   const up = (delta ?? 0) >= 0;
   return (
-    <Card className="p-4 rounded-2xl relative overflow-hidden card-rise">
-      <div className="flex items-start justify-between gap-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
+    <Card className="p-4 sm:p-5 rounded-[var(--radius-card)] flex flex-col">
+      <div className="flex items-start justify-between gap-2 text-sm text-slate-600 dark:text-slate-300">
         <span className="leading-snug">{label}</span>
-        <Icon className={`h-5 w-5 shrink-0 ${c.icon}`} />
+        <Icon className={`h-[18px] w-[18px] shrink-0 ${c.icon}`} aria-hidden />
       </div>
-      <div className="mt-2 flex flex-wrap items-baseline gap-x-2">
-        <span className={`text-xl sm:text-2xl lg:text-3xl font-black ${c.text}`}>{value}</span>
+      <div className="mt-auto pt-4 flex flex-wrap items-baseline gap-x-2">
+        <span className={`fs-display text-[1.5rem] sm:text-[1.75rem] lg:text-[2rem] ${titleText}`}>{value}</span>
         {delta !== undefined && (
-          <span className={`text-sm font-bold flex items-center ${up ? 'text-emerald-600 dark:text-emerald-300' : 'text-red-500'}`}>
+          <span className={`text-sm font-medium flex items-center ${up ? 'text-emerald-600 dark:text-emerald-300' : 'text-red-500'}`}>
             {up ? <TrendingUp className="h-4 w-4 mr-0.5" /> : <TrendingDown className="h-4 w-4 mr-0.5" />}
             {deltaText ?? `${signed(delta, 0, lang)}${deltaSuffix}`}
           </span>
         )}
       </div>
-      <span className="block text-xs mt-1 leading-snug text-slate-500 dark:text-slate-400">{note}</span>
-      <div className={`absolute bottom-0 left-0 right-0 h-1 ${c.bar}`} />
+      <span className="block text-xs mt-1.5 leading-snug text-slate-500 dark:text-slate-400">{note}</span>
     </Card>
   );
 }
@@ -203,13 +525,13 @@ function PlanList({ plan, onChange, variant }: { plan: string[]; onChange: (i: n
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative shrink-0">
                 <CropIcon id={crop.id} size={48} />
-                <span className={`absolute -top-1.5 -left-1.5 h-6 min-w-6 px-1 rounded-lg font-black text-xs flex items-center justify-center ${rec ? 'bg-sky-600 text-white' : 'bg-slate-500 text-white'}`}>
+                <span className={`absolute -top-1.5 -left-1.5 h-6 min-w-6 px-1 rounded-lg font-semibold text-xs flex items-center justify-center ${rec ? 'bg-sky-600 text-white' : 'bg-slate-600 text-white'}`}>
                   {t(`S${idx + 1}`, `${idx + 1}`)}
                 </span>
               </div>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h4 className={`font-bold text-sm lg:text-base ${titleText}`}>{lang === 'bn' ? crop.nameBn : crop.name}</h4>
+                  <h4 className={`font-medium text-sm lg:text-base ${titleText}`}>{lang === 'bn' ? crop.nameBn : crop.name}</h4>
                   <span className={`text-xs px-1.5 py-0.5 rounded ${rec ? 'bg-sky-500/10 text-sky-700 dark:text-sky-300' : 'bg-slate-400/20 text-slate-700 dark:text-slate-200'}`}>
                     {lang === 'bn' ? crop.categoryBn : crop.category}
                   </span>

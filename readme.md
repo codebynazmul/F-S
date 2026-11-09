@@ -32,7 +32,7 @@ The dashboard is split into tabs. They are listed in the side menu; on phones a 
 
 | Tab | What you can do |
 | --- | --- |
-| **Crop Rotation Optimizer** | See a recommended 4-season rotation for your district, with the reason for each crop. Compare it against the traditional Boro–Aman rice cycle, and edit either plan. |
+| **Crop Rotation Optimizer** | Pick your priorities (save water, improve soil, income, cattle fodder, lower climate risk). Compare up to four rotation strategies against what you grow now, ranked by your priorities. Each strategy shows why it was suggested, its gains and trade-offs, and what to check with your agriculture officer. The evidence used (NASA POWER, SMAP, MODIS, NASADEM, risk levels) and the information gaps are listed. |
 | **What-If Climate Simulator** | Change rainfall, temperature and irrigation availability with sliders, or pick a quick scenario (severe drought, heatwave, flood year, normal year), and see how both plans hold up. |
 | **Soil & Water Analytics** | Compare water use, nitrogen balance, soil score, drought resilience and crop diversity, plus a 3-year soil organic matter projection. |
 | **NASA Earth Data** | Live long-term climate averages for the district from NASA POWER: monthly rainfall, temperature, humidity, solar radiation, root-zone soil wetness and estimated evapotranspiration. |

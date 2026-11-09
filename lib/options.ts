@@ -1,4 +1,4 @@
-import type { Bi, IrrigationType, SoilTexture } from './types';
+import type { Bi, FarmProfile, IrrigationType, Priority, SoilTexture } from './types';
 
 export const DIVISIONS: { id: string; bn: string }[] = [
   { id: 'Dhaka', bn: 'ঢাকা' },
@@ -37,3 +37,21 @@ export const IRRIGATION_TYPES: { id: IrrigationType; en: string; bn: string; sup
 export const BIGHA_M2 = 1337.8;
 export const BIGHA_HA = BIGHA_M2 / 10000;
 export const BIGHA_ACRE = 0.33;
+
+/** Farm values used until the farmer enters their own (no soil test yet). */
+export const DEFAULT_FARM: FarmProfile = {
+  sizeBigha: 8.5,
+  texture: 'clay_loam',
+  ph: 6.5,
+  organicMatter: 1.2,
+  irrigation: 'deep_tw',
+};
+
+/** Farmer priorities, in the order they are shown. */
+export const PRIORITIES: { id: Priority; en: string; bn: string }[] = [
+  { id: 'water',      en: 'Save water',          bn: 'পানি সাশ্রয়' },
+  { id: 'soil',       en: 'Improve soil',        bn: 'মাটির উন্নতি' },
+  { id: 'income',     en: 'More income',         bn: 'বেশি আয়' },
+  { id: 'forage',     en: 'Cattle fodder',       bn: 'গবাদিপশুর খাদ্য' },
+  { id: 'resilience', en: 'Lower climate risk',  bn: 'কম জলবায়ু ঝুঁকি' },
+];

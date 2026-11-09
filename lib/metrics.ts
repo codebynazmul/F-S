@@ -11,6 +11,8 @@ export interface PlanMetrics {
   yieldResilience: number; // 0–100
   diversityPct: number;  // share of distinct crop families
   avgCarbon: number;
+  avgIncome: number;     // 0–10
+  avgForage: number;     // 0–10
 }
 
 export const NO_SHOCK: SimSettings = { rainDelta: 0, tempDelta: 0, irrigationCut: 0 };
@@ -41,6 +43,8 @@ export function calculatePlanMetrics(
   const totalWaterMm = crops.reduce((s, c) => s + c.waterMm, 0);
   const netNitrogen = crops.reduce((s, c) => s + c.nBalanceKgHa, 0);
   const avgCarbon = crops.reduce((s, c) => s + c.carbonScore, 0) / n;
+  const avgIncome = crops.reduce((s, c) => s + c.incomeScore, 0) / n;
+  const avgForage = crops.reduce((s, c) => s + c.forageScore, 0) / n;
   const avgDrought = crops.reduce((s, c) => s + droughtPoints(c), 0) / n;
   const diversity = new Set(crops.map(c => c.family)).size / n;
 
@@ -80,6 +84,8 @@ export function calculatePlanMetrics(
     yieldResilience,
     diversityPct: Math.round(diversity * 100),
     avgCarbon,
+    avgIncome,
+    avgForage,
   };
 }
 

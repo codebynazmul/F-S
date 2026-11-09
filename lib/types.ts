@@ -84,6 +84,9 @@ export interface FarmProfile {
   irrigation: IrrigationType;
 }
 
+/** What the farmer cares about most when choosing a rotation. */
+export type Priority = 'water' | 'soil' | 'income' | 'forage' | 'resilience';
+
 export interface SimSettings {
   rainDelta: number;     // % change in rainfall
   tempDelta: number;     // °C increase

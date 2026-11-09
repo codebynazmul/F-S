@@ -24,7 +24,7 @@ export default function WhatIfTab() {
 
   return (
     <div className="space-y-6 card-rise">
-      <Card className="p-6 rounded-4xl space-y-6 shadow-xl">
+      <Card className="p-6 rounded-[var(--radius-card)] space-y-6">
         <TabHeader
           icon={Sliders}
           title={t('What-If Climate Simulator', 'হোয়াট-ইফ জলবায়ু সিমুলেটর')}
@@ -39,7 +39,7 @@ export default function WhatIfTab() {
         />
 
         <div className="space-y-2">
-          <span className="text-sm font-bold block text-slate-700 dark:text-slate-300">{t('Quick scenarios', 'দ্রুত পরিস্থিতি')}</span>
+          <span className="text-sm font-medium block text-slate-700 dark:text-slate-300">{t('Quick scenarios', 'দ্রুত পরিস্থিতি')}</span>
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
             {PRESETS.map(p => {
               const active = isPreset(p.sim);
@@ -49,8 +49,8 @@ export default function WhatIfTab() {
                   type="button"
                   onClick={() => setSim(p.sim)}
                   aria-pressed={active}
-                  className={`btn-popup min-h-tap px-4 py-2 rounded-full text-sm font-bold border ${
-                    active ? 'bg-sky-600 text-white border-sky-600 shadow-md' : 'border-sky-500/25 glass-subtle text-slate-800 dark:text-slate-100'
+                  className={`btn-popup min-h-tap px-4 py-2 rounded-full text-sm font-medium border ${
+                    active ? 'bg-sky-600 text-white border-sky-600' : 'border-sky-500/25 glass-subtle text-slate-800 dark:text-slate-100'
                   }`}
                 >
                   {lang === 'bn' ? p.bn : p.en}
@@ -127,7 +127,7 @@ export default function WhatIfTab() {
     ];
     return (
       <SubCard className="p-5 rounded-2xl space-y-3">
-        <h3 className={`text-sm font-black flex items-center gap-2 ${head}`}>
+        <h3 className={`text-sm font-semibold flex items-center gap-2 ${head}`}>
           <Icon className="h-4 w-4" />{title}
         </h3>
         <div className="space-y-3 text-sm">
@@ -151,11 +151,11 @@ function Slider({
 }) {
   return (
     <SubCard className="p-4 rounded-2xl space-y-2">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-medium">
         <label htmlFor={id} className="flex items-center gap-1.5">
           <Icon className={`h-5 w-5 ${iconColor}`} />{label}
         </label>
-        <span className={`px-2.5 py-1 rounded-lg text-sm font-black whitespace-nowrap ${badge}`} aria-hidden>{display}</span>
+        <span className={`px-2.5 py-1 rounded-lg text-sm font-semibold whitespace-nowrap ${badge}`} aria-hidden>{display}</span>
       </div>
       <input
         id={id} type="range" min={min} max={max} step={step} value={value}

@@ -30,7 +30,7 @@ function Glyph({ id }: { id: string }) {
           {[[16.6, 8.2, -60], [19.3, 7.8, -10], [21.4, 9.9, 20], [22.6, 12.7, 10], [23.1, 16, 0], [14.6, 11.5, -30]].map(([x, y, r], i) => (
             <ellipse key={i} cx={x} cy={y} rx="1.4" ry="2.3" fill="#CA8A04" transform={`rotate(${r} ${x} ${y})`} />
           ))}
-          {id === 'rice_boro' && <path d="M6 25 q1.5 -2.5 3 0 a1.5 1.5 0 0 1 -3 0z" fill="#0EA5E9" />}
+          {id === 'rice_boro' && <path d="M6 25 q1.5 -2.5 3 0 a1.5 1.5 0 0 1 -3 0z" fill="#157A80" />}
         </>
       );
     }
@@ -146,7 +146,7 @@ export function CropPicker({ value, onChange, label, id }: {
         aria-haspopup="true"
         aria-expanded={open}
         aria-label={`${label}: ${lang === 'bn' ? crop.nameBn : crop.name}`}
-        className="btn-popup min-h-tap w-full sm:w-auto flex items-center justify-between gap-2 px-3 py-2 rounded-xl border glass-subtle border-sky-500/25 text-sm font-bold text-sky-700 dark:text-sky-300"
+        className="btn-popup min-h-tap w-full sm:w-auto flex items-center justify-between gap-2 px-3 py-2 rounded-xl border glass-subtle border-sky-500/25 text-sm font-medium text-sky-700 dark:text-sky-300"
       >
         <span>{t('Change', 'পরিবর্তন')}</span>
         <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -172,7 +172,7 @@ export function CropPicker({ value, onChange, label, id }: {
               >
                 <CropIcon id={c.id} size={36} />
                 <span className="flex-1 min-w-0">
-                  <span className="block text-sm font-bold text-slate-900 dark:text-slate-50 truncate">{lang === 'bn' ? c.nameBn : c.name}</span>
+                  <span className="block text-sm font-medium text-slate-900 dark:text-slate-50 truncate">{lang === 'bn' ? c.nameBn : c.name}</span>
                   <span className="block text-xs text-slate-500 dark:text-slate-400">
                     {t('Water', 'পানি')} {n(c.waterMm)} {t('mm', 'মিমি')} · {n(c.growingPeriodDays)} {t('days', 'দিন')}
                   </span>

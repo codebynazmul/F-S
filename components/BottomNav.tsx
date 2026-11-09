@@ -24,14 +24,14 @@ export default function BottomNav() {
   };
 
   const itemClass = (active: boolean) =>
-    `flex-1 min-h-[56px] flex flex-col items-center justify-center gap-0.5 rounded-xl text-xs font-bold transition-colors ${
-      active ? 'text-sky-700 dark:text-sky-300' : 'text-slate-600 dark:text-slate-400'
+    `flex-1 min-h-[56px] flex flex-col items-center justify-center gap-1 rounded-xl text-xs transition-colors duration-150 ${
+      active ? 'text-sky-800 dark:text-sky-300 font-medium' : 'text-slate-500 dark:text-slate-400'
     }`;
 
   return (
     <nav
       aria-label={t('Quick navigation', 'দ্রুত মেনু')}
-      className="fs-bottom-nav lg:hidden fixed bottom-0 inset-x-0 z-30 glass-bar border-t border-sky-500/15 pb-safe"
+      className="fs-bottom-nav lg:hidden fixed bottom-0 inset-x-0 z-30 glass-bar border-t border-sky-600/10 pb-safe"
     >
       <div className="flex items-stretch gap-1 px-2 pt-1 pb-1">
         {ITEMS.map(item => {
@@ -39,7 +39,7 @@ export default function BottomNav() {
           const active = activeTab === item.id && !menuOpen;
           return (
             <button key={item.id} type="button" onClick={() => go(item.id)} aria-current={active ? 'page' : undefined} className={itemClass(active)}>
-              <span className={`px-4 py-1 rounded-full transition-colors ${active ? 'bg-sky-500/15' : ''}`}>
+              <span className={`px-4 py-1 rounded-full transition-colors duration-150 ${active ? 'bg-sky-600/10' : ''}`}>
                 <Icon className="h-5 w-5" />
               </span>
               <span>{lang === 'bn' ? item.bn : item.en}</span>
@@ -53,7 +53,7 @@ export default function BottomNav() {
           aria-controls="fs-drawer"
           className={itemClass(menuOpen || !inMain)}
         >
-          <span className={`px-4 py-1 rounded-full transition-colors ${menuOpen || !inMain ? 'bg-sky-500/15' : ''}`}>
+          <span className={`px-4 py-1 rounded-full transition-colors duration-150 ${menuOpen || !inMain ? 'bg-sky-600/10' : ''}`}>
             <Menu className="h-5 w-5" />
           </span>
           <span>{t('More', 'আরও')}</span>
