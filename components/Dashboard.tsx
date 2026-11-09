@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { tabSwap } from '@/lib/motion';
 import { useApp } from './AppProvider';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
@@ -43,12 +45,20 @@ export default function Dashboard() {
         <TopBar />
 
         <main id="main" className="px-4 py-6 sm:px-6 lg:px-10 lg:py-10 space-y-6 max-w-[1240px] w-full mx-auto flex-1">
-          {/* The admin panel keeps its original look (see .fs-classic in globals.css). */}
-          {activeTab === 'admin' ? (
-            <div className="fs-classic space-y-6"><Tab key={activeTab} /></div>
-          ) : (
-            <Tab key={activeTab} />
-          )}
+          {/* The old tab fades out, then the new one's sections rise in one after another (.fs-tab). */}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeTab}
+              variants={tabSwap}
+              initial="hidden"
+              animate="show"
+              exit="exit"
+              // The admin panel keeps its original look (see .fs-classic in globals.css).
+              className={`fs-tab ${activeTab === 'admin' ? 'fs-classic space-y-6' : ''}`}
+            >
+              <Tab />
+            </motion.div>
+          </AnimatePresence>
         </main>
 
         <footer className="no-print border-t border-sky-600/10 py-6 px-4 sm:px-6 lg:px-10 mt-auto mb-[calc(64px+env(safe-area-inset-bottom))] lg:mb-0 text-xs text-slate-500 dark:text-slate-400">

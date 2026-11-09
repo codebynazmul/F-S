@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { EASE, stepSlide } from '@/lib/motion';
 import { ArrowLeft, ArrowRight, Check, CloudRain, Droplets, Layers, LocateFixed, MapPin, Waves } from 'lucide-react';
 import { ALL_DISTRICTS } from '@/data/districts';
 import { DIVISIONS, IRRIGATION_TYPES, SOIL_TEXTURES, divisionName } from '@/lib/options';
@@ -38,6 +40,9 @@ function distanceKm(aLat: number, aLng: number, bLat: number, bLng: number) {
 export default function Onboarding() {
   const { t, n, lang, user, district, setDistrictId, farm, updateFarm, finishOnboarding } = useApp();
   const [step, setStep] = useState(0);
+  // Which way the steps slide: 1 = forward, -1 = back.
+  const [dir, setDir] = useState(1);
+  const move = (by: 1 | -1) => { setDir(by); setStep(s => s + by); };
   const [locating, setLocating] = useState(false);
   const [locError, setLocError] = useState('');
 
@@ -96,18 +101,30 @@ export default function Onboarding() {
             {/* Progress */}
             <div className="flex items-center gap-2" aria-hidden>
               {steps.map((_, i) => (
-                <div key={i} className={`h-1 flex-1 rounded-full transition-colors duration-300 ${i <= step ? 'bg-sky-600' : 'bg-slate-500/15'}`} />
+                <div key={i} className="h-1 flex-1 rounded-full bg-slate-500/15 overflow-hidden">
+                  <motion.div
+                    className="h-full w-full bg-sky-600"
+                    style={{ originX: 0 }}
+                    initial={false}
+                    animate={{ scaleX: i <= step ? 1 : 0 }}
+                    transition={{ duration: 0.35, ease: EASE }}
+                  />
+                </div>
               ))}
             </div>
             <p className="fs-eyebrow">
               {t(`Step ${step + 1} of ${steps.length}`, `ধাপ ${step + 1} / ${steps.length}`)}
             </p>
-            <h1 className="fs-display text-[1.75rem] sm:text-[2.25rem] flex items-center gap-3">
-              {React.createElement(steps[step].icon, { className: 'h-7 w-7 text-sky-600 dark:text-sky-400 shrink-0' })}
-              {steps[step].title}
-            </h1>
+            <AnimatePresence mode="wait" initial={false} custom={dir}>
+              <motion.h1 key={step} custom={dir} variants={stepSlide} initial="enter" animate="show" exit="exit" className="fs-display text-[1.75rem] sm:text-[2.25rem] flex items-center gap-3">
+                {React.createElement(steps[step].icon, { className: 'h-7 w-7 text-sky-600 dark:text-sky-400 shrink-0' })}
+                {steps[step].title}
+              </motion.h1>
+            </AnimatePresence>
           </div>
 
+          <AnimatePresence mode="wait" initial={false} custom={dir}>
+          <motion.div key={step} custom={dir} variants={stepSlide} initial="enter" animate="show" exit="exit">
           {step === 0 && (
             <div className="space-y-4">
               <button type="button" onClick={locate} disabled={locating} className={`${ghostBtn} w-full sm:w-auto text-sm`}>
@@ -195,9 +212,12 @@ export default function Onboarding() {
             </div>
           )}
 
+          </motion.div>
+          </AnimatePresence>
+
           <div className="flex items-center justify-between gap-3 pt-5 border-t border-sky-600/10">
             {step > 0 ? (
-              <button type="button" onClick={() => setStep(s => s - 1)} className={`${ghostBtn} text-sm`}>
+              <button type="button" onClick={() => move(-1)} className={`${ghostBtn} text-sm`}>
                 <ArrowLeft className="h-4 w-4" />{t('Back', 'পেছনে')}
               </button>
             ) : (
@@ -207,7 +227,7 @@ export default function Onboarding() {
             )}
             <button
               type="button"
-              onClick={() => (last ? finishOnboarding() : setStep(s => s + 1))}
+              onClick={() => (last ? finishOnboarding() : move(1))}
               className={`flex items-center gap-2 px-6 rounded-xl text-sm ${primaryBtn}`}
             >
               {last ? t('Show my crop plan', 'আমার ফসল পরিকল্পনা দেখুন') : t('Next', 'পরবর্তী')}

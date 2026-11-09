@@ -2,7 +2,9 @@
 
 import React from 'react';
 import { FileText, Globe, Menu, Sliders, Sprout, type LucideIcon } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useApp } from './AppProvider';
+import { SLIDE } from '@/lib/motion';
 import type { TabId } from '@/lib/types';
 
 const ITEMS: { id: TabId; en: string; bn: string; icon: LucideIcon }[] = [
@@ -39,8 +41,11 @@ export default function BottomNav() {
           const active = activeTab === item.id && !menuOpen;
           return (
             <button key={item.id} type="button" onClick={() => go(item.id)} aria-current={active ? 'page' : undefined} className={itemClass(active)}>
-              <span className={`px-4 py-1 rounded-full transition-colors duration-150 ${active ? 'bg-sky-600/10' : ''}`}>
-                <Icon className="h-5 w-5" />
+              <span className="relative px-4 py-1 rounded-full">
+                {active && <motion.span layoutId="fs-bottom-active" transition={SLIDE} className="absolute inset-0 rounded-full bg-sky-600/10" aria-hidden />}
+                <motion.span className="relative flex" whileTap={{ scale: 0.88 }}>
+                  <Icon className="h-5 w-5" />
+                </motion.span>
               </span>
               <span>{lang === 'bn' ? item.bn : item.en}</span>
             </button>
@@ -53,8 +58,11 @@ export default function BottomNav() {
           aria-controls="fs-drawer"
           className={itemClass(menuOpen || !inMain)}
         >
-          <span className={`px-4 py-1 rounded-full transition-colors duration-150 ${menuOpen || !inMain ? 'bg-sky-600/10' : ''}`}>
-            <Menu className="h-5 w-5" />
+          <span className="relative px-4 py-1 rounded-full">
+            {(menuOpen || !inMain) && <motion.span layoutId="fs-bottom-active" transition={SLIDE} className="absolute inset-0 rounded-full bg-sky-600/10" aria-hidden />}
+            <motion.span className="relative flex" whileTap={{ scale: 0.88 }}>
+              <Menu className="h-5 w-5" />
+            </motion.span>
           </span>
           <span>{t('More', 'আরও')}</span>
         </button>

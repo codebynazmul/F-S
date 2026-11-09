@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, MotionConfig, motion, type Variants } from 'motion/react';
 import { ArrowLeft, CheckCircle2, Eye, EyeOff, Info, KeyRound, Lock, LogIn, Mail, Save, Send, User as UserIcon, UserPlus } from 'lucide-react';
 import type { AuthError } from '@supabase/supabase-js';
 import { useApp } from './AppProvider';
@@ -28,6 +29,29 @@ const fieldInput =
   'w-full bg-transparent outline-none text-[0.9375rem] text-slate-900 dark:text-white placeholder:text-slate-400';
 
 type Mode = 'login' | 'code' | 'signup' | 'forgot';
+
+const easeOut = [0.22, 1, 0.36, 1] as const;
+
+const heroStagger: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } },
+};
+const heroRise: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: easeOut } },
+};
+
+const swap = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
+  exit: { opacity: 0, y: -6, transition: { duration: 0.15, ease: 'easeIn' } },
+} as const;
+
+const alertMotion = {
+  initial: { opacity: 0, height: 0, marginTop: 0 },
+  animate: { opacity: 1, height: 'auto', marginTop: 20, transition: { duration: 0.22, ease: easeOut } },
+  exit: { opacity: 0, height: 0, marginTop: 0, transition: { duration: 0.15, ease: 'easeIn' } },
+} as const;
 
 export default function LoginScreen() {
   const { t, authNotice, clearAuthNotice } = useApp();
@@ -265,14 +289,23 @@ export default function LoginScreen() {
         aria-label={showPassword ? t('Hide password', 'পাসওয়ার্ড লুকান') : t('Show password', 'পাসওয়ার্ড দেখান')}
         aria-pressed={showPassword}
       >
-        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        <motion.span
+          key={showPassword ? 'hide' : 'show'}
+          className="block"
+          initial={{ opacity: 0, scale: 0.6, rotate: -20 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', bounce: 0.3, visualDuration: 0.25 }}
+        >
+          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </motion.span>
       </button>
     </div>
   );
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="min-h-screen lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] font-sans antialiased text-slate-900 dark:text-slate-100">
-      <section className="fs-login-media min-h-[40vh] lg:min-h-screen lg:sticky lg:top-0 flex flex-col justify-between gap-8 p-5 sm:p-8 lg:p-12 text-white">
+      <motion.section initial="hidden" animate="show" variants={heroStagger} className="fs-login-media min-h-[40vh] lg:min-h-screen lg:sticky lg:top-0 flex flex-col justify-between gap-8 p-5 sm:p-8 lg:p-12 text-white">
         {showVideo && (
           <video
             ref={videoRef}
@@ -288,19 +321,19 @@ export default function LoginScreen() {
             <source src={VIDEO_URL} type="video/mp4" onError={() => setShowVideo(false)} />
           </video>
         )}
-        <div className="fs-login-media-copy flex items-center gap-3">
+        <motion.div variants={heroRise} className="fs-login-media-copy flex items-center gap-3">
           <img src="/logo-sm.png" alt="" className="h-10 w-10 rounded-xl object-cover" />
           <span className="fs-display text-xl">{t('Field Shift', 'ফিল্ড শিফট')}</span>
-        </div>
-        <div className="fs-login-media-copy max-w-xl space-y-4">
-          <h1 className="fs-display text-[2rem] sm:text-[2.75rem] lg:text-[3.5rem] text-white">
+        </motion.div>
+        <motion.div variants={heroStagger} className="fs-login-media-copy max-w-xl space-y-4">
+          <motion.h1 variants={heroRise} className="fs-display text-[2rem] sm:text-[2.75rem] lg:text-[3.5rem] text-white">
             {t('Crop rotations that use less water, for farms in Bangladesh.', 'কম পানিতে ফসল পর্যায়ক্রম, বাংলাদেশের খামারের জন্য।')}
-          </h1>
-          <p className="text-[0.9375rem] lg:text-base text-white/85 max-w-md leading-relaxed">
+          </motion.h1>
+          <motion.p variants={heroRise} className="text-[0.9375rem] lg:text-base text-white/85 max-w-md leading-relaxed">
             {t('All 64 districts, with NASA POWER climate data, in Bangla and English.', '৬৪টি জেলা, নাসা POWER জলবায়ু তথ্যসহ, বাংলা ও ইংরেজিতে।')}
-          </p>
-        </div>
-      </section>
+          </motion.p>
+        </motion.div>
+      </motion.section>
 
       <main className="fs-login-panel flex flex-col lg:min-h-screen">
         <div className="flex justify-end px-5 pt-5 sm:px-8 lg:px-12 lg:pt-8">
@@ -308,19 +341,30 @@ export default function LoginScreen() {
         </div>
         <div className="flex-1 flex items-center justify-center px-5 py-8 sm:px-8 lg:px-12">
         <div className="w-full max-w-[400px] space-y-5 card-popup">
-          <h2 className="fs-display text-[1.75rem] lg:text-[2rem]">{titles[mode]}</h2>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.h2 key={mode} {...swap} className="fs-display text-[1.75rem] lg:text-[2rem]">{titles[mode]}</motion.h2>
+          </AnimatePresence>
 
-          {shownError && (
-            <div role="alert" className="text-sm text-red-700 dark:text-red-300 bg-red-500/[0.06] border border-red-500/25 rounded-xl px-3.5 py-2.5">
-              {shownError}
-            </div>
-          )}
-          {info && (
-            <div role="status" className="text-sm flex items-start gap-1.5 rounded-xl px-3.5 py-2.5 bg-sky-600/[0.06] border border-sky-600/20 text-sky-800 dark:text-sky-200">
-              <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-              <span>{info}</span>
-            </div>
-          )}
+          <AnimatePresence initial={false}>
+            {shownError && (
+              <motion.div key="error" {...alertMotion} style={{ overflow: 'hidden' }}>
+                <div role="alert" className="text-sm text-red-700 dark:text-red-300 bg-red-500/[0.06] border border-red-500/25 rounded-xl px-3.5 py-2.5">
+                  {shownError}
+                </div>
+              </motion.div>
+            )}
+            {info && (
+              <motion.div key="info" {...alertMotion} style={{ overflow: 'hidden' }}>
+                <div role="status" className="text-sm flex items-start gap-1.5 rounded-xl px-3.5 py-2.5 bg-sky-600/[0.06] border border-sky-600/20 text-sky-800 dark:text-sky-200">
+                  <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                  <span>{info}</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence mode="wait" initial={false}>
+          <motion.div key={mode} {...swap} className="space-y-5">
 
           {/* Email + password log in */}
           {mode === 'login' && (
@@ -503,20 +547,25 @@ export default function LoginScreen() {
               </div>
             </>
           )}
+          </motion.div>
+          </AnimatePresence>
 
-          <p className="text-xs text-center text-slate-500 dark:text-slate-400 leading-relaxed">
+          <motion.p layout="position" className="text-xs text-center text-slate-500 dark:text-slate-400 leading-relaxed">
             {t('By continuing, you agree to our ', 'চালিয়ে যাওয়ার মাধ্যমে আপনি আমাদের ')}
             <button type="button" onClick={() => setLegal('terms')} className="underline underline-offset-2 text-slate-700 dark:text-slate-300 hover:text-sky-700 dark:hover:text-sky-300">{t('Terms of Service', 'সেবার শর্তাবলি')}</button>
             {t(' and ', ' এবং ')}
             <button type="button" onClick={() => setLegal('privacy')} className="underline underline-offset-2 text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400">{t('Privacy Policy', 'গোপনীয়তা নীতি')}</button>
             {t('.', '-তে সম্মত হচ্ছেন।')}
-          </p>
+          </motion.p>
         </div>
         </div>
       </main>
 
-      {legal && <LegalModal doc={legal} onClose={() => setLegal(null)} />}
+      <AnimatePresence>
+        {legal && <LegalModal key="legal" doc={legal} onClose={() => setLegal(null)} />}
+      </AnimatePresence>
     </div>
+    </MotionConfig>
   );
 }
 

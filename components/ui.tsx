@@ -2,6 +2,8 @@
 
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { EASE_ENTER } from '@/lib/motion';
 import { useApp } from './AppProvider';
 
 export const primaryBtn = 'btn-popup fs-btn-primary min-h-tap font-medium';
@@ -85,7 +87,14 @@ export function Meter({ value, color = 'bg-sky-500', label }: { value: number; c
       aria-valuenow={value}
       aria-label={label}
     >
-      <div style={{ width: `${Math.max(0, Math.min(100, value))}%` }} className={`h-full rounded-full ${color} transition-all duration-500`} />
+      {/* Grows from zero when shown, then eases to each new value. scaleX keeps it on the GPU. */}
+      <motion.div
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: Math.max(0, Math.min(100, value)) / 100 }}
+        transition={{ duration: 0.6, ease: EASE_ENTER }}
+        style={{ originX: 0 }}
+        className={`h-full w-full rounded-full ${color}`}
+      />
     </div>
   );
 }

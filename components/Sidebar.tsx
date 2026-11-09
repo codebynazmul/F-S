@@ -5,7 +5,9 @@ import {
   BarChart3, FileText, Globe, Layers, LogOut, Menu, Moon, ShieldCheck,
   Sliders, SlidersHorizontal, Sprout, Sun, User as UserIcon, X, type LucideIcon,
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useApp } from './AppProvider';
+import { SLIDE, iconSwap } from '@/lib/motion';
 import { Avatar, LangToggle } from './ui';
 import type { TabId } from '@/lib/types';
 
@@ -47,13 +49,27 @@ export default function Sidebar() {
         aria-expanded={menuOpen}
         aria-controls="fs-drawer"
       >
-        {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.span key={menuOpen ? 'close' : 'menu'} {...iconSwap} className="flex">
+            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </motion.span>
+        </AnimatePresence>
       </button>
 
       {/* Click outside to close (phones and tablets) */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-40 bg-slate-950/30 lg:hidden" onClick={() => setMenuOpen(false)} aria-hidden />
-      )}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.25 } }}
+            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            className="fixed inset-0 z-40 bg-slate-950/30 lg:hidden"
+            onClick={() => setMenuOpen(false)}
+            aria-hidden
+          />
+        )}
+      </AnimatePresence>
 
       <aside
         id="fs-drawer"
@@ -78,7 +94,7 @@ export default function Sidebar() {
           <span className="fs-eyebrow px-3 mb-2 block">
             {t('Menu', 'মেন্যু')}
           </span>
-          <div className="space-y-0.5">
+          <div className="space-y-0.5 isolate">
             {NAV_ITEMS.filter(i => !i.adminOnly || user.role === 'admin').map(item => {
               const Icon = item.icon;
               const active = activeTab === item.id;
@@ -88,12 +104,18 @@ export default function Sidebar() {
                   key={item.id}
                   onClick={() => go(item.id)}
                   aria-current={active ? 'page' : undefined}
-                  className={`fs-nav-link min-h-tap w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left transition-colors duration-150 ${
+                  className={`fs-nav-link relative min-h-tap w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left transition-colors duration-150 ${
                     active
-                      ? 'bg-sky-600/[0.08] text-sky-800 dark:text-sky-300 font-medium'
+                      ? 'text-sky-800 dark:text-sky-300 font-medium'
                       : 'text-slate-700 dark:text-slate-300 hover:bg-sky-600/5 hover:text-slate-900'
                   }`}
                 >
+                  {/* One highlight that slides to whichever item is active. */}
+                  {active && (
+                    <motion.span layoutId="fs-sidebar-active" transition={SLIDE} className="absolute inset-0 -z-10 rounded-xl bg-sky-600/[0.08]" aria-hidden>
+                      <span className="fs-nav-bar" />
+                    </motion.span>
+                  )}
                   <Icon className={`h-[18px] w-[18px] shrink-0 ${active ? 'text-sky-700 dark:text-sky-300' : 'text-slate-500 dark:text-slate-400'}`} />
                   <span className="leading-snug">{lang === 'bn' ? item.bn : item.en}</span>
                 </button>
@@ -111,7 +133,11 @@ export default function Sidebar() {
               className="btn-popup min-h-[40px] flex items-center gap-1.5 px-3 rounded-xl border border-sky-600/15 bg-[var(--bg-surface)] text-sm font-medium text-slate-700 dark:text-slate-200"
               aria-label={isNight ? t('Switch to day mode', 'দিন মোডে যান') : t('Switch to night mode', 'রাত মোডে যান')}
             >
-              {isNight ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-sky-700" />}
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span key={isNight ? 'sun' : 'moon'} {...iconSwap} className="flex">
+                  {isNight ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-sky-700" />}
+                </motion.span>
+              </AnimatePresence>
               <span>{isNight ? t('Day', 'দিন') : t('Night', 'রাত')}</span>
             </button>
           </div>

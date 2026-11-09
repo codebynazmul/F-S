@@ -4,7 +4,9 @@ import React from 'react';
 import { CloudRain, FileText, Layers, MapPin, TriangleAlert } from 'lucide-react';
 import { ALL_DISTRICTS } from '@/data/districts';
 import { DIVISIONS, divisionName } from '@/lib/options';
+import { AnimatePresence, motion } from 'motion/react';
 import { useApp } from './AppProvider';
+import { textSwap } from '@/lib/motion';
 import { primaryBtn } from './ui';
 
 export default function TopBar() {
@@ -16,12 +18,17 @@ export default function TopBar() {
         <div className="max-w-[1240px] mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <MapPin className="h-[18px] w-[18px] shrink-0 text-sky-700 dark:text-sky-300" aria-hidden />
-            <span className="text-base font-medium truncate text-slate-900 dark:text-white">
-              {lang === 'bn' ? district.nameBn : district.name}
-            </span>
-            <span className="hidden md:inline text-sm text-slate-500 dark:text-slate-400 truncate">
-              · {divisionName(district.division, lang)} {t('Division', 'বিভাগ')}
-            </span>
+            {/* District name and facts swap with a quick fade when the district changes. */}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span key={`${district.id}-${lang}`} {...textSwap} className="flex items-center gap-2 min-w-0">
+                <span className="text-base font-medium truncate text-slate-900 dark:text-white">
+                  {lang === 'bn' ? district.nameBn : district.name}
+                </span>
+                <span className="hidden md:inline text-sm text-slate-500 dark:text-slate-400 truncate">
+                  · {divisionName(district.division, lang)} {t('Division', 'বিভাগ')}
+                </span>
+              </motion.span>
+            </AnimatePresence>
           </div>
 
           <div className="flex items-center gap-2.5">
@@ -53,7 +60,8 @@ export default function TopBar() {
 
       {/* District facts strip */}
       <div className="border-b border-sky-600/10 px-4 sm:px-6 lg:px-10 py-2.5 overflow-x-auto">
-        <dl className="max-w-[1240px] mx-auto flex items-center gap-x-6 gap-y-1 text-sm whitespace-nowrap">
+        <AnimatePresence mode="wait" initial={false}>
+        <motion.dl key={`${district.id}-${lang}`} {...textSwap} className="max-w-[1240px] mx-auto flex items-center gap-x-6 gap-y-1 text-sm whitespace-nowrap">
           <div className="flex items-center gap-1.5">
             <Layers className="h-4 w-4 text-slate-400" aria-hidden />
             <dt className="text-slate-500 dark:text-slate-400">{t('Soil', 'মাটি')}</dt>
@@ -69,7 +77,8 @@ export default function TopBar() {
             <dt className="text-slate-500 dark:text-slate-400">{t('Main risk', 'প্রধান ঝুঁকি')}</dt>
             <dd className="font-medium text-amber-700 dark:text-amber-400">{lang === 'bn' ? district.riskBn : district.risk}</dd>
           </div>
-        </dl>
+        </motion.dl>
+        </AnimatePresence>
       </div>
     </div>
   );

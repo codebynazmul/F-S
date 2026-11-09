@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{background:#F6F3EA;color:#032D33;position:relative}
+.field{position:absolute;right:0;top:0;width:560px;height:400px;overflow:hidden}
+.c{position:absolute;left:88px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center}
+.eyebrow{font-size:14px;letter-spacing:3px;text-transform:uppercase;color:#06525C;display:flex;align-items:center;gap:12px}
+.eyebrow:before{content:"";width:32px;height:2px;background:#C8901A}
+h1{font-size:84px;font-weight:700;letter-spacing:-3px;line-height:1;margin-top:18px}
+h1 span{color:#157A80}
+p{font-size:23px;color:#3B4F52;margin-top:18px;max-width:560px;line-height:1.4}
+.bn{color:#9A6A0C;font-size:20px;margin-top:14px;font-weight:600}
+.logo{position:absolute;left:820px;top:50%;transform:translate(-50%,-50%);width:250px;height:250px;filter:drop-shadow(0 18px 30px rgba(3,45,51,.28))}
+</style></head><body>
+<svg class="field" viewBox="0 0 560 400" preserveAspectRatio="none">
+<defs><clipPath id="k"><path d="M120 0 H560 V400 H40 Z"/></clipPath></defs>
+<g clip-path="url(#k)"><rect width="560" height="400" fill="#06525C"/>
+<g id="r"></g></g></svg>
+<script>const r=document.getElementById('r');const cols=['#0A6670','#157A80','#3F9A9E','#C8901A','#8A5A2B'];
+for(let i=0;i<22;i++){const p=document.createElementNS('http://www.w3.org/2000/svg','path');const y=i*22-40;
+p.setAttribute('d',`M0 ${y+120} Q 300 ${y-20}, 560 ${y+60}`);p.setAttribute('stroke',cols[i%5]);p.setAttribute('stroke-width','9');p.setAttribute('fill','none');p.setAttribute('opacity','.55');r.appendChild(p)}</script>
+<div class="c"><div class="eyebrow mono">NASA Space Apps · SPIDERX</div><h1>Field <span>Shift</span></h1>
+<p>Crop rotations that use less water, build soil, and hold up under climate stress.</p><div class="bn">বাংলাদেশের ৬৪ জেলার জন্য</div></div>
+<img class="logo" src="../../../../public/logo.png"></body></html>

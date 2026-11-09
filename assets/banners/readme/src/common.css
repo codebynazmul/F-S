@@ -1,0 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@500;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1280px;height:400px;overflow:hidden}
+body{font-family:'Instrument Sans','Noto Sans Bengali',sans-serif;-webkit-font-smoothing:antialiased}
+.bn{font-family:'Noto Sans Bengali',sans-serif}
+.mono{font-family:'DM Mono',monospace}

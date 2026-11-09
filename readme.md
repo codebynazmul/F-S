@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/logo.png" alt="Field Shift logo" width="160" />
+  <img src="./assets/banners/readme/editorial-2560x800.png" alt="Field Shift: crop rotations that use less water, build soil, and hold up under climate stress, for all 64 districts of Bangladesh. NASA Space Apps, team SPIDERX." width="100%" />
 </p>
 
 <h1 align="center">Field Shift</h1>
