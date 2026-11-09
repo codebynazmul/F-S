@@ -13,7 +13,7 @@ export interface User {
   role: Role;
 }
 
-/** A registered account, as kept in this browser's account list. */
+/** A registered account, as shown in the admin panel (from public.profiles). */
 export interface Account {
   id: string;
   name: string;
@@ -22,7 +22,6 @@ export interface Account {
   method: SignInMethod;
   role: Role;
   blocked: boolean;
-  passwordHash?: string;
   createdAt: number;
   lastLoginAt: number;
   loginCount: number;

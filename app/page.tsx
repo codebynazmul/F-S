@@ -2,7 +2,7 @@
 
 import { AppProvider, useApp } from '@/components/AppProvider';
 import Dashboard from '@/components/Dashboard';
-import LoginScreen from '@/components/LoginScreen';
+import LoginScreen, { NewPasswordScreen } from '@/components/LoginScreen';
 import Onboarding from '@/components/Onboarding';
 import { Skeleton } from '@/components/ui';
 
@@ -31,10 +31,11 @@ function LoadingScreen() {
 }
 
 function Root() {
-  const { ready, user, onboarded } = useApp();
+  const { ready, user, onboarded, passwordRecovery } = useApp();
 
-  // Wait for saved settings to load so a signed-in user doesn't see the login screen flash.
+  // Wait for saved settings and the session to load so a signed-in user doesn't see the login screen flash.
   if (!ready) return <LoadingScreen />;
+  if (passwordRecovery) return <NewPasswordScreen />;
   if (!user) return <LoginScreen />;
   if (!onboarded && user.role !== 'admin') return <Onboarding />;
   return <Dashboard />;

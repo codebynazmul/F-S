@@ -7,11 +7,13 @@ import { useApp } from '../AppProvider';
 import { Card, LangToggle, TabHeader, labelClass } from '../ui';
 
 export default function SettingsTab() {
-  const { t, theme, setTheme } = useApp();
+  const { t, theme, setTheme, signOut } = useApp();
 
-  const resetAll = () => {
+  const resetAll = async () => {
     if (!window.confirm(t('Delete all saved data on this device (profile, farm, plans) and sign out?',
                           'এই ডিভাইসে সংরক্ষিত সব তথ্য (প্রোফাইল, খামার, পরিকল্পনা) মুছে লগআউট করবেন?'))) return;
+    // Supabase keeps its session under its own key, so sign out explicitly.
+    try { await signOut(); } catch {}
     clearSavedData();
     window.location.reload();
   };
@@ -52,8 +54,8 @@ export default function SettingsTab() {
         <div className="pt-4 border-t border-sky-500/10 space-y-2">
           <span className={labelClass}>{t('Saved data', 'সংরক্ষিত তথ্য')}</span>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            {t('Your preferences, farm profile and plans are stored only in this browser.',
-               'আপনার পছন্দ, খামারের তথ্য ও পরিকল্পনা শুধু এই ব্রাউজারে সংরক্ষিত থাকে।')}
+            {t('Your preferences are stored in this browser. Your farm profile and plans are also saved to your account, so clearing this device does not delete them.',
+               'আপনার পছন্দ এই ব্রাউজারে সংরক্ষিত থাকে। খামারের তথ্য ও পরিকল্পনা আপনার অ্যাকাউন্টেও সংরক্ষিত থাকে, তাই এই ডিভাইস থেকে মুছলে সেগুলো মুছে যায় না।')}
           </p>
           <button type="button" onClick={resetAll} className="btn-popup min-h-tap text-sm font-bold flex items-center gap-1.5 text-red-600 dark:text-red-400 px-4 rounded-xl border border-red-500/30">
             <Trash2 className="h-4 w-4" />{t('Clear all saved data', 'সব সংরক্ষিত তথ্য মুছুন')}

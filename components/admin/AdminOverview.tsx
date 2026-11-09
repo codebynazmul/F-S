@@ -74,8 +74,8 @@ export default function AdminOverview({ onOpenUsers }: { onOpenUsers: (filter: U
         <StatTile icon={Ban} tone="red" label={t('Blocked', 'ব্লক করা')} value={n(stats.blocked)}
           note={share(stats.blocked)} onClick={() => onOpenUsers('blocked')} actionLabel={openList} />
         <div className="col-span-2 lg:col-span-1">
-          <StatTile icon={ShieldCheck} tone="ink" label={t('Admins', 'অ্যাডমিন')} value={n(stats.admins + 1)}
-            note={t('Including the built-in admin', 'বিল্ট-ইন অ্যাডমিন সহ')} onClick={() => onOpenUsers('admin')} actionLabel={openList} />
+          <StatTile icon={ShieldCheck} tone="ink" label={t('Admins', 'অ্যাডমিন')} value={n(stats.admins)}
+            note={t('Can manage users', 'ব্যবহারকারী পরিচালনা করতে পারেন')} onClick={() => onOpenUsers('admin')} actionLabel={openList} />
         </div>
       </div>
 
@@ -113,8 +113,8 @@ export default function AdminOverview({ onOpenUsers }: { onOpenUsers: (filter: U
       </section>
 
       <FootNote>
-        {t('Demo: these numbers only include accounts used in this browser. A shared backend is needed to see every farmer.',
-           'ডেমো: এই হিসাবে শুধু এই ব্রাউজারে ব্যবহৃত অ্যাকাউন্টগুলো আছে। সব কৃষকের তথ্য দেখতে একটি শেয়ার্ড ব্যাকএন্ড প্রয়োজন।')}
+        {t('User numbers come from every account in the database. District and crop charts use saved farms, which fill in once farms are stored online.',
+           'ব্যবহারকারীর হিসাব ডাটাবেসের সব অ্যাকাউন্ট থেকে নেওয়া। জেলা ও ফসলের চার্ট সংরক্ষিত খামারের তথ্য থেকে আসে, যা খামারের তথ্য অনলাইনে রাখা শুরু হলে দেখা যাবে।')}
       </FootNote>
     </div>
   );
