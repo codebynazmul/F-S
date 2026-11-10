@@ -4,10 +4,8 @@ import React from 'react';
 import { CloudRain, FileText, Layers, MapPin, Moon, Sun, Sunrise, TriangleAlert, Wheat } from 'lucide-react';
 import { ALL_DISTRICTS } from '@/data/districts';
 import { DIVISIONS, divisionName } from '@/lib/options';
+import { AnimatePresence, motion } from 'motion/react';
 import { useApp } from './AppProvider';
-<<<<<<< Updated upstream
-import { primaryBtn } from './ui';
-=======
 import { textSwap } from '@/lib/motion';
 import { harvestBtn } from './ui';
 
@@ -24,7 +22,6 @@ function greeting(hour: number) {
   if (hour < 12) return { en: 'Good morning', bn: 'শুভ সকাল', Icon: Sunrise };
   return { en: 'Good afternoon', bn: 'শুভ অপরাহ্ন', Icon: Sun };
 }
->>>>>>> Stashed changes
 
 export default function TopBar() {
   const { t, n, lang, user, district, setDistrictId, setActiveTab } = useApp();
@@ -40,15 +37,6 @@ export default function TopBar() {
       <header className="glass-bar border-b border-sky-600/10 sticky top-0 z-30 pl-[4.25rem] pr-4 sm:pr-6 lg:px-10 py-2.5">
         <div className="max-w-[1240px] mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
-<<<<<<< Updated upstream
-            <MapPin className="h-[18px] w-[18px] shrink-0 text-sky-700 dark:text-sky-300" aria-hidden />
-            <span className="text-base font-medium truncate text-slate-900 dark:text-white">
-              {lang === 'bn' ? district.nameBn : district.name}
-            </span>
-            <span className="hidden md:inline text-sm text-slate-500 dark:text-slate-400 truncate">
-              · {divisionName(district.division, lang)} {t('Division', 'বিভাগ')}
-            </span>
-=======
             <span className="h-9 w-9 rounded-full bg-sky-600/10 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0">
               <MapPin className="h-[18px] w-[18px]" aria-hidden />
             </span>
@@ -63,7 +51,6 @@ export default function TopBar() {
                 </span>
               </motion.span>
             </AnimatePresence>
->>>>>>> Stashed changes
           </div>
 
           <div className="flex items-center gap-2.5">
@@ -93,15 +80,6 @@ export default function TopBar() {
         </div>
       </header>
 
-<<<<<<< Updated upstream
-      {/* District facts strip */}
-      <div className="border-b border-sky-600/10 px-4 sm:px-6 lg:px-10 py-2.5 overflow-x-auto">
-        <dl className="max-w-[1240px] mx-auto flex items-center gap-x-6 gap-y-1 text-sm whitespace-nowrap">
-          <div className="flex items-center gap-1.5">
-            <Layers className="h-4 w-4 text-slate-400" aria-hidden />
-            <dt className="text-slate-500 dark:text-slate-400">{t('Soil', 'মাটি')}</dt>
-            <dd className="font-medium text-slate-900 dark:text-slate-50">{district.soil}</dd>
-=======
       {/* Greeting, crop season and district facts */}
       <div className="px-4 sm:px-6 lg:px-10 pt-4">
         <div className="max-w-[1240px] mx-auto flex flex-col xl:flex-row xl:items-center justify-between gap-3">
@@ -119,7 +97,6 @@ export default function TopBar() {
                 <span className="hidden sm:inline truncate">· {t(season.tipEn, season.tipBn)}</span>
               </p>
             </div>
->>>>>>> Stashed changes
           </div>
 
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
@@ -143,16 +120,7 @@ export default function TopBar() {
             </motion.dl>
             </AnimatePresence>
           </div>
-<<<<<<< Updated upstream
-          <div className="flex items-center gap-1.5">
-            <TriangleAlert className="h-4 w-4 text-amber-500" aria-hidden />
-            <dt className="text-slate-500 dark:text-slate-400">{t('Main risk', 'প্রধান ঝুঁকি')}</dt>
-            <dd className="font-medium text-amber-700 dark:text-amber-400">{lang === 'bn' ? district.riskBn : district.risk}</dd>
-          </div>
-        </dl>
-=======
         </div>
->>>>>>> Stashed changes
       </div>
     </div>
   );
