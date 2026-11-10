@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Mono, Instrument_Sans, Inter, Noto_Sans_Bengali } from "next/font/google";
+import { Baloo_Da_2, DM_Mono, Figtree, Hind_Siliguri, Inter, Noto_Sans_Bengali } from "next/font/google";
 import ServiceWorker from "@/components/ServiceWorker";
 import "./globals.css";
 
-// Instrument Sans for the app; Inter is kept for the admin panel, which keeps its original look.
-const instrument = Instrument_Sans({ subsets: ["latin"], variable: "--font-instrument", display: "swap" });
+// Farmer UI: Figtree (Latin) + Hind Siliguri (Bangla) for text, Baloo Da 2 for friendly rounded headings
+// in both scripts. Inter + Noto Sans Bengali are kept for the admin panel, which keeps its original look.
+const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree", display: "swap" });
+const hind = Hind_Siliguri({ subsets: ["bengali", "latin"], weight: ["400", "500", "600", "700"], variable: "--font-hind", display: "swap" });
+const baloo = Baloo_Da_2({ subsets: ["bengali", "latin"], variable: "--font-baloo", display: "swap" });
 const dmMono = DM_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-dm-mono", display: "swap" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const bengali = Noto_Sans_Bengali({ subsets: ["bengali"], variable: "--font-bengali", display: "swap" });
@@ -23,8 +26,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F7F9F8" },
-    { media: "(prefers-color-scheme: dark)", color: "#0C1517" },
+    { media: "(prefers-color-scheme: light)", color: "#FAF6EA" },
+    { media: "(prefers-color-scheme: dark)", color: "#0E1610" },
   ],
 };
 
@@ -32,7 +35,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-theme="day" suppressHydrationWarning className={`${instrument.variable} ${dmMono.variable} ${inter.variable} ${bengali.variable}`}>
+    <html lang="en" data-theme="day" suppressHydrationWarning className={`${figtree.variable} ${hind.variable} ${baloo.variable} ${dmMono.variable} ${inter.variable} ${bengali.variable}`}>
       <head>
         {/* Apply the saved theme and language before first paint so the page doesn't flash. */}
         <script
@@ -41,7 +44,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased selection:bg-sky-600 selection:text-white">
+      <body className="font-sans antialiased selection:bg-harvest-300 selection:text-slate-900">
         {children}
         <ServiceWorker />
       </body>

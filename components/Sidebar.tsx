@@ -13,6 +13,19 @@ import type { TabId } from '@/lib/types';
 
 interface NavItem { id: TabId; en: string; bn: string; icon: LucideIcon; adminOnly?: boolean }
 
+/** Each section has its own tile colour so it's easy to find again by sight. */
+const TILE: Record<TabId, string> = {
+  rotation:     'bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300',
+  whatif:       'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300',
+  analytics:    'bg-cyan-100 text-cyan-800 dark:bg-cyan-500/20 dark:text-cyan-300',
+  nasa:         'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300',
+  farm_profile: 'bg-soil-100 text-soil-700 dark:bg-soil-500/25 dark:text-soil-200',
+  user_account: 'bg-harvest-100 text-harvest-800 dark:bg-harvest-500/20 dark:text-harvest-200',
+  settings:     'bg-slate-200/70 text-slate-700 dark:bg-slate-500/25 dark:text-slate-200',
+  admin:        'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200',
+  report:       'bg-harvest-200 text-harvest-900 dark:bg-harvest-500/25 dark:text-harvest-200',
+};
+
 export const NAV_ITEMS: NavItem[] = [
   { id: 'rotation',     en: 'Crop Rotation Optimizer',   bn: 'ফসল পর্যায়ক্রম অপটিমাইজার',     icon: Sprout },
   { id: 'whatif',       en: 'What-If Climate Simulator', bn: 'জলবায়ু সিমুলেটর (হোয়াট-ইফ)',  icon: Sliders },
@@ -80,9 +93,9 @@ export default function Sidebar() {
       >
         <div className="px-5 pt-[4.25rem] lg:pt-6 pb-5">
           <div className="flex items-center gap-3">
-            <img src="/logo-sm.png" alt="" className="h-10 w-10 rounded-xl object-cover shrink-0" />
+            <img src="/logo-sm.png" alt="" className="h-12 w-12 rounded-2xl object-cover shrink-0 shadow-leaf" />
             <div className="min-w-0">
-              <div className="fs-display text-lg text-slate-900 dark:text-white">{t('Field Shift', 'ফিল্ড শিফট')}</div>
+              <div className="fs-display text-xl text-slate-900 dark:text-white">{t('Field Shift', 'ফিল্ড শিফট')}</div>
               <span className="text-xs block leading-tight text-slate-500 dark:text-slate-400">
                 {t('Crop and soil planner', 'ফসল ও মাটির পরিকল্পনা')}
               </span>
@@ -94,7 +107,7 @@ export default function Sidebar() {
           <span className="fs-eyebrow px-3 mb-2 block">
             {t('Menu', 'মেন্যু')}
           </span>
-          <div className="space-y-0.5 isolate">
+          <div className="space-y-1 isolate">
             {NAV_ITEMS.filter(i => !i.adminOnly || user.role === 'admin').map(item => {
               const Icon = item.icon;
               const active = activeTab === item.id;
@@ -104,19 +117,21 @@ export default function Sidebar() {
                   key={item.id}
                   onClick={() => go(item.id)}
                   aria-current={active ? 'page' : undefined}
-                  className={`fs-nav-link relative min-h-tap w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left transition-colors duration-150 ${
+                  className={`group fs-nav-link relative min-h-[52px] w-full flex items-center gap-3 px-2 py-1.5 rounded-2xl text-[0.9375rem] text-left cursor-pointer transition-colors duration-150 ${
                     active
-                      ? 'text-sky-800 dark:text-sky-300 font-medium'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-sky-600/5 hover:text-slate-900'
+                      ? 'text-white font-semibold'
+                      : 'text-slate-700 dark:text-slate-300 font-medium hover:bg-sky-600/[0.07] hover:text-slate-900'
                   }`}
                 >
-                  {/* One highlight that slides to whichever item is active. */}
+                  {/* One green pill that slides to whichever item is active. */}
                   {active && (
-                    <motion.span layoutId="fs-sidebar-active" transition={SLIDE} className="absolute inset-0 -z-10 rounded-xl bg-sky-600/[0.08]" aria-hidden>
-                      <span className="fs-nav-bar" />
-                    </motion.span>
+                    <motion.span layoutId="fs-sidebar-active" transition={SLIDE} className="absolute inset-0 -z-10 rounded-2xl fs-btn-primary" aria-hidden />
                   )}
-                  <Icon className={`h-[18px] w-[18px] shrink-0 ${active ? 'text-sky-700 dark:text-sky-300' : 'text-slate-500 dark:text-slate-400'}`} />
+                  <span className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 ${
+                    active ? 'bg-white/20 text-white' : TILE[item.id]
+                  }`}>
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </span>
                   <span className="leading-snug">{lang === 'bn' ? item.bn : item.en}</span>
                 </button>
               );
@@ -130,19 +145,19 @@ export default function Sidebar() {
             <button
               type="button"
               onClick={() => setTheme(isNight ? 'day' : 'night')}
-              className="btn-popup min-h-[40px] flex items-center gap-1.5 px-3 rounded-xl border border-sky-600/15 bg-[var(--bg-surface)] text-sm font-medium text-slate-700 dark:text-slate-200"
+              className="btn-popup min-h-[44px] flex items-center gap-1.5 px-3.5 rounded-full border border-sky-600/20 bg-[var(--bg-surface)] text-sm font-semibold text-slate-700 dark:text-slate-200 cursor-pointer"
               aria-label={isNight ? t('Switch to day mode', 'দিন মোডে যান') : t('Switch to night mode', 'রাত মোডে যান')}
             >
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span key={isNight ? 'sun' : 'moon'} {...iconSwap} className="flex">
-                  {isNight ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-sky-700" />}
+                  {isNight ? <Sun className="h-4 w-4 text-harvest-300" /> : <Moon className="h-4 w-4 text-sky-700" />}
                 </motion.span>
               </AnimatePresence>
               <span>{isNight ? t('Day', 'দিন') : t('Night', 'রাত')}</span>
             </button>
           </div>
 
-          <div className="rounded-2xl border border-sky-600/10 bg-[var(--bg-surface)] p-2.5 flex items-center justify-between gap-2">
+          <div className="rounded-3xl border border-sky-600/10 bg-[var(--bg-surface)] shadow-leaf p-2.5 flex items-center justify-between gap-2">
             <button type="button" onClick={() => go('user_account')} className="flex items-center gap-2.5 min-w-0 text-left rounded-xl p-1 -m-1 hover:bg-sky-600/5 transition-colors" aria-label={t('Edit Profile', 'প্রোফাইল সম্পাদন')}>
               <Avatar initials={user.initials} admin={user.role === 'admin'} />
               <span className="truncate">
@@ -152,7 +167,7 @@ export default function Sidebar() {
                 </span>
               </span>
             </button>
-            <button type="button" onClick={signOut} className="btn-popup h-11 w-11 shrink-0 flex items-center justify-center text-slate-500 hover:text-red-600 hover:bg-red-500/5 rounded-xl" title={t('Sign Out', 'লগআউট')} aria-label={t('Sign Out', 'লগআউট')}>
+            <button type="button" onClick={signOut} className="btn-popup h-11 w-11 shrink-0 flex items-center justify-center text-slate-500 hover:text-red-600 hover:bg-red-500/10 rounded-full cursor-pointer" title={t('Sign Out', 'লগআউট')} aria-label={t('Sign Out', 'লগআউট')}>
               <LogOut className="h-[18px] w-[18px]" />
             </button>
           </div>

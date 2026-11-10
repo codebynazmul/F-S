@@ -19,17 +19,17 @@ export default function NasaTab() {
 
   return (
     <div className="space-y-6 card-rise">
-      <Card className="p-6 rounded-[var(--radius-card)] space-y-6">
-        <TabHeader
-          icon={Globe}
-          title={t('NASA Earth Data', 'নাসা আর্থ পর্যবেক্ষণ')}
-          description={t(
-            `Long-term monthly climate averages and the last 30 days for ${base.name} (${base.lat.toFixed(2)}°N, ${base.lng.toFixed(2)}°E), from NASA POWER.`,
-            `নাসা POWER থেকে ${base.nameBn} জেলার (${base.lat.toFixed(2)}°N, ${base.lng.toFixed(2)}°E) দীর্ঘমেয়াদি মাসিক জলবায়ু গড় ও গত ৩০ দিনের তথ্য।`
-          )}
-          actions={<StatusPill status={climateStatus} hasData={!!data} updatedAt={climate?.updatedAt ?? null} onRetry={retryClimate} />}
-        />
+      <TabHeader
+        icon={Globe}
+        title={t('NASA Earth Data', 'নাসা আর্থ পর্যবেক্ষণ')}
+        description={t(
+          `Long-term monthly climate averages and the last 30 days for ${base.name} (${base.lat.toFixed(2)}°N, ${base.lng.toFixed(2)}°E), from NASA POWER.`,
+          `নাসা POWER থেকে ${base.nameBn} জেলার (${base.lat.toFixed(2)}°N, ${base.lng.toFixed(2)}°E) দীর্ঘমেয়াদি মাসিক জলবায়ু গড় ও গত ৩০ দিনের তথ্য।`
+        )}
+        actions={<StatusPill status={climateStatus} hasData={!!data} updatedAt={climate?.updatedAt ?? null} onRetry={retryClimate} />}
+      />
 
+      <Card className="p-4 sm:p-6 rounded-[var(--radius-card)] space-y-6">
         {climateStatus === 'loading' && !data && (
           <div className="space-y-4" aria-busy="true">
             <span className="sr-only" role="status">{t('Loading NASA data…', 'নাসার তথ্য আনা হচ্ছে…')}</span>
@@ -341,9 +341,11 @@ function Metric({ icon: Icon, color, source, value, label, sub }: {
 }) {
   return (
     <SubCard className="p-4 rounded-2xl">
-      <div className="flex items-center justify-between text-xs mb-1 font-mono text-slate-500 dark:text-slate-400 gap-2">
-        <span className="truncate">{source}</span>
-        <Icon className={`h-5 w-5 shrink-0 ${color}`} />
+      <div className="flex items-start justify-between text-xs mb-1 font-semibold text-slate-500 dark:text-slate-400 gap-2">
+        <span className="leading-snug break-words min-w-0">{source}</span>
+        <span className="h-9 w-9 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-soft)] flex items-center justify-center shrink-0">
+          <Icon className={`h-5 w-5 ${color}`} aria-hidden />
+        </span>
       </div>
       <div className={`fs-display text-[1.5rem] sm:text-[1.75rem] mt-2 ${titleText}`}>{value}</div>
       <div className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</div>

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import {
-  AlertTriangle, CheckCircle2, ClipboardCheck, Droplets, Info, Layers, RotateCcw, Satellite, Scale, ShieldCheck,
+  AlertTriangle, Beef, CheckCircle2, Coins, ClipboardCheck, Droplets, Info, Layers, RotateCcw, Satellite, Scale, ShieldCheck,
   Sparkles, Sprout, Target, TrendingDown, TrendingUp, type LucideIcon,
 } from 'lucide-react';
 import { getCrop } from '@/lib/metrics';
@@ -73,7 +73,7 @@ export default function RotationTab() {
         <Card className="p-4 sm:p-6 rounded-[var(--radius-card)] !border-sky-600/40 space-y-4">
           <div className="flex flex-col-reverse sm:flex-row items-start justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="p-2 rounded-lg bg-sky-600/10 text-sky-700 dark:text-sky-300"><Sparkles className="h-5 w-5" /></span>
+              <span className="fs-icon-tile h-11 w-11 rounded-2xl"><Sparkles className="h-5 w-5" /></span>
               <div>
                 <h3 className={`font-medium text-base lg:text-[1.0625rem] ${titleText}`}>
                   {chosenStrategy
@@ -101,7 +101,7 @@ export default function RotationTab() {
                 <RotateCcw className="h-3.5 w-3.5" />{t('Back to best match', 'সেরা মিলে ফিরুন')}
               </button>
             ) : (
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-sky-500/10 text-sky-600 dark:text-sky-300 border-sky-500/25 whitespace-nowrap">
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-harvest-300 text-harvest-900 whitespace-nowrap shadow-sm">
                 {t('Best match', 'সেরা মিল')}
               </span>
             )}
@@ -183,13 +183,27 @@ export default function RotationTab() {
 
 // ---------- Priorities ----------
 
+/** An icon and colour per goal, so each choice is recognisable before reading. */
+const PRIORITY_ICON: Record<Priority, LucideIcon> = { water: Droplets, soil: Layers, income: Coins, forage: Beef, resilience: ShieldCheck };
+const PRIORITY_TILE: Record<Priority, string> = {
+  water: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-500/20 dark:text-cyan-300',
+  soil: 'bg-soil-100 text-soil-700 dark:bg-soil-500/25 dark:text-soil-200',
+  income: 'bg-harvest-100 text-harvest-800 dark:bg-harvest-500/20 dark:text-harvest-200',
+  forage: 'bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300',
+  resilience: 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300',
+};
+function PriorityIcon({ id }: { id: Priority }) {
+  const Icon = PRIORITY_ICON[id];
+  return <Icon className="h-[18px] w-[18px]" aria-hidden />;
+}
+
 function PriorityPicker() {
   const { t, lang, priorities, togglePriority } = useApp();
   return (
     <Card className="p-4 sm:p-5 rounded-[var(--radius-card)] space-y-3">
       <div>
         <h2 className={`fs-display text-[1.25rem] lg:text-[1.5rem] ${titleText} flex items-center gap-2.5`}>
-          <Target className="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0" />
+          <span className="fs-icon-tile h-10 w-10 rounded-xl"><Target className="h-5 w-5" aria-hidden /></span>
           <span>{t('What matters most on your farm?', 'আপনার খামারে কোনটি সবচেয়ে জরুরি?')}</span>
         </h2>
         <p className={`text-sm mt-1 ${mutedText}`}>
@@ -206,11 +220,13 @@ function PriorityPicker() {
               type="button"
               aria-pressed={on}
               onClick={() => togglePriority(p.id)}
-              className={`btn-popup min-h-tap px-4 py-2 rounded-full text-sm font-medium border flex items-center gap-1.5 ${
-                on ? 'bg-sky-600 text-white border-sky-600' : 'border-sky-600/20 bg-[var(--bg-surface)] hover:border-sky-600/45 text-slate-800 dark:text-slate-100'
+              className={`btn-popup min-h-[48px] pl-2 pr-4 py-1.5 rounded-full text-[0.9375rem] font-semibold border flex items-center gap-2 cursor-pointer ${
+                on ? 'fs-btn-primary border-transparent' : 'border-sky-600/20 bg-[var(--bg-surface)] hover:border-sky-600/45 hover:bg-sky-600/[0.05] text-slate-800 dark:text-slate-100'
               }`}
             >
-              {on && <CheckCircle2 className="h-4 w-4" />}
+              <span className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${on ? 'bg-white/20' : PRIORITY_TILE[p.id]}`}>
+                {on ? <CheckCircle2 className="h-[18px] w-[18px]" aria-hidden /> : <PriorityIcon id={p.id} />}
+              </span>
               {lang === 'bn' ? p.bn : p.en}
             </button>
           );
@@ -478,10 +494,10 @@ function Disclaimer() {
 }
 
 const COLORS = {
-  sky: { text: 'text-sky-600 dark:text-sky-300', bar: 'bg-sky-500', icon: 'text-sky-500' },
-  cyan: { text: 'text-cyan-600 dark:text-cyan-300', bar: 'bg-cyan-500', icon: 'text-cyan-500' },
-  emerald: { text: 'text-emerald-700 dark:text-emerald-300', bar: 'bg-emerald-500', icon: 'text-emerald-600' },
-  teal: { text: 'text-teal-600 dark:text-teal-300', bar: 'bg-teal-500', icon: 'text-teal-500' },
+  sky: { text: 'text-sky-600 dark:text-sky-300', bar: 'bg-sky-500', tile: 'bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300', wash: 'from-sky-500/[0.10]' },
+  cyan: { text: 'text-cyan-600 dark:text-cyan-300', bar: 'bg-cyan-500', tile: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-500/20 dark:text-cyan-300', wash: 'from-cyan-500/[0.10]' },
+  emerald: { text: 'text-soil-700 dark:text-soil-200', bar: 'bg-soil-500', tile: 'bg-soil-100 text-soil-700 dark:bg-soil-500/25 dark:text-soil-200', wash: 'from-soil-400/[0.12]' },
+  teal: { text: 'text-harvest-700 dark:text-harvest-300', bar: 'bg-harvest-500', tile: 'bg-harvest-100 text-harvest-800 dark:bg-harvest-500/20 dark:text-harvest-200', wash: 'from-harvest-400/[0.14]' },
 };
 
 function StatCard({
@@ -494,15 +510,17 @@ function StatCard({
   const c = COLORS[color];
   const up = (delta ?? 0) >= 0;
   return (
-    <Card className="p-4 sm:p-5 rounded-[var(--radius-card)] flex flex-col">
-      <div className="flex items-start justify-between gap-2 text-sm text-slate-600 dark:text-slate-300">
+    <Card className={`fs-lift p-4 sm:p-5 rounded-[var(--radius-card)] flex flex-col bg-gradient-to-br ${c.wash} to-transparent`}>
+      <div className="flex items-start justify-between gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
         <span className="leading-snug">{label}</span>
-        <Icon className={`h-[18px] w-[18px] shrink-0 ${c.icon}`} aria-hidden />
+        <span className={`h-10 w-10 sm:h-11 sm:w-11 rounded-2xl flex items-center justify-center shrink-0 ${c.tile}`}>
+          <Icon className="h-5 w-5" aria-hidden />
+        </span>
       </div>
       <div className="mt-auto pt-4 flex flex-wrap items-baseline gap-x-2">
         <span className={`fs-display text-[1.5rem] sm:text-[1.75rem] lg:text-[2rem] ${titleText}`}>{value}</span>
         {delta !== undefined && (
-          <span className={`text-sm font-medium flex items-center ${up ? 'text-emerald-600 dark:text-emerald-300' : 'text-red-500'}`}>
+          <span className={`text-xs font-bold flex items-center px-2 py-0.5 rounded-full ${up ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' : 'bg-red-500/10 text-red-600 dark:text-red-300'}`}>
             {up ? <TrendingUp className="h-4 w-4 mr-0.5" /> : <TrendingDown className="h-4 w-4 mr-0.5" />}
             {deltaText ?? `${signed(delta, 0, lang)}${deltaSuffix}`}
           </span>
@@ -525,7 +543,7 @@ function PlanList({ plan, onChange, variant }: { plan: string[]; onChange: (i: n
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative shrink-0">
                 <CropIcon id={crop.id} size={48} />
-                <span className={`absolute -top-1.5 -left-1.5 h-6 min-w-6 px-1 rounded-lg font-semibold text-xs flex items-center justify-center ${rec ? 'bg-sky-600 text-white' : 'bg-slate-600 text-white'}`}>
+                <span className={`absolute -top-1.5 -left-1.5 h-6 min-w-6 px-1 rounded-full font-bold text-xs flex items-center justify-center ring-2 ring-[var(--bg-surface)] ${rec ? 'bg-sky-600 text-white' : 'bg-slate-600 text-white'}`}>
                   {t(`S${idx + 1}`, `${idx + 1}`)}
                 </span>
               </div>

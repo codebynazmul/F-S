@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/banners/readme/editorial-2560x800.png" alt="Field Shift: crop rotations that use less water, build soil, and hold up under climate stress, for all 64 districts of Bangladesh. NASA Space Apps, team SPIDERX." width="100%" />
+  <img src="public/logo.png" alt="Field Shift logo" width="160" />
 </p>
 
 <h1 align="center">Field Shift</h1>
@@ -11,7 +11,6 @@
 <p align="center">
   <a href="https://www.spaceappschallenge.org/"><img src="https://img.shields.io/badge/NASA_Space_Apps-Challenge-0B3D91?style=for-the-badge&logo=nasa&logoColor=white" alt="NASA Space Apps Challenge" /></a>
   <img src="https://img.shields.io/badge/Team-SPIDERX-2E7D32?style=for-the-badge" alt="Team SPIDERX" />
-  <a href="https://fieldshift-space-apps-challenge.vercel.app/"><img src="https://img.shields.io/badge/Live_demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live demo on Vercel" /></a>
 </p>
 
 <p align="center">
