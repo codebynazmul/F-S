@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{background:radial-gradient(120% 140% at 85% 50%,#06525C 0%,#043940 45%,#022429 100%);color:#fff;position:relative}
+svg.lines{position:absolute;right:0;top:0}
+.c{position:absolute;left:96px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center}
+.row{display:flex;align-items:center;gap:22px}
+.logo{width:96px;height:96px}
+h1{font-size:80px;font-weight:700;letter-spacing:-2.5px;line-height:1}
+p{font-size:23px;color:#AED6D4;margin-top:22px;max-width:620px;line-height:1.4}
+.meta{display:flex;gap:10px;margin-top:28px}
+.chip{font-size:14px;letter-spacing:.5px;color:#D6EBE9;border:1px solid rgba(174,214,212,.35);padding:7px 12px;border-radius:6px}
+.chip b{color:#F5C451;font-weight:500}
+</style></head><body>
+<svg class="lines" width="500" height="400" viewBox="0 0 500 400" fill="none">
+<g stroke="#7DBCBC" stroke-opacity=".28" stroke-width="1.5" id="g"></g>
+<circle cx="330" cy="120" r="54" fill="#F5C451" fill-opacity=".9"/>
+<circle cx="330" cy="120" r="80" stroke="#F5C451" stroke-opacity=".25"/>
+</svg>
+<script>const g=document.getElementById('g');for(let i=0;i<16;i++){const y=180+i*16;const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+p.setAttribute('d',`M0 ${y+40} C 130 ${y-30+i*2}, 290 ${y+50}, 500 ${y-10-i*3}`);if(i%4===0){p.setAttribute('stroke','#F5C451');p.setAttribute('stroke-opacity','.45')}g.appendChild(p)}</script>
+<div class="c"><div class="row"><img class="logo" src="../../../../public/logo.png"><h1>Field Shift</h1></div>
+<p>Climate-adaptive crop rotation and soil health planner for all 64 districts of Bangladesh.</p>
+<div class="meta mono"><span class="chip"><b>NASA</b> POWER · MODIS · SMAP · NASADEM</span><span class="chip">English | <span class="bn">বাংলা</span></span><span class="chip">Team SPIDERX</span></div></div>
+</body></html>

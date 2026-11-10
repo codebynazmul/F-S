@@ -390,6 +390,16 @@ html[lang="bn"] .fs-eyebrow { text-transform: none; letter-spacing: 0; }
 .card-popup { animation: fs-popup 420ms var(--ease-enter) both; }
 .card-rise  { animation: fs-settle 420ms var(--ease-enter) both; }
 
+/* Tab content: each top-level section settles in, 50ms after the one before it.
+   The tab's own .card-rise is switched off here so the first section doesn't move twice. */
+.fs-tab > .card-rise { animation: none; }
+.fs-tab > * > * { animation: fs-settle 380ms var(--ease-enter) backwards; }
+.fs-tab > * > :nth-child(2) { animation-delay: 50ms; }
+.fs-tab > * > :nth-child(3) { animation-delay: 100ms; }
+.fs-tab > * > :nth-child(4) { animation-delay: 150ms; }
+.fs-tab > * > :nth-child(5) { animation-delay: 200ms; }
+.fs-tab > * > :nth-child(n+6) { animation-delay: 250ms; }
+
 /* Admin panel keeps its original springy buttons */
 .fs-classic .btn-popup {
   transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 220ms ease,

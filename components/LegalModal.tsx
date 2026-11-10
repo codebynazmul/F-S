@@ -2,7 +2,9 @@
 
 import React, { useEffect, useRef } from 'react';
 import { ShieldCheck, FileText, X } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useApp } from './AppProvider';
+import { EASE, EASE_ENTER } from '@/lib/motion';
 import { primaryBtn } from './ui';
 
 export type LegalDoc = 'terms' | 'privacy';
@@ -116,16 +118,22 @@ export default function LegalModal({ doc, onClose }: { doc: LegalDoc; onClose: (
   const Icon = isTerms ? FileText : ShieldCheck;
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { duration: 0.2, ease: EASE } }}
+      exit={{ opacity: 0, transition: { duration: 0.18, ease: EASE } }}
     >
-      <div
+      <motion.div
         role="dialog"
         aria-modal="true"
         aria-labelledby="legal-title"
         onClick={(e) => e.stopPropagation()}
-        className={`${isNight ? 'glass-strong' : 'glass'} card-popup rounded-[var(--radius-card)] w-full max-w-lg max-h-[85vh] flex flex-col text-slate-900 dark:text-slate-100`}
+        initial={{ opacity: 0, scale: 0.97, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.28, ease: EASE_ENTER } }}
+        exit={{ opacity: 0, scale: 0.98, y: 4, transition: { duration: 0.15, ease: EASE } }}
+        className={`${isNight ? 'glass-strong' : 'glass'} rounded-[var(--radius-card)] w-full max-w-lg max-h-[85vh] flex flex-col text-slate-900 dark:text-slate-100`}
       >
         <div className="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-sky-500/15">
           <Icon className="h-5 w-5 text-sky-500 shrink-0" />
@@ -160,7 +168,7 @@ export default function LegalModal({ doc, onClose }: { doc: LegalDoc; onClose: (
             {t('Got it', 'বুঝেছি')}
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

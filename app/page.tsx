@@ -1,10 +1,12 @@
 'use client';
 
+import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { AppProvider, useApp } from '@/components/AppProvider';
 import Dashboard from '@/components/Dashboard';
 import LoginScreen, { NewPasswordScreen } from '@/components/LoginScreen';
 import Onboarding from '@/components/Onboarding';
 import { Skeleton } from '@/components/ui';
+import { screenFade } from '@/lib/motion';
 
 /** Page-shaped placeholder shown while saved settings load. */
 function LoadingScreen() {
@@ -39,17 +41,34 @@ function Root() {
   const { ready, user, onboarded, passwordRecovery } = useApp();
 
   // Wait for saved settings and the session to load so a signed-in user doesn't see the login screen flash.
-  if (!ready) return <LoadingScreen />;
-  if (passwordRecovery) return <NewPasswordScreen />;
-  if (!user) return <LoginScreen />;
-  if (!onboarded && user.role !== 'admin') return <Onboarding />;
-  return <Dashboard />;
+  const screen =
+    !ready ? 'loading'
+    : passwordRecovery ? 'recovery'
+    : !user ? 'login'
+    : !onboarded && user.role !== 'admin' ? 'onboarding'
+    : 'dashboard';
+
+  // Screens crossfade: the old one fades out before the new one fades in.
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div key={screen} variants={screenFade} initial="hidden" animate="show" exit="exit">
+        {screen === 'loading' && <LoadingScreen />}
+        {screen === 'recovery' && <NewPasswordScreen />}
+        {screen === 'login' && <LoginScreen />}
+        {screen === 'onboarding' && <Onboarding />}
+        {screen === 'dashboard' && <Dashboard />}
+      </motion.div>
+    </AnimatePresence>
+  );
 }
 
 export default function Page() {
   return (
     <AppProvider>
-      <Root />
+      {/* People who ask for reduced motion get fades only: no movement or scaling. */}
+      <MotionConfig reducedMotion="user">
+        <Root />
+      </MotionConfig>
     </AppProvider>
   );
 }
