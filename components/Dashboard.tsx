@@ -34,7 +34,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex font-sans antialiased text-slate-900 dark:text-slate-100">
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-16 lg:focus:left-[19rem] focus:z-[90] focus:px-3 focus:py-2 focus:rounded-lg focus:bg-sky-600 focus:text-white">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-16 lg:focus:left-[19rem] focus:z-[90] focus:px-3 focus:py-2 focus:rounded-full focus:bg-sky-600 focus:text-white">
         {t('Skip to content', 'মূল অংশে যান')}
       </a>
       <Sidebar />
@@ -51,10 +51,10 @@ export default function Dashboard() {
           )}
         </main>
 
-        <footer className="no-print border-t border-sky-600/10 py-6 px-4 sm:px-6 lg:px-10 mt-auto mb-[calc(64px+env(safe-area-inset-bottom))] lg:mb-0 text-xs text-slate-500 dark:text-slate-400">
+        <footer className="no-print border-t border-sky-600/10 py-6 px-4 sm:px-6 lg:px-10 mt-auto mb-[calc(72px+env(safe-area-inset-bottom))] lg:mb-0 text-xs text-slate-500 dark:text-slate-400">
           <div className="max-w-[1240px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
             <div>
-              <span className="font-medium text-slate-800 dark:text-white">Field Shift</span> · {t('Developed by SPIDERX', 'ডেভেলপড বাই SPIDERX')}
+              <span className="fs-display text-sm text-sky-700 dark:text-sky-300">Field Shift</span> · {t('Developed by SPIDERX', 'ডেভেলপড বাই SPIDERX')}
             </div>
             <div>
               {t('Climate data: NASA POWER · Built for NASA Space Apps Challenge', 'জলবায়ু তথ্য: নাসা POWER · নাসা স্পেস অ্যাপস চ্যালেঞ্জের জন্য তৈরি')}

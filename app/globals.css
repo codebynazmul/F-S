@@ -4,78 +4,91 @@
 
 /* ===================================================================== */
 /* THEME TOKENS                                                          */
-/* Day: teal on paper. Night: deep teal-black.                           */
+/* Day: paddy green and harvest gold on rice-straw cream.                */
+/* Night: deep forest green.                                             */
 /* The admin panel sits inside .fs-classic, which keeps the original     */
 /* sky-blue tokens further down.                                         */
 /* ===================================================================== */
 :root {
-  --font-ui: var(--font-instrument), var(--font-bengali), system-ui, sans-serif;
+  --font-ui: var(--font-figtree), var(--font-hind), system-ui, sans-serif;
+  --font-display: var(--font-baloo), var(--font-hind), system-ui, sans-serif;
 
-  /* Accent scale, read by Tailwind's sky-* classes (RGB channels) */
-  --sky-50:  238 246 245;
-  --sky-100: 214 235 233;
-  --sky-200: 174 214 212;
-  --sky-300: 125 188 188;
-  --sky-400: 63 154 158;
-  --sky-500: 21 122 128;
-  --sky-600: 6 82 92;
-  --sky-700: 5 69 78;
-  --sky-800: 4 57 64;
-  --sky-900: 3 45 51;
+  /* Main accent scale (paddy green), read by Tailwind's sky-* classes (RGB channels) */
+  --sky-50:  240 247 236;
+  --sky-100: 221 239 211;
+  --sky-200: 188 223 168;
+  --sky-300: 143 200 116;
+  --sky-400: 95 174 71;
+  --sky-500: 59 143 44;
+  --sky-600: 42 113 33;
+  --sky-700: 34 89 28;
+  --sky-800: 28 71 25;
+  --sky-900: 22 56 21;
 
-  --bg-page:        #F7F9F8;   /* paper */
+  /* Harvest gold, as RGB channels for gradients */
+  --gold: 237 178 36;
+  --gold-soft: 253 240 196;
+
+  --bg-page:        #FAF6EA;   /* rice-straw cream */
   --bg-surface:     #FFFFFF;   /* cards */
-  --bg-surface-2:   #F0F4F3;   /* boxes inside cards */
+  --bg-surface-2:   #F6F2E3;   /* boxes inside cards */
   --bg-elevated:    #FFFFFF;
-  --bg-bar:         rgba(247, 249, 248, 0.88);
-  --border-soft:    rgba(6, 82, 92, 0.12);
-  --border-strong:  rgba(6, 82, 92, 0.26);
-  --text-primary:   #0D2A2E;
-  --text-secondary: #2E4A4E;
-  --text-muted:     #4E6A6D;
-  --accent:         #06525C;
-  --accent-hover:   #05454E;
-  --accent-soft:    rgba(6, 82, 92, 0.08);
-  --shadow-color:   rgba(6, 50, 56, 0.08);
-  --skeleton:       #E6ECEB;
-  --skeleton-shine: #F3F6F5;
-  --ring:           rgba(6, 82, 92, 0.35);
+  --bg-bar:         rgba(250, 246, 234, 0.86);
+  --border-soft:    rgba(70, 90, 30, 0.14);
+  --border-strong:  rgba(42, 113, 33, 0.34);
+  --text-primary:   #1B2B12;
+  --text-secondary: #37462C;
+  --text-muted:     #56634B;
+  --accent:         #2A7121;
+  --accent-hover:   #22591C;
+  --accent-soft:    rgba(42, 113, 33, 0.09);
+  --shadow-color:   rgba(60, 70, 20, 0.12);
+  --skeleton:       #ECE6D2;
+  --skeleton-shine: #F7F3E7;
+  --ring:           rgba(42, 113, 33, 0.35);
+  --glow-sun:       rgba(247, 203, 77, 0.20);
+  --glow-leaf:      rgba(95, 174, 71, 0.13);
 
-  --radius-card: 1.25rem;
-  --radius-inner: 0.875rem;
+  --radius-card: 1.5rem;
+  --radius-inner: 1rem;
   --ease: cubic-bezier(.2, .8, .2, 1);
   --ease-enter: cubic-bezier(.22, 1, .36, 1);
 }
 
 [data-theme="night"] {
-  --sky-50:  14 33 36;
-  --sky-100: 18 45 49;
-  --sky-200: 26 66 71;
-  --sky-300: 143 211 214;
-  --sky-400: 92 191 197;
-  --sky-500: 52 167 174;
-  --sky-600: 29 128 136;
-  --sky-700: 23 112 120;
-  --sky-800: 18 92 99;
-  --sky-900: 14 70 76;
+  --sky-50:  20 34 22;
+  --sky-100: 26 46 28;
+  --sky-200: 38 68 38;
+  --sky-300: 174 222 150;
+  --sky-400: 140 205 112;
+  --sky-500: 104 178 78;
+  --sky-600: 52 128 42;
+  --sky-700: 44 110 36;
+  --sky-800: 36 92 30;
+  --sky-900: 28 72 24;
 
-  --bg-page:        #0C1517;
-  --bg-surface:     #121E21;
-  --bg-surface-2:   #0F191C;
-  --bg-elevated:    #162427;
-  --bg-bar:         rgba(12, 21, 23, 0.88);
-  --border-soft:    rgba(222, 240, 238, 0.09);
-  --border-strong:  rgba(222, 240, 238, 0.2);
-  --text-primary:   #EEF4F3;
-  --text-secondary: #C3D3D2;
-  --text-muted:     #98ACAB;
-  --accent:         #7CC9CD;
-  --accent-hover:   #A3DCDF;
-  --accent-soft:    rgba(124, 201, 205, 0.12);
-  --shadow-color:   rgba(0, 0, 0, 0.4);
-  --skeleton:       #1A2a2d;
-  --skeleton-shine: #223538;
-  --ring:           rgba(124, 201, 205, 0.45);
+  --gold: 247 203 77;
+  --gold-soft: 64 52 18;
+
+  --bg-page:        #0E1610;
+  --bg-surface:     #152019;
+  --bg-surface-2:   #111B14;
+  --bg-elevated:    #1A281E;
+  --bg-bar:         rgba(14, 22, 16, 0.86);
+  --border-soft:    rgba(220, 240, 200, 0.09);
+  --border-strong:  rgba(220, 240, 200, 0.22);
+  --text-primary:   #F0F5EA;
+  --text-secondary: #C9D5BE;
+  --text-muted:     #A0AE95;
+  --accent:         #9AD67E;
+  --accent-hover:   #B7E59F;
+  --accent-soft:    rgba(154, 214, 126, 0.12);
+  --shadow-color:   rgba(0, 0, 0, 0.45);
+  --skeleton:       #1C2A1F;
+  --skeleton-shine: #24352A;
+  --ring:           rgba(154, 214, 126, 0.45);
+  --glow-sun:       rgba(247, 203, 77, 0.07);
+  --glow-leaf:      rgba(95, 174, 71, 0.08);
 }
 
 /* Admin panel: original sky-blue look, unchanged. */
@@ -126,8 +139,8 @@
   --ring:           rgba(56, 189, 248, 0.40);
 }
 
+html { background: var(--bg-page); }
 html, body {
-  background: var(--bg-page);
   color: var(--text-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -135,29 +148,43 @@ html, body {
   font-feature-settings: "ss01", "cv11";
   transition: background-color 350ms ease, color 350ms ease;
 }
+/* A warm morning-sun glow top right and a leaf-green glow bottom left. */
+body {
+  background:
+    radial-gradient(1100px 520px at 105% -12%, var(--glow-sun), transparent 62%),
+    radial-gradient(900px 520px at -12% 112%, var(--glow-leaf), transparent 62%),
+    var(--bg-page);
+  background-attachment: fixed;
+}
 
 /* Bangla script has taller letters, so give lines more room. */
 html[lang="bn"] body { line-height: 1.65; }
 html[lang="bn"] .leading-relaxed { line-height: 1.8; }
 
-/* Headings: medium weight, tight tracking (Latin only; Bangla keeps its spacing). */
+/* Headings: Baloo Da 2, a friendly rounded face that covers Latin and Bangla. */
 .fs-display {
-  font-weight: 500;
-  letter-spacing: -0.028em;
-  line-height: 1.08;
-  font-stretch: 96%;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.012em;
+  line-height: 1.12;
 }
-html[lang="bn"] .fs-display { letter-spacing: 0; line-height: 1.3; }
+html[lang="bn"] .fs-display { letter-spacing: 0; line-height: 1.32; }
+.fs-classic .fs-display { font-family: var(--font-ui); font-weight: 500; letter-spacing: -0.028em; }
 
-/* Small uppercase label above a heading */
+/* Small label above a heading: green, bold, easy to spot */
 .fs-eyebrow {
-  font-family: var(--font-dm-mono), ui-monospace, monospace;
+  font-family: var(--font-ui);
   font-size: 0.8125rem;
-  letter-spacing: 0.02em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--accent);
 }
-html[lang="bn"] .fs-eyebrow { font-family: var(--font-ui); text-transform: none; letter-spacing: 0; }
+html[lang="bn"] .fs-eyebrow { text-transform: none; letter-spacing: 0; }
+.fs-classic .fs-eyebrow {
+  font-family: var(--font-dm-mono), ui-monospace, monospace;
+  font-weight: 400; letter-spacing: 0.02em; color: var(--text-muted);
+}
 
 /* ===================================================================== */
 /* TEXT LEVELS                                                           */
@@ -182,14 +209,16 @@ html[lang="bn"] .fs-eyebrow { font-family: var(--font-ui); text-transform: none;
 
 /* ===================================================================== */
 /* SURFACES                                                              */
-/* Flat cards on a paper ground: a hairline border, no drop shadow.      */
+/* Soft white cards with a warm, sunlit shadow on a cream ground.        */
 /* Only the fixed bars use a frosted blur.                               */
 /* ===================================================================== */
 .glass,
 .glass-strong {
   background: var(--bg-surface);
   border: 1px solid var(--border-soft);
+  box-shadow: 0 1px 2px var(--shadow-color), 0 10px 28px -14px var(--shadow-color);
 }
+[data-theme="night"] :is(.glass, .glass-strong) { box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 10px 28px -14px var(--shadow-color); }
 .glass-subtle {
   background: var(--bg-surface-2);
   border: 1px solid var(--border-soft);
@@ -221,8 +250,8 @@ html[lang="bn"] .fs-eyebrow { font-family: var(--font-ui); text-transform: none;
 
 /* ===================================================================== */
 /* MOTION                                                                */
-/* Buttons step 1px up on hover and press 1px down at .985; linked cards */
-/* lift 2px; a tab's content settles once when opened. No bounce.        */
+/* Buttons step up on hover and press down when tapped; linked cards     */
+/* lift; a tab's content settles once when opened.                       */
 /* ===================================================================== */
 @keyframes fs-settle {
   0%   { transform: translateY(8px); opacity: 0; }
@@ -244,7 +273,7 @@ html[lang="bn"] .fs-eyebrow { font-family: var(--font-ui); text-transform: none;
   .btn-popup:hover { transform: translateY(-1px); }
 }
 .btn-popup:active {
-  transform: translateY(1px) scale(0.985);
+  transform: translateY(1px) scale(0.97);
   transition-duration: 90ms;
 }
 .btn-popup:disabled { transform: none; }
@@ -255,20 +284,108 @@ html[lang="bn"] .fs-eyebrow { font-family: var(--font-ui); text-transform: none;
 }
 @media (hover: hover) and (pointer: fine) {
   .fs-lift:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     border-color: var(--border-strong);
-    box-shadow: 0 10px 24px -12px var(--shadow-color);
+    box-shadow: 0 2px 4px var(--shadow-color), 0 20px 40px -18px var(--shadow-color);
   }
 }
 
-/* Primary button: solid teal, white text, darkens a step on hover */
+/* Primary button: leafy green with a soft glow, white text */
 .fs-btn-primary {
-  background: rgb(var(--sky-600));
+  background: linear-gradient(180deg, rgb(var(--sky-500)) 0%, rgb(var(--sky-600)) 100%);
   color: #fff;
+  font-weight: 600;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 8px 18px -8px rgb(var(--sky-600) / 0.6);
 }
 @media (hover: hover) and (pointer: fine) {
-  .fs-btn-primary:hover { background: rgb(var(--sky-700)); }
+  .fs-btn-primary:hover { background: linear-gradient(180deg, rgb(var(--sky-600)) 0%, rgb(var(--sky-700)) 100%); }
 }
+.fs-classic .fs-btn-primary { background: rgb(var(--sky-600)); box-shadow: none; font-weight: 500; }
+
+/* Harvest button: golden, for the one extra call to action (e.g. the report) */
+.fs-btn-harvest {
+  background: linear-gradient(180deg, #F7CB4D 0%, #EDB224 100%);
+  color: #3D2A06;
+  font-weight: 600;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 8px 18px -8px rgba(214, 150, 17, 0.7);
+}
+@media (hover: hover) and (pointer: fine) {
+  .fs-btn-harvest:hover { background: linear-gradient(180deg, #EDB224 0%, #D69611 100%); }
+}
+
+/* ===================================================================== */
+/* FARM PIECES                                                           */
+/* ===================================================================== */
+/* Tab banner: a soft field-green to harvest wash with crop rows drawn   */
+/* in the corner.                                                        */
+.fs-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-soft);
+  background:
+    radial-gradient(420px 220px at 100% 0%, rgb(var(--gold) / 0.28), transparent 70%),
+    linear-gradient(120deg, rgb(var(--sky-50)) 0%, var(--bg-surface) 55%, rgb(var(--gold-soft) / 0.55) 100%);
+  box-shadow: 0 1px 2px var(--shadow-color), 0 14px 34px -18px var(--shadow-color);
+}
+[data-theme="night"] .fs-hero {
+  background:
+    radial-gradient(420px 220px at 100% 0%, rgb(var(--gold) / 0.10), transparent 70%),
+    linear-gradient(120deg, rgb(var(--sky-100)) 0%, var(--bg-surface) 60%, var(--bg-elevated) 100%);
+}
+.fs-hero-art {
+  position: absolute;
+  right: -10px;
+  bottom: -6px;
+  width: 260px;
+  height: auto;
+  z-index: -1;
+  color: rgb(var(--sky-500));
+  opacity: 0.22;
+  pointer-events: none;
+}
+[data-theme="night"] .fs-hero-art { opacity: 0.16; }
+@media (max-width: 640px) { .fs-hero-art { width: 170px; opacity: 0.14; } }
+
+/* Big rounded icon tile: green gradient, white icon */
+.fs-icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+  background: linear-gradient(145deg, rgb(var(--sky-400)) 0%, rgb(var(--sky-600)) 100%);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 10px 20px -10px rgb(var(--sky-600) / 0.8);
+}
+
+/* Little rounded fact chip (soil, rain, risk) */
+.fs-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 34px;
+  padding: 0.25rem 0.75rem 0.25rem 0.35rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-surface);
+  white-space: nowrap;
+}
+.fs-chip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+}
+
+/* Gentle sway for the decorative sprout icons */
+@keyframes fs-sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50%      { transform: rotate(4deg); }
+}
+.fs-sway { transform-origin: 50% 100%; animation: fs-sway 3.6s ease-in-out infinite; }
 
 .card-popup { animation: fs-popup 420ms var(--ease-enter) both; }
 .card-rise  { animation: fs-settle 420ms var(--ease-enter) both; }
@@ -309,10 +426,10 @@ html[lang="bn"] .fs-eyebrow { font-family: var(--font-ui); text-transform: none;
 .fs-fab:active { transform: scale(0.96); }
 @media (min-width: 1024px) { .fs-fab { display: none; } }
 
-/* Side menu link: a 2px bar marks the current page */
+/* Side menu link: a 3px bar marks the current page. It lives inside the sliding
+   highlight (Sidebar.tsx), so it glides between items with it. */
 .fs-nav-link { position: relative; }
-.fs-nav-link[aria-current="page"]::before {
-  content: "";
+.fs-nav-bar {
   position: absolute;
   left: -0.75rem;
   top: 0.65rem;
@@ -330,7 +447,7 @@ html[lang="bn"] .fs-eyebrow { font-family: var(--font-ui); text-transform: none;
 .fs-login-media {
   position: relative;
   overflow: hidden;
-  background: #2A3A22 url('/login-bg.jpg') center / cover no-repeat;
+  background: #23401C url('/login-bg.jpg') center / cover no-repeat;
   isolation: isolate;
 }
 .fs-login-media video {
@@ -348,7 +465,7 @@ html[lang="bn"] .fs-eyebrow { font-family: var(--font-ui); text-transform: none;
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(180deg, rgba(4, 26, 29, 0.35) 0%, rgba(4, 26, 29, 0.05) 35%, rgba(4, 26, 29, 0.78) 100%);
+  background: linear-gradient(180deg, rgba(14, 36, 10, 0.40) 0%, rgba(14, 36, 10, 0.05) 35%, rgba(14, 36, 10, 0.82) 100%);
 }
 .fs-login-media > .fs-login-media-copy { position: relative; z-index: 2; }
 
@@ -360,9 +477,12 @@ html[lang="bn"] .fs-eyebrow { font-family: var(--font-ui); text-transform: none;
   border: 1px solid var(--border-soft);
   transition: border-color 150ms var(--ease), box-shadow 150ms var(--ease);
 }
+@media (hover: hover) and (pointer: fine) {
+  .fs-field:hover { border-color: var(--border-strong); }
+}
 .fs-field:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
 /* ===================================================================== */
@@ -385,8 +505,9 @@ html[lang="bn"] .fs-eyebrow { font-family: var(--font-ui); text-transform: none;
 /* Range inputs: accent color and a taller touch area */
 input[type="range"] {
   accent-color: var(--accent);
-  height: 32px;
+  height: 36px;
   touch-action: manipulation;
+  cursor: pointer;
 }
 
 /* Leave room for the phone bottom bar and the iPhone home indicator */
@@ -432,7 +553,7 @@ input[type="number"]::-webkit-inner-spin-button {
     -webkit-backdrop-filter: none !important;
     border: 1px solid #D4D4D8 !important;
   }
-  .card-rise, .card-popup { animation: none !important; }
+  .card-rise, .card-popup, .fs-tab * { animation: none !important; }
   main { padding: 0 !important; max-width: none !important; }
   .break-inside-avoid { break-inside: avoid; }
   @page { margin: 14mm; }

@@ -1,17 +1,17 @@
 'use client';
 
 import React from 'react';
-import { AlertTriangle, CheckCircle2, Droplets, RefreshCw, Sliders, Sparkles, Sun, Zap, type LucideIcon } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, CloudSun, Droplets, Flame, RefreshCw, Sliders, Sparkles, Sun, Waves, Zap, type LucideIcon } from 'lucide-react';
 import type { PlanMetrics } from '@/lib/metrics';
 import { IRRIGATION_TYPES } from '@/lib/options';
 import { DEFAULT_SIM, useApp } from '../AppProvider';
 import { Card, Meter, SubCard, TabHeader, ghostBtn } from '../ui';
 
 const PRESETS = [
-  { en: 'Severe drought', bn: 'তীব্র খরা', sim: { rainDelta: -40, tempDelta: 2, irrigationCut: 60 } },
-  { en: 'Heatwave', bn: 'তাপপ্রবাহ', sim: { rainDelta: -10, tempDelta: 3.5, irrigationCut: 20 } },
-  { en: 'Flood year', bn: 'বন্যার বছর', sim: { rainDelta: 40, tempDelta: 0.5, irrigationCut: 0 } },
-  { en: 'Normal year', bn: 'স্বাভাবিক বছর', sim: { rainDelta: 0, tempDelta: 0, irrigationCut: 0 } },
+  { en: 'Severe drought', bn: 'তীব্র খরা', icon: Sun, tile: 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300', sim: { rainDelta: -40, tempDelta: 2, irrigationCut: 60 } },
+  { en: 'Heatwave', bn: 'তাপপ্রবাহ', icon: Flame, tile: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300', sim: { rainDelta: -10, tempDelta: 3.5, irrigationCut: 20 } },
+  { en: 'Flood year', bn: 'বন্যার বছর', icon: Waves, tile: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-500/20 dark:text-cyan-300', sim: { rainDelta: 40, tempDelta: 0.5, irrigationCut: 0 } },
+  { en: 'Normal year', bn: 'স্বাভাবিক বছর', icon: CloudSun, tile: 'bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300', sim: { rainDelta: 0, tempDelta: 0, irrigationCut: 0 } },
 ];
 
 export default function WhatIfTab() {
@@ -24,22 +24,22 @@ export default function WhatIfTab() {
 
   return (
     <div className="space-y-6 card-rise">
-      <Card className="p-6 rounded-[var(--radius-card)] space-y-6">
-        <TabHeader
-          icon={Sliders}
-          title={t('What-If Climate Simulator', 'হোয়াট-ইফ জলবায়ু সিমুলেটর')}
-          description={t('Test how both plans hold up under drought, heat and water rationing.',
-                         'বৃষ্টিপাত কমলে বা তাপমাত্রা বাড়লে আপনার ফসল টিকবে কিনা তা আগেই পরীক্ষা করে দেখুন।')}
-          actions={
-            <button type="button" onClick={() => setSim(DEFAULT_SIM)} className={ghostBtn}>
-              <RefreshCw className="h-3.5 w-3.5" />
-              <span>{t('Reset Sliders', 'রিসেট করুন')}</span>
-            </button>
-          }
-        />
+      <TabHeader
+        icon={Sliders}
+        title={t('What-If Climate Simulator', 'হোয়াট-ইফ জলবায়ু সিমুলেটর')}
+        description={t('Test how both plans hold up under drought, heat and water rationing.',
+                       'বৃষ্টিপাত কমলে বা তাপমাত্রা বাড়লে আপনার ফসল টিকবে কিনা তা আগেই পরীক্ষা করে দেখুন।')}
+        actions={
+          <button type="button" onClick={() => setSim(DEFAULT_SIM)} className={ghostBtn}>
+            <RefreshCw className="h-3.5 w-3.5" />
+            <span>{t('Reset Sliders', 'রিসেট করুন')}</span>
+          </button>
+        }
+      />
 
+      <Card className="p-4 sm:p-6 rounded-[var(--radius-card)] space-y-6">
         <div className="space-y-2">
-          <span className="text-sm font-medium block text-slate-700 dark:text-slate-300">{t('Quick scenarios', 'দ্রুত পরিস্থিতি')}</span>
+          <span className="text-sm font-semibold block text-slate-700 dark:text-slate-300">{t('Quick scenarios: tap one to try it', 'দ্রুত পরিস্থিতি: একটি চেপে দেখুন')}</span>
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
             {PRESETS.map(p => {
               const active = isPreset(p.sim);
@@ -49,10 +49,13 @@ export default function WhatIfTab() {
                   type="button"
                   onClick={() => setSim(p.sim)}
                   aria-pressed={active}
-                  className={`btn-popup min-h-tap px-4 py-2 rounded-full text-sm font-medium border ${
-                    active ? 'bg-sky-600 text-white border-sky-600' : 'border-sky-500/25 glass-subtle text-slate-800 dark:text-slate-100'
+                  className={`btn-popup min-h-[52px] pl-2 pr-4 py-1.5 rounded-full text-[0.9375rem] font-semibold border flex items-center gap-2 cursor-pointer ${
+                    active ? 'fs-btn-primary border-transparent' : 'border-sky-600/20 bg-[var(--bg-surface)] hover:border-sky-600/45 hover:bg-sky-600/[0.05] text-slate-800 dark:text-slate-100'
                   }`}
                 >
+                  <span className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 ${active ? 'bg-white/20' : p.tile}`}>
+                    <p.icon className="h-[18px] w-[18px]" aria-hidden />
+                  </span>
                   {lang === 'bn' ? p.bn : p.en}
                 </button>
               );

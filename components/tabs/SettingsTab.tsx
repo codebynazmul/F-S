@@ -20,29 +20,29 @@ export default function SettingsTab() {
 
   return (
     <div className="space-y-6 card-rise">
-      <Card className="rounded-[var(--radius-card)] p-6 lg:p-8 space-y-6">
-        <TabHeader
-          icon={SlidersHorizontal}
-          badge={t('Settings & Preferences', 'সেটিংস ও পছন্দ')}
-          title={t('Theme & Language', 'থিম ও ভাষা পছন্দ')}
-          description={t('Day mode uses deep teal on a paper-white ground. Night mode switches to a dark teal-black, which is easier on the eyes at night.',
-                         'দিনের মুডে সাদাটে জমিনে গাঢ় টিল রং থাকে; রাতের মুডে গাঢ় টিল-কালো থিম চালু হয়, যা রাতে চোখের জন্য আরামদায়ক।')}
-        />
+      <TabHeader
+        icon={SlidersHorizontal}
+        badge={t('Settings & Preferences', 'সেটিংস ও পছন্দ')}
+        title={t('Theme & Language', 'থিম ও ভাষা পছন্দ')}
+        description={t('Day mode uses fresh paddy green and harvest gold on a warm cream ground, easy to read outdoors. Night mode switches to a deep forest green that is gentle on the eyes.',
+                       'দিনের মুডে উষ্ণ ঘিয়ে জমিনে ধানসবুজ ও সোনালি রং থাকে, যা বাইরে রোদেও পড়া সহজ; রাতের মুডে গাঢ় বনসবুজ থিম চালু হয়, যা চোখের জন্য আরামদায়ক।')}
+      />
 
+      <Card className="rounded-[var(--radius-card)] p-4 sm:p-6 lg:p-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ThemeCard
             active={theme === 'day'} onClick={() => setTheme('day')}
             icon={<Sun className="h-4 w-4 text-amber-500" />}
-            title={t('Day Mode', 'দিন মুড')} subtitle={t('Teal on paper', 'সাদাটে জমিনে টিল')}
-            swatches={['#F7F9F8', '#FFFFFF', '#7DBCBC', '#06525C']}
-            style={{ background: '#F7F9F8', color: '#0D2A2E' }}
+            title={t('Day Mode', 'দিন মুড')} subtitle={t('Paddy green & harvest gold', 'ধানসবুজ ও সোনালি')}
+            swatches={['#FAF6EA', '#FFFFFF', '#EDB224', '#2A7121']}
+            style={{ background: '#FAF6EA', color: '#1B2B12' }}
           />
           <ThemeCard
             active={theme === 'night'} onClick={() => setTheme('night')}
             icon={<Moon className="h-4 w-4 text-amber-300" />}
-            title={t('Night Mode', 'রাত মুড')} subtitle={t('Dark teal-black', 'গাঢ় টিল-কালো')}
-            swatches={['#0C1517', '#121E21', '#1D8088', '#7CC9CD']}
-            style={{ background: '#0C1517', color: '#EEF4F3' }}
+            title={t('Night Mode', 'রাত মুড')} subtitle={t('Deep forest green', 'গাঢ় বনসবুজ')}
+            swatches={['#0E1610', '#152019', '#34802A', '#9AD67E']}
+            style={{ background: '#0E1610', color: '#F0F5EA' }}
           />
         </div>
 

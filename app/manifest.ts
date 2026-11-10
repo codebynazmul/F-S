@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Climate-adaptive crop rotation and soil health planning for Bangladesh.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#F0F9FF',
-    theme_color: '#0284C7',
+    background_color: '#FAF6EA',
+    theme_color: '#2A7121',
     lang: 'bn',
     icons: [
       { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },

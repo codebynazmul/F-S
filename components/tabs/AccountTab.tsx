@@ -35,21 +35,21 @@ export default function AccountTab() {
 
   return (
     <div className="space-y-6 card-rise">
-      <Card className="rounded-[var(--radius-card)] p-6 lg:p-8 space-y-6">
-        <TabHeader
-          icon={UserIcon}
-          badge={t('User Account Management', 'ব্যবহারকারী একাউন্ট ব্যবস্থাপনা')}
-          title={t('Profile Settings', 'প্রোফাইল তথ্য')}
-          description={t('Your name and phone number appear on your farm action report.', 'আপনার নাম ও মোবাইল নম্বর কর্মপরিকল্পনা রিপোর্টে দেখাবে।')}
-          actions={
-            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${admin
-              ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/25'
-              : 'bg-sky-500/15 text-sky-600 dark:text-sky-300 border-sky-500/25'}`}>
-              {admin ? t('Admin Role', 'অ্যাডমিন একাউন্ট') : t('Farmer Role', 'কৃষক একাউন্ট')}
-            </span>
-          }
-        />
+      <TabHeader
+        icon={UserIcon}
+        badge={t('User Account Management', 'ব্যবহারকারী একাউন্ট ব্যবস্থাপনা')}
+        title={t('Profile Settings', 'প্রোফাইল তথ্য')}
+        description={t('Your name and phone number appear on your farm action report.', 'আপনার নাম ও মোবাইল নম্বর কর্মপরিকল্পনা রিপোর্টে দেখাবে।')}
+        actions={
+          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${admin
+            ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/25'
+            : 'bg-sky-500/15 text-sky-600 dark:text-sky-300 border-sky-500/25'}`}>
+            {admin ? t('Admin Role', 'অ্যাডমিন একাউন্ট') : t('Farmer Role', 'কৃষক একাউন্ট')}
+          </span>
+        }
+      />
 
+      <Card className="rounded-[var(--radius-card)] p-4 sm:p-6 lg:p-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <SubCard className="p-5 rounded-2xl flex flex-col items-center justify-center text-center space-y-3">
             <Avatar initials={user.initials} admin={admin} size="lg" />

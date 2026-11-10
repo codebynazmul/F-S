@@ -10,12 +10,38 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Accent scale. The class name stays "sky" so existing markup keeps working,
-        // but the values come from CSS variables in globals.css: deep teal in the
+        // Main accent scale. The class name stays "sky" so existing markup keeps working,
+        // but the values come from CSS variables in globals.css: paddy green in the
         // app, and the original sky blue inside the admin panel (.fs-classic).
         sky: Object.fromEntries(
           [50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map(k => [k, `rgb(var(--sky-${k}) / <alpha-value>)`])
         ),
+        // Harvest gold (ripe rice, mustard flowers): highlights, badges, the season banner.
+        harvest: {
+          50:  "#FEF9E8",
+          100: "#FDF0C4",
+          200: "#FBE08A",
+          300: "#F7CB4D",
+          400: "#EDB224",
+          500: "#D69611",
+          600: "#B0740B",
+          700: "#8A570E",
+          800: "#6F4512",
+          900: "#5C3913",
+        },
+        // Soil brown: soil facts and earthy details.
+        soil: {
+          50:  "#FAF4EE",
+          100: "#F1E3D3",
+          200: "#E2C6A6",
+          300: "#CFA275",
+          400: "#B9804F",
+          500: "#9C6638",
+          600: "#7F512C",
+          700: "#653F25",
+          800: "#4F3220",
+          900: "#3D271B",
+        },
         // NIGHT theme — deep dark gray
         graphite: {
           50:  "#F1F5F9",
@@ -39,7 +65,8 @@ module.exports = {
       },
       fontFamily: {
         // Inter for Latin text; Noto Sans Bengali fills in every Bangla character.
-        // --font-ui is set in globals.css (Instrument Sans; Inter inside the admin panel).
+        // --font-ui is set in globals.css (Figtree + Hind Siliguri; Inter inside the admin panel).
+        display: ['var(--font-display)', 'var(--font-ui)', 'system-ui', 'sans-serif'],
         sans: ['var(--font-ui)', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
         mono: ['var(--font-dm-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco',
                'Consolas', 'monospace'],
@@ -56,9 +83,14 @@ module.exports = {
       },
       borderRadius: {
         '4xl': '2rem',
+        '5xl': '2.5rem',
       },
       boxShadow: {
         'glass':       '0 8px 32px rgba(14, 165, 233, 0.18)',
+        // Soft, warm, sunlight-style shadows for the farmer UI
+        'leaf':        '0 1px 2px rgba(40, 60, 20, 0.06), 0 8px 24px -10px rgba(40, 60, 20, 0.18)',
+        'leaf-lg':     '0 2px 4px rgba(40, 60, 20, 0.06), 0 18px 40px -16px rgba(40, 60, 20, 0.30)',
+        'cta':         '0 8px 20px -8px rgba(42, 113, 33, 0.55)',
         'glass-dark':  '0 8px 32px rgba(0, 0, 0, 0.55)',
         'fab':         '0 12px 28px rgba(14, 165, 233, 0.30)',
       },

@@ -51,25 +51,25 @@ export default function ReportTab() {
 
   return (
     <div className="space-y-6 card-rise print-area">
-      <Card className="p-6 lg:p-8 rounded-[var(--radius-card)] space-y-6">
-        <TabHeader
-          icon={FileText}
-          badge={t('Farmer Decision Dossier', 'কৃষক পরামর্শ ও কর্মপরিকল্পনা দলিল')}
-          title={t(`Farm Adaptation Plan for ${district.name} District`, `${district.nameBn} জেলার জন্য ফসল পর্যায়ক্রম কর্মপরিকল্পনা`)}
-          description={`${t('Farmer', 'কৃষক')}: ${user.name}${user.phone !== '—' ? ` (${user.phone})` : ''} · ${today}`}
-          actions={
-            <>
-              <button type="button" onClick={copy} className={ghostBtn}>
-                {copied ? <CheckCircle2 className="h-3.5 w-3.5" /> : <ClipboardCopy className="h-3.5 w-3.5" />}
-                {copied ? t('Copied', 'কপি হয়েছে') : t('Copy summary', 'সারাংশ কপি')}
-              </button>
-              <button type="button" onClick={() => window.print()} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm ${primaryBtn}`}>
-                <Download className="h-4 w-4" />{t('Print / Save PDF', 'প্রিন্ট বা পিডিএফ')}
-              </button>
-            </>
-          }
-        />
+      <TabHeader
+        icon={FileText}
+        badge={t('Farmer Decision Dossier', 'কৃষক পরামর্শ ও কর্মপরিকল্পনা দলিল')}
+        title={t(`Farm Adaptation Plan for ${district.name} District`, `${district.nameBn} জেলার জন্য ফসল পর্যায়ক্রম কর্মপরিকল্পনা`)}
+        description={`${t('Farmer', 'কৃষক')}: ${user.name}${user.phone !== '—' ? ` (${user.phone})` : ''} · ${today}`}
+        actions={
+          <>
+            <button type="button" onClick={copy} className={ghostBtn}>
+              {copied ? <CheckCircle2 className="h-3.5 w-3.5" /> : <ClipboardCopy className="h-3.5 w-3.5" />}
+              {copied ? t('Copied', 'কপি হয়েছে') : t('Copy summary', 'সারাংশ কপি')}
+            </button>
+            <button type="button" onClick={() => window.print()} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm ${primaryBtn}`}>
+              <Download className="h-4 w-4" />{t('Print / Save PDF', 'প্রিন্ট বা পিডিএফ')}
+            </button>
+          </>
+        }
+      />
 
+      <Card className="p-4 sm:p-6 lg:p-8 rounded-[var(--radius-card)] space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-sm">
           <Fact label={t('District', 'জেলা')} value={`${districtName}, ${divisionName(district.division, lang)}`} />
           <Fact label={t('Farm size', 'জমির পরিমাণ')} value={`${n(farm.sizeBigha, farm.sizeBigha % 1 ? 1 : 0)} ${t('bigha', 'বিঘা')} (${n(farm.sizeBigha * BIGHA_ACRE, 2)} ${t('acres', 'একর')})`} />

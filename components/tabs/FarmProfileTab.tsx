@@ -35,28 +35,28 @@ export default function FarmProfileTab() {
 
   return (
     <div className="space-y-6 card-rise">
-      <Card className="p-6 rounded-[var(--radius-card)] space-y-6">
-        <TabHeader
-          icon={Layers}
-          title={t('Farm Profile & Soil Lab Values', 'খামার ও মাটির ল্যাব টেস্ট তথ্য')}
-          description={t('These values change your crop recommendation and every score in the app. Changes are saved automatically.',
-                         'এই তথ্যগুলো আপনার ফসলের পরামর্শ ও সব স্কোর পরিবর্তন করে। পরিবর্তন স্বয়ংক্রিয়ভাবে সংরক্ষিত হয়।')}
-          actions={
-            <>
-              <span role="status" className="contents">
-                {savedFlash && (
-                  <span className="card-popup min-h-tap flex items-center gap-1.5 px-3 rounded-xl text-sm font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-500/15">
-                    <CheckCircle2 className="h-4 w-4" />{t('Saved', 'সংরক্ষিত')}
-                  </span>
-                )}
-              </span>
-              <button type="button" onClick={() => updateFarm(DEFAULT_FARM)} className={ghostBtn}>
-                <RotateCcw className="h-4 w-4" />{t('Reset', 'রিসেট')}
-              </button>
-            </>
-          }
-        />
+      <TabHeader
+        icon={Layers}
+        title={t('Farm Profile & Soil Lab Values', 'খামার ও মাটির ল্যাব টেস্ট তথ্য')}
+        description={t('These values change your crop recommendation and every score in the app. Changes are saved automatically.',
+                       'এই তথ্যগুলো আপনার ফসলের পরামর্শ ও সব স্কোর পরিবর্তন করে। পরিবর্তন স্বয়ংক্রিয়ভাবে সংরক্ষিত হয়।')}
+        actions={
+          <>
+            <span role="status" className="contents">
+              {savedFlash && (
+                <span className="card-popup min-h-tap flex items-center gap-1.5 px-3 rounded-xl text-sm font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-500/15">
+                  <CheckCircle2 className="h-4 w-4" />{t('Saved', 'সংরক্ষিত')}
+                </span>
+              )}
+            </span>
+            <button type="button" onClick={() => updateFarm(DEFAULT_FARM)} className={ghostBtn}>
+              <RotateCcw className="h-4 w-4" />{t('Reset', 'রিসেট')}
+            </button>
+          </>
+        }
+      />
 
+      <Card className="p-4 sm:p-6 rounded-[var(--radius-card)] space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div>
             <label htmlFor="farm-size" className={labelClass}>{t('Cultivated Area (Bigha)', 'মোট আবাদি জমি (বিঘা)')}</label>

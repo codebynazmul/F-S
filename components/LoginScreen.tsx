@@ -23,7 +23,7 @@ function canPlayVideo(): boolean {
   return true;
 }
 
-const fieldBox = 'fs-field min-h-tap flex items-center gap-2.5 rounded-xl px-3.5 py-2.5';
+const fieldBox = 'fs-field min-h-[52px] flex items-center gap-2.5 rounded-2xl px-4 py-2.5';
 const fieldInput =
   'w-full bg-transparent outline-none text-[0.9375rem] text-slate-900 dark:text-white placeholder:text-slate-400';
 
@@ -226,7 +226,7 @@ export default function LoginScreen() {
 
   const linkBtn = 'min-h-tap text-sm font-medium text-sky-700 dark:text-sky-300 hover:underline underline-offset-4 transition-colors';
   const socialBtn =
-    'btn-popup min-h-tap w-full flex items-center justify-center gap-3 py-3 px-5 rounded-xl bg-[var(--bg-surface)] border border-sky-600/15 hover:border-sky-600/40 font-medium text-sm';
+    'btn-popup min-h-[52px] w-full flex items-center justify-center gap-3 py-3 px-5 rounded-full bg-[var(--bg-surface)] border border-sky-600/20 hover:border-sky-600/45 shadow-leaf font-semibold text-sm cursor-pointer';
 
   const emailField = (
     <label className={fieldBox}>
@@ -288,19 +288,46 @@ export default function LoginScreen() {
             <source src={VIDEO_URL} type="video/mp4" onError={() => setShowVideo(false)} />
           </video>
         )}
+<<<<<<< Updated upstream
         <div className="fs-login-media-copy flex items-center gap-3">
           <img src="/logo-sm.png" alt="" className="h-10 w-10 rounded-xl object-cover" />
           <span className="fs-display text-xl">{t('Field Shift', 'ফিল্ড শিফট')}</span>
         </div>
         <div className="fs-login-media-copy max-w-xl space-y-4">
           <h1 className="fs-display text-[2rem] sm:text-[2.75rem] lg:text-[3.5rem] text-white">
+=======
+        <motion.div variants={heroRise} className="fs-login-media-copy flex items-center gap-3">
+          <img src="/logo-sm.png" alt="" className="h-12 w-12 rounded-2xl object-cover ring-2 ring-white/30" />
+          <span className="fs-display text-2xl">{t('Field Shift', 'ফিল্ড শিফট')}</span>
+        </motion.div>
+        <motion.div variants={heroStagger} className="fs-login-media-copy max-w-xl space-y-4">
+          <motion.h1 variants={heroRise} className="fs-display text-[2rem] sm:text-[2.75rem] lg:text-[3.5rem] text-white">
+>>>>>>> Stashed changes
             {t('Crop rotations that use less water, for farms in Bangladesh.', 'কম পানিতে ফসল পর্যায়ক্রম, বাংলাদেশের খামারের জন্য।')}
           </h1>
           <p className="text-[0.9375rem] lg:text-base text-white/85 max-w-md leading-relaxed">
             {t('All 64 districts, with NASA POWER climate data, in Bangla and English.', '৬৪টি জেলা, নাসা POWER জলবায়ু তথ্যসহ, বাংলা ও ইংরেজিতে।')}
+<<<<<<< Updated upstream
           </p>
         </div>
       </section>
+=======
+          </motion.p>
+          <motion.ul variants={heroRise} className="flex flex-wrap gap-2 pt-1" aria-label={t('Highlights', 'বিশেষ দিক')}>
+            {[
+              t('64 districts', '৬৪ জেলা'),
+              t('NASA climate data', 'নাসার জলবায়ু তথ্য'),
+              t('Saves water & urea', 'পানি ও ইউরিয়া সাশ্রয়'),
+            ].map(label => (
+              <li key={label} className="flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-semibold text-white bg-white/15 border border-white/25 backdrop-blur-sm">
+                <span className="h-2 w-2 rounded-full bg-harvest-300" aria-hidden />
+                {label}
+              </li>
+            ))}
+          </motion.ul>
+        </motion.div>
+      </motion.section>
+>>>>>>> Stashed changes
 
       <main className="fs-login-panel flex flex-col lg:min-h-screen">
         <div className="flex justify-end px-5 pt-5 sm:px-8 lg:px-12 lg:pt-8">
@@ -338,7 +365,7 @@ export default function LoginScreen() {
               <button
                 type="submit"
                 disabled={busy || !email.trim() || !password}
-                className={`w-full py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
+                className={`w-full py-3.5 rounded-full text-base flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
               >
                 <LogIn className="h-4 w-4" />
                 <span>{busy ? t('Logging in…', 'লগইন হচ্ছে…') : t('Log in', 'লগইন')}</span>
@@ -368,7 +395,7 @@ export default function LoginScreen() {
 
               {!codeSent ? (
                 <button type="submit" disabled={busy || !email.trim()}
-                  className={`w-full py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}>
+                  className={`w-full py-3.5 rounded-full text-base flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}>
                   <Send className="h-4 w-4" />
                   <span>{busy ? t('Sending…', 'পাঠানো হচ্ছে…') : t('Send code', 'কোড পাঠান')}</span>
                 </button>
@@ -400,7 +427,7 @@ export default function LoginScreen() {
                     <button
                       type="submit"
                       disabled={busy || code.length < 6}
-                      className={`flex-1 py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
+                      className={`flex-1 py-3.5 rounded-full text-base flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
                     >
                       <LogIn className="h-4 w-4" />
                       <span>{busy ? t('Checking…', 'যাচাই হচ্ছে…') : t('Log in', 'লগইন')}</span>
@@ -439,7 +466,7 @@ export default function LoginScreen() {
               <button
                 type="submit"
                 disabled={busy || !name.trim() || !email.trim() || !password}
-                className={`w-full py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
+                className={`w-full py-3.5 rounded-full text-base flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
               >
                 <UserPlus className="h-4 w-4" />
                 <span>{busy ? t('Creating account…', 'অ্যাকাউন্ট খোলা হচ্ছে…') : t('Sign up', 'নিবন্ধন করুন')}</span>
@@ -460,7 +487,7 @@ export default function LoginScreen() {
                   <button
                     type="submit"
                     disabled={busy || !email.trim()}
-                    className={`w-full py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
+                    className={`w-full py-3.5 rounded-full text-base flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}
                   >
                     <Send className="h-4 w-4" />
                     <span>{t('Send reset link', 'রিসেট লিংক পাঠান')}</span>
@@ -578,7 +605,7 @@ export function NewPasswordScreen() {
                 <CheckCircle2 className="h-4 w-4" />{t('Your password has been changed.', 'আপনার পাসওয়ার্ড পরিবর্তন হয়েছে।')}
               </div>
               <button type="button" onClick={finishPasswordRecovery}
-                className={`w-full py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 ${primaryBtn}`}>
+                className={`w-full py-3.5 rounded-full text-base flex items-center justify-center gap-2 ${primaryBtn}`}>
                 <LogIn className="h-4 w-4" />{t('Continue to Field Shift', 'ফিল্ড শিফটে যান')}
               </button>
             </div>
@@ -587,7 +614,7 @@ export function NewPasswordScreen() {
               {input('np-new', t('New password', 'নতুন পাসওয়ার্ড'), password, setPassword)}
               {input('np-confirm', t('Confirm new password', 'নতুন পাসওয়ার্ড আবার দিন'), confirm, setConfirm)}
               <button type="submit" disabled={busy || !password || !confirm}
-                className={`w-full py-3 rounded-xl text-[0.9375rem] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}>
+                className={`w-full py-3.5 rounded-full text-base flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed ${primaryBtn}`}>
                 <Save className="h-4 w-4" />{busy ? t('Saving…', 'সংরক্ষণ হচ্ছে…') : t('Save new password', 'নতুন পাসওয়ার্ড সংরক্ষণ')}
               </button>
             </form>
