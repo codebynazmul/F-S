@@ -2,16 +2,15 @@
 
 import React, { useEffect } from 'react';
 import {
-  BarChart3, FileText, Globe, Layers, LogOut, Menu, Moon, ShieldCheck,
-  Sliders, SlidersHorizontal, Sprout, Sun, User as UserIcon, X, type LucideIcon,
+  BarChart3, FileText, Globe, Layers, Moon, MoreVertical, Sliders, Sprout, Sun, X, type LucideIcon,
 } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, type Variants } from 'motion/react';
 import { useApp } from './AppProvider';
 import { SLIDE, iconSwap } from '@/lib/motion';
-import { Avatar, LangToggle } from './ui';
+import { LangToggle } from './ui';
 import type { TabId } from '@/lib/types';
 
-interface NavItem { id: TabId; en: string; bn: string; icon: LucideIcon; adminOnly?: boolean }
+interface NavItem { id: TabId; en: string; bn: string; icon: LucideIcon }
 
 /** Each section has its own tile colour so it's easy to find again by sight. */
 const TILE: Record<TabId, string> = {
@@ -20,9 +19,6 @@ const TILE: Record<TabId, string> = {
   analytics:    'bg-cyan-100 text-cyan-800 dark:bg-cyan-500/20 dark:text-cyan-300',
   nasa:         'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300',
   farm_profile: 'bg-soil-100 text-soil-700 dark:bg-soil-500/25 dark:text-soil-200',
-  user_account: 'bg-harvest-100 text-harvest-800 dark:bg-harvest-500/20 dark:text-harvest-200',
-  settings:     'bg-slate-200/70 text-slate-700 dark:bg-slate-500/25 dark:text-slate-200',
-  admin:        'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200',
   report:       'bg-harvest-200 text-harvest-900 dark:bg-harvest-500/25 dark:text-harvest-200',
 };
 
@@ -32,14 +28,21 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'analytics',    en: 'Soil & Water Analytics',    bn: 'মাটি ও পানির তুলনা',            icon: BarChart3 },
   { id: 'nasa',         en: 'NASA Earth Data',           bn: 'নাসা আর্থ পর্যবেক্ষণ',          icon: Globe },
   { id: 'farm_profile', en: 'Farm & Soil Profile',       bn: 'খামার ও মাটির ল্যাব তথ্য',      icon: Layers },
-  { id: 'user_account', en: 'My Account',                bn: 'আমার একাউন্ট ও প্রোফাইল',        icon: UserIcon },
-  { id: 'settings',     en: 'Settings & Theme',          bn: 'সেটিংস ও থিম',                 icon: SlidersHorizontal },
-  { id: 'admin',        en: 'Admin Panel',               bn: 'অ্যাডমিন প্যানেল',               icon: ShieldCheck, adminOnly: true },
   { id: 'report',       en: 'Farm Action Dossier',       bn: 'কৃষক কর্মপরিকল্পনা রিপোর্ট',      icon: FileText },
 ];
 
+// Menu items slide in one after another each time the menu opens.
+const listStagger: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.04, delayChildren: 0.08 } },
+};
+const itemSlide: Variants = {
+  hidden: { opacity: 0, x: -16 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } },
+};
+
 export default function Sidebar() {
-  const { t, lang, user, activeTab, setActiveTab, menuOpen, setMenuOpen, isNight, setTheme, signOut } = useApp();
+  const { t, lang, user, activeTab, setActiveTab, menuOpen, setMenuOpen, isNight, setTheme } = useApp();
 
   // Close on Escape.
   useEffect(() => {
@@ -64,12 +67,12 @@ export default function Sidebar() {
       >
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.span key={menuOpen ? 'close' : 'menu'} {...iconSwap} className="flex">
-            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {menuOpen ? <X className="h-6 w-6" /> : <MoreVertical className="h-6 w-6" />}
           </motion.span>
         </AnimatePresence>
       </button>
 
-      {/* Click outside to close (phones and tablets) */}
+      {/* Click outside to close */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -77,7 +80,7 @@ export default function Sidebar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: 0.25 } }}
             exit={{ opacity: 0, transition: { duration: 0.2 } }}
-            className="fixed inset-0 z-40 bg-slate-950/30 lg:hidden"
+            className="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-[2px]"
             onClick={() => setMenuOpen(false)}
             aria-hidden
           />
@@ -87,15 +90,15 @@ export default function Sidebar() {
       <aside
         id="fs-drawer"
         aria-label={t('Main navigation', 'প্রধান মেন্যু')}
-        className={`fs-drawer fixed top-0 bottom-0 left-0 z-50 w-72 max-w-[85vw] h-screen flex flex-col bg-[var(--bg-page)] border-r border-sky-600/10 transition-[transform,visibility] duration-300 ease-[cubic-bezier(.2,.8,.2,1)] lg:translate-x-0 lg:visible ${
+        className={`fs-drawer fixed top-0 bottom-0 left-0 z-50 w-72 max-w-[85vw] h-screen flex flex-col bg-[var(--bg-page)] border-r border-sky-600/10 shadow-2xl transition-[transform,visibility] duration-300 ease-[cubic-bezier(.2,.8,.2,1)] ${
           menuOpen ? 'translate-x-0 visible' : '-translate-x-full invisible'
         }`}
       >
-        <div className="px-5 pt-[4.25rem] lg:pt-6 pb-5">
+        <div className="px-5 pt-[4.25rem] pb-5">
           <div className="flex items-center gap-3">
             <img src="/logo-sm.png" alt="" className="h-12 w-12 rounded-2xl object-cover shrink-0 shadow-leaf" />
             <div className="min-w-0">
-              <div className="fs-display text-xl text-slate-900 dark:text-white">{t('Field Shift', 'ফিল্ড শিফট')}</div>
+              <div className="fs-display text-xl text-slate-900 dark:text-white">{t('Agro Cosmic Weave', 'অ্যাগ্রো কসমিক উইভ')}</div>
               <span className="text-xs block leading-tight text-slate-500 dark:text-slate-400">
                 {t('Crop and soil planner', 'ফসল ও মাটির পরিকল্পনা')}
               </span>
@@ -107,12 +110,13 @@ export default function Sidebar() {
           <span className="fs-eyebrow px-3 mb-2 block">
             {t('Menu', 'মেন্যু')}
           </span>
-          <div className="space-y-1 isolate">
-            {NAV_ITEMS.filter(i => !i.adminOnly || user.role === 'admin').map(item => {
+          <motion.div className="space-y-1 isolate" variants={listStagger} initial="hidden" animate={menuOpen ? 'show' : 'hidden'}>
+            {NAV_ITEMS.map(item => {
               const Icon = item.icon;
               const active = activeTab === item.id;
               return (
-                <button
+                <motion.button
+                  variants={itemSlide}
                   type="button"
                   key={item.id}
                   onClick={() => go(item.id)}
@@ -133,44 +137,27 @@ export default function Sidebar() {
                     <Icon className="h-5 w-5" aria-hidden />
                   </span>
                   <span className="leading-snug">{lang === 'bn' ? item.bn : item.en}</span>
-                </button>
+                </motion.button>
               );
             })}
-          </div>
+          </motion.div>
         </nav>
 
-        <div className="p-4 border-t border-sky-600/10 space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <LangToggle />
-            <button
-              type="button"
-              onClick={() => setTheme(isNight ? 'day' : 'night')}
-              className="btn-popup min-h-[44px] flex items-center gap-1.5 px-3.5 rounded-full border border-sky-600/20 bg-[var(--bg-surface)] text-sm font-semibold text-slate-700 dark:text-slate-200 cursor-pointer"
-              aria-label={isNight ? t('Switch to day mode', 'দিন মোডে যান') : t('Switch to night mode', 'রাত মোডে যান')}
-            >
-              <AnimatePresence mode="popLayout" initial={false}>
-                <motion.span key={isNight ? 'sun' : 'moon'} {...iconSwap} className="flex">
-                  {isNight ? <Sun className="h-4 w-4 text-harvest-300" /> : <Moon className="h-4 w-4 text-sky-700" />}
-                </motion.span>
-              </AnimatePresence>
-              <span>{isNight ? t('Day', 'দিন') : t('Night', 'রাত')}</span>
-            </button>
-          </div>
-
-          <div className="rounded-3xl border border-sky-600/10 bg-[var(--bg-surface)] shadow-leaf p-2.5 flex items-center justify-between gap-2">
-            <button type="button" onClick={() => go('user_account')} className="flex items-center gap-2.5 min-w-0 text-left rounded-xl p-1 -m-1 hover:bg-sky-600/5 transition-colors" aria-label={t('Edit Profile', 'প্রোফাইল সম্পাদন')}>
-              <Avatar initials={user.initials} admin={user.role === 'admin'} />
-              <span className="truncate">
-                <span className="text-sm font-medium truncate block text-slate-900 dark:text-white">{user.name}</span>
-                <span className="text-xs block text-slate-500 dark:text-slate-400">
-                  {user.role === 'admin' ? t('Admin', 'অ্যাডমিন') : t('Farmer', 'কৃষক')}
-                </span>
-              </span>
-            </button>
-            <button type="button" onClick={signOut} className="btn-popup h-11 w-11 shrink-0 flex items-center justify-center text-slate-500 hover:text-red-600 hover:bg-red-500/10 rounded-full cursor-pointer" title={t('Sign Out', 'লগআউট')} aria-label={t('Sign Out', 'লগআউট')}>
-              <LogOut className="h-[18px] w-[18px]" />
-            </button>
-          </div>
+        <div className="p-4 border-t border-sky-600/10 flex items-center justify-between gap-2">
+          <LangToggle />
+          <button
+            type="button"
+            onClick={() => setTheme(isNight ? 'day' : 'night')}
+            className="btn-popup min-h-[44px] flex items-center gap-1.5 px-3.5 rounded-full border border-sky-600/20 bg-[var(--bg-surface)] text-sm font-semibold text-slate-700 dark:text-slate-200 cursor-pointer"
+            aria-label={isNight ? t('Switch to day mode', 'দিন মোডে যান') : t('Switch to night mode', 'রাত মোডে যান')}
+          >
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.span key={isNight ? 'sun' : 'moon'} {...iconSwap} className="flex">
+                {isNight ? <Sun className="h-4 w-4 text-harvest-300" /> : <Moon className="h-4 w-4 text-sky-700" />}
+              </motion.span>
+            </AnimatePresence>
+            <span>{isNight ? t('Day', 'দিন') : t('Night', 'রাত')}</span>
+          </button>
         </div>
       </aside>
     </>

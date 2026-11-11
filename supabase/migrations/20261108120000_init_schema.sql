@@ -1,4 +1,4 @@
--- Field Shift: initial schema.
+-- Agro Cosmic Weave: initial schema.
 -- Flow: NASA APIs -> Edge Functions -> these tables. Only processed values are stored.
 -- Edge Functions write with the service key, which bypasses RLS, so most NASA tables
 -- have read policies only.

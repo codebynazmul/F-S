@@ -1,5 +1,5 @@
 /*
- * Field Shift service worker.
+ * Agro Cosmic Weave service worker.
  * - Pages: try the network first, fall back to the cached copy when offline.
  * - Built files, fonts, images: serve from cache, fetch once.
  * - Supabase and other sites are not touched; the app keeps its own offline copy of NASA data.

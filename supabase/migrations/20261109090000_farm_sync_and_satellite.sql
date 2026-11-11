@@ -1,4 +1,4 @@
--- Field Shift: one farm per account, a "latest value" view for observations,
+-- Agro Cosmic Weave: one farm per account, a "latest value" view for observations,
 -- and keeping elevation data (it never changes) out of the cleanup.
 
 -- Safe to run more than once.

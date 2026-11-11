@@ -1,4 +1,4 @@
--- Field Shift: sign-in tracking for the admin panel, activity log writes,
+-- Agro Cosmic Weave: sign-in tracking for the admin panel, activity log writes,
 -- and locking blocked users out of their data.
 
 -- ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// Field Shift: NASA POWER sync.
+// Agro Cosmic Weave: NASA POWER sync.
 //
 // Fetches NASA POWER data for the 64 districts and stores only processed values:
 //   - climate_normals: 30-year monthly averages (refreshed yearly)

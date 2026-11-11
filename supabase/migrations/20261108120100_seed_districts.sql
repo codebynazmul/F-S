@@ -1,4 +1,4 @@
--- Field Shift: the 64 districts, generated from data/districts.ts.
+-- Agro Cosmic Weave: the 64 districts, generated from data/districts.ts.
 insert into public.districts (id, name, name_bn, division, lat, lng, soil, rainfall, temp, risk, risk_bn) values
   ('dhaka', 'Dhaka', 'ঢাকা', 'Dhaka', 23.8103, 90.4125, 'Madhupur Tract Clay Loam', 2040, 26.8, 'Urban Runoff & Heat Island', 'জলাবদ্ধতা ও চরম তাপদাহ'),
   ('gazipur', 'Gazipur', 'গাজীপুর', 'Dhaka', 24.0023, 90.4264, 'Red Brown Terrace Clay', 2100, 26.5, 'Industrial Runoff & Soil Acidity', 'মাটির অম্লতা বৃদ্ধি ও উর্বরতা হ্রাস'),

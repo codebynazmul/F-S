@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="public/logo.png" alt="Field Shift logo" width="160" />
+  <img src="public/logo.png" alt="Agro Cosmic Weave logo" width="160" />
 </p>
 
-<h1 align="center">Field Shift</h1>
+<h1 align="center">Agro Cosmic Weave</h1>
 
 <p align="center">
   <strong>A climate-adaptive crop rotation and soil health planner for Bangladesh.</strong>
@@ -30,7 +30,7 @@
 
 ---
 
-Field Shift helps farmers and agricultural officers pick crop rotations that use less water, build soil health, and hold up better under climate stress. It covers all 64 districts of Bangladesh, uses NASA climate and satellite data (POWER, MODIS, SMAP and NASADEM), and works in both English and Bangla.
+Agro Cosmic Weave helps farmers and agricultural officers pick crop rotations that use less water, build soil health, and hold up better under climate stress. It covers all 64 districts of Bangladesh, uses NASA climate and satellite data (POWER, MODIS, SMAP and NASADEM), and works in both English and Bangla.
 
 Built by **SPIDERX** for the NASA Space Apps Challenge.
 
@@ -161,7 +161,7 @@ It can be skipped, and every value can be changed later in **Farm & Soil Profile
 
 ## Install and offline use
 
-Field Shift is a Progressive Web App:
+Agro Cosmic Weave is a Progressive Web App:
 
 - [app/manifest.ts](app/manifest.ts) provides the web app manifest, so it can be installed to a phone's home screen.
 - [public/sw.js](public/sw.js) is a service worker that caches pages, built files, fonts and images, so the app still opens without a connection. It does not touch Supabase requests.
@@ -281,7 +281,7 @@ The `@/` import alias points to the project root.
 
 ### Architecture
 
-![Field Shift backend on Supabase](docs/diagrams/supabase-architecture.png)
+![Agro Cosmic Weave backend on Supabase](docs/diagrams/supabase-architecture.png)
 
 *Interactive version: [docs/diagrams/supabase-architecture.html](docs/diagrams/supabase-architecture.html)*
 
@@ -322,7 +322,7 @@ NASA-derived data stays at roughly 10,000 rows (64 districts × about 12 metrics
 
 ### Tables
 
-![Field Shift database tables](docs/diagrams/supabase-data-model.png)
+![Agro Cosmic Weave database tables](docs/diagrams/supabase-data-model.png)
 
 *Interactive version: [docs/diagrams/supabase-data-model.html](docs/diagrams/supabase-data-model.html)*
 

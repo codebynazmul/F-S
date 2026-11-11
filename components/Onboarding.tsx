@@ -27,55 +27,24 @@ const IRRIGATION_ICONS: Record<IrrigationType, typeof Droplets> = {
   rainfed: CloudRain,
 };
 
-/** Distance in km between two points (haversine). */
-function distanceKm(aLat: number, aLng: number, bLat: number, bLng: number) {
-  const r = (x: number) => (x * Math.PI) / 180;
-  const dLat = r(bLat - aLat);
-  const dLng = r(bLng - aLng);
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(aLat)) * Math.cos(r(bLat)) * Math.sin(dLng / 2) ** 2;
-  return 6371 * 2 * Math.asin(Math.sqrt(h));
-}
-
 /** Three short steps for new users: district → soil → water and farm size. */
 export default function Onboarding() {
-  const { t, n, lang, user, district, setDistrictId, farm, updateFarm, finishOnboarding } = useApp();
+  const { t, n, lang, user, district, setDistrictId, farm, updateFarm, finishOnboarding, locationStatus, locate } = useApp();
+  const locating = locationStatus === 'locating';
+  const locError =
+    locationStatus === 'denied' ? t('Could not get your location. Please choose your district from the list.', 'লোকেশন পাওয়া যায়নি। তালিকা থেকে জেলা বেছে নিন।')
+    : locationStatus === 'unsupported' ? t('Location is not available on this device.', 'এই ডিভাইসে লোকেশন পাওয়া যাচ্ছে না।')
+    : '';
   const [step, setStep] = useState(0);
   // Which way the steps slide: 1 = forward, -1 = back.
   const [dir, setDir] = useState(1);
   const move = (by: 1 | -1) => { setDir(by); setStep(s => s + by); };
-  const [locating, setLocating] = useState(false);
-  const [locError, setLocError] = useState('');
-
   const steps = [
     { icon: MapPin, title: t('Where is your farm?', 'আপনার জমি কোথায়?') },
     { icon: Layers, title: t('What is your soil like?', 'আপনার মাটি কেমন?') },
     { icon: Droplets, title: t('How do you water your crops?', 'আপনি কীভাবে সেচ দেন?') },
   ];
   const last = step === steps.length - 1;
-
-  const locate = () => {
-    if (!('geolocation' in navigator)) {
-      setLocError(t('Location is not available on this device.', 'এই ডিভাইসে লোকেশন পাওয়া যাচ্ছে না।'));
-      return;
-    }
-    setLocating(true);
-    setLocError('');
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        const nearest = ALL_DISTRICTS.reduce((best, d) =>
-          distanceKm(latitude, longitude, d.lat, d.lng) < distanceKm(latitude, longitude, best.lat, best.lng) ? d : best
-        );
-        setDistrictId(nearest.id);
-        setLocating(false);
-      },
-      () => {
-        setLocError(t('Could not get your location. Please choose your district from the list.', 'লোকেশন পাওয়া যায়নি। তালিকা থেকে জেলা বেছে নিন।'));
-        setLocating(false);
-      },
-      { timeout: 10000, maximumAge: 600000 }
-    );
-  };
 
   const optionClass = (active: boolean) =>
     `btn-popup min-h-[56px] w-full flex items-center gap-3 p-3.5 rounded-2xl border text-left cursor-pointer ${
@@ -87,7 +56,7 @@ export default function Onboarding() {
       <header className="glass-bar border-b border-sky-600/10 px-4 sm:px-8 py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <img src="/logo-sm.png" alt="" className="h-11 w-11 rounded-2xl object-cover shadow-leaf" />
-          <span className="fs-display text-xl">{t('Field Shift', 'ফিল্ড শিফট')}</span>
+          <span className="fs-display text-xl">{t('Agro Cosmic Weave', 'অ্যাগ্রো কসমিক উইভ')}</span>
         </div>
         <LangToggle />
       </header>
@@ -129,7 +98,7 @@ export default function Onboarding() {
           <motion.div key={step} custom={dir} variants={stepSlide} initial="enter" animate="show" exit="exit">
           {step === 0 && (
             <div className="space-y-4">
-              <button type="button" onClick={locate} disabled={locating} className={`${ghostBtn} w-full sm:w-auto text-sm`}>
+              <button type="button" onClick={() => locate(true)} disabled={locating} className={`${ghostBtn} w-full sm:w-auto text-sm`}>
                 <LocateFixed className={`h-5 w-5 ${locating ? 'animate-pulse' : ''}`} />
                 {locating ? t('Finding you…', 'খোঁজা হচ্ছে…') : t('Use my location', 'আমার লোকেশন ব্যবহার করুন')}
               </button>

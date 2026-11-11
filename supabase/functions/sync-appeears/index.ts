@@ -1,4 +1,4 @@
-// Field Shift: AppEEARS sync (needs a free NASA Earthdata Login).
+// Agro Cosmic Weave: AppEEARS sync (needs a free NASA Earthdata Login).
 //
 // AppEEARS works with tasks that take minutes to hours, so every call does two things:
 //   1. Collect: check pending tasks; when one is done, read its CSV results and store
@@ -241,7 +241,7 @@ async function submitDue(db: SupabaseClient, token: string): Promise<string[]> {
 
 /** Starts a task and records it. A failure is recorded too, so the next try waits. */
 async function submit(db: SupabaseClient, token: string, job: Job, params: Record<string, unknown>) {
-  const body = { task_type: 'point', task_name: `field-shift-${job}-${new Date().toISOString().slice(0, 10)}`, params };
+  const body = { task_type: 'point', task_name: `agro-cosmic-weave-${job}-${new Date().toISOString().slice(0, 10)}`, params };
   try {
     const res = await (await api(token, '/task', { method: 'POST', body: JSON.stringify(body) })).json();
     if (!res.task_id) throw new Error(`AppEEARS did not return a task id: ${JSON.stringify(res).slice(0, 200)}`);

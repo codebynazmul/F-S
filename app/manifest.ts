@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Field Shift — Climate-Smart Crop Planner',
-    short_name: 'Field Shift',
+    name: 'Agro Cosmic Weave — Climate-Smart Crop Planner',
+    short_name: 'Agro Cosmic Weave',
     description: 'Climate-adaptive crop rotation and soil health planning for Bangladesh.',
     start_url: '/',
     display: 'standalone',

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ALL_DISTRICTS, type DistrictData } from '@/data/districts';
 import { CROP_DATABASE } from '@/data/crops';
 import { usePersistentState } from '@/lib/storage';
@@ -8,13 +8,10 @@ import { calculatePlanMetrics, type PlanMetrics } from '@/lib/metrics';
 import { recommendPlan, type Recommendation, type Strategy } from '@/lib/recommend';
 import { DEFAULT_FARM, PRIORITIES } from '@/lib/options';
 import { formatNum, localDigits, tr } from '@/lib/i18n';
-import { accountFromProfile, userFromProfile } from '@/lib/auth';
-import { supabase, type ProfileRow } from '@/lib/supabase';
+import { initialsOf } from '@/lib/auth';
+import { nearestDistrict, type LocationStatus } from '@/lib/geo';
 import { loadDistrictClimate, type ClimateStatus, type DistrictClimate } from '@/lib/climate';
-import { useFarmSync, type FarmSyncStatus } from './useFarmSync';
-import type {
-  Account, AdminAction, AdminLogEntry, FarmProfile, IrrigationType, Lang, Priority, Role, SimSettings, SoilTexture, TabId, Theme, User,
-} from '@/lib/types';
+import type { FarmProfile, Lang, Priority, SimSettings, TabId, Theme, User } from '@/lib/types';
 
 export { DEFAULT_FARM };
 export const DEFAULT_SIM: SimSettings = { rainDelta: -25, tempDelta: 1.5, irrigationCut: 35 };
@@ -27,35 +24,14 @@ const isPriorityList = (v: unknown): v is Priority[] =>
 const isTheme = (v: unknown): v is Theme => v === 'day' || v === 'night';
 const isLang = (v: unknown): v is Lang => v === 'en' || v === 'bn';
 const isDistrictId = (v: unknown): v is string => ALL_DISTRICTS.some(d => d.id === v);
-const TAB_IDS: TabId[] = ['rotation', 'whatif', 'analytics', 'nasa', 'farm_profile', 'user_account', 'settings', 'admin', 'report'];
+const TAB_IDS: TabId[] = ['rotation', 'whatif', 'analytics', 'nasa', 'farm_profile', 'report'];
 const isTabId = (v: unknown): v is TabId => TAB_IDS.includes(v as TabId);
-// Sessions saved before accounts existed have no id and are not restored.
+/** There are no accounts: the person's profile lives only on this device. */
+const LOCAL_USER_ID = 'local';
+// Profiles saved by the old sign-in system have a different id and are not restored.
 const isUser = (v: unknown): v is User =>
-  typeof v === 'object' && v !== null &&
-  typeof (v as User).id === 'string' && ((v as User).role === 'farmer' || (v as User).role === 'admin');
+  typeof v === 'object' && v !== null && (v as User).id === LOCAL_USER_ID && typeof (v as User).name === 'string';
 const isRecord = <T,>(v: unknown): v is Record<string, T> => typeof v === 'object' && v !== null && !Array.isArray(v);
-const MAX_LOG = 500;
-
-/** Why the login screen is showing a message after an automatic sign-out. */
-export type AuthNotice = 'blocked' | 'profile-error';
-
-export type PasswordChangeResult = 'ok' | 'wrong-password' | 'no-password' | 'error';
-
-/**
- * Actions only an admin can run. Each one is written to the activity log.
- * The database's row-level security enforces the same rules, so hiding the
- * admin tab is only for convenience.
- */
-export interface AdminActions {
-  updateAccount: (id: string, patch: { name?: string; phone?: string }) => Promise<void>;
-  setBlocked: (id: string, blocked: boolean) => Promise<void>;
-  setRole: (id: string, role: Role) => Promise<void>;
-  /** Changes the signed-in admin's own password after checking the current one. */
-  changePassword: (current: string, next: string) => Promise<PasswordChangeResult>;
-  recordExport: () => Promise<void>;
-  clearLog: () => Promise<void>;
-  reload: () => Promise<void>;
-}
 
 interface AppState {
   ready: boolean;
@@ -69,17 +45,21 @@ interface AppState {
   theme: Theme; setTheme: (t: Theme) => void;
   isNight: boolean;
 
+  /** The person's profile on this device; null until they first press "Get started". */
   user: User | null;
-  isAdmin: boolean;
-  signOut: () => Promise<void>;
-  /** Saves the signed-in user's own name and phone. Returns false if saving failed. */
+  /** False until "Get started" is pressed. The welcome screen shows on every visit. */
+  entered: boolean;
+  /** Creates (or renames) the local profile and leaves the welcome screen. */
+  getStarted: (name: string) => void;
+
+  /** Location lookup, asked for automatically when the site opens. */
+  locationStatus: LocationStatus;
+  /** The district nearest to the person's location, once found. */
+  nearbyDistrictId: string | null;
+  /** Asks for the location again. With `apply`, the nearest district is selected. */
+  locate: (apply: boolean) => void;
+  /** Saves the person's own name and phone on this device. */
   updateUser: (patch: { name?: string; phone?: string }) => Promise<boolean>;
-  /** Message for the login screen after an automatic sign-out. */
-  authNotice: AuthNotice | null;
-  clearAuthNotice: () => void;
-  /** True after the person opened a password-reset link; they must choose a new password. */
-  passwordRecovery: boolean;
-  finishPasswordRecovery: () => void;
 
   /** True once the first-time setup has been finished or skipped on this device. */
   onboarded: boolean;
@@ -105,8 +85,6 @@ interface AppState {
 
   farm: FarmProfile;
   updateFarm: (patch: Partial<FarmProfile>) => void;
-  /** Whether the farm and plan are saved to the person's account. */
-  farmSyncStatus: FarmSyncStatus;
 
   sim: SimSettings;
   setSim: React.Dispatch<React.SetStateAction<SimSettings>>;
@@ -133,31 +111,6 @@ interface AppState {
   simTradMetrics: PlanMetrics;
   simRecMetrics: PlanMetrics;
 
-  /** Every account, loaded from Supabase for admins (empty for farmers). */
-  accounts: Account[];
-  adminLog: AdminLogEntry[];
-  /** The last admin action that failed, shown in the admin panel. */
-  adminError: string | null;
-  clearAdminError: () => void;
-  admin: AdminActions;
-}
-
-/** Rows as the admin panel reads them. */
-interface FarmRow {
-  user_id: string;
-  district_id: string;
-  size_bigha: number;
-  texture: SoilTexture;
-  ph: number;
-  organic_matter: number;
-  irrigation: IrrigationType;
-}
-interface LogRow {
-  id: string;
-  action: AdminAction;
-  target: string | null;
-  created_at: string;
-  actor: { name: string; email: string | null } | { name: string; email: string | null }[] | null;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -170,8 +123,8 @@ export function useApp(): AppState {
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLang, l1] = usePersistentState<Lang>('lang', 'en', isLang);
+  // The person's profile, kept on this device only.
   const [theme, setTheme, l2] = usePersistentState<Theme>('theme', 'day', isTheme);
-  // Last known profile, so the app can still open offline. Supabase holds the real session.
   const [user, setUser, l3] = usePersistentState<User | null>('user', null, isUser);
   const [activeTab, setActiveTab, l4] = usePersistentState<TabId>('tab', 'rotation', isTabId);
   const [districtId, setDistrictId, l5] = usePersistentState<string>('district', 'rajshahi', isDistrictId);
@@ -182,24 +135,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Offline copy of NASA data per district, so recommendations still use it without internet.
   const [climateCache, setClimateCache, l10] = usePersistentState<Record<string, DistrictClimate>>('climate', {}, isRecord);
   const [priorities, setPriorities, l11] = usePersistentState<Priority[]>('priorities', [], isPriorityList);
-  const prefsReady = l1 && l2 && l3 && l4 && l5 && l6 && l7 && l8 && l9 && l10 && l11;
-
-  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
-  const [authReady, setAuthReady] = useState(false);
-  const [profileReady, setProfileReady] = useState(false);
-  const [authNotice, setAuthNotice] = useState<AuthNotice | null>(null);
-  const [passwordRecovery, setPasswordRecovery] = useState(false);
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [adminLog, setAdminLog] = useState<AdminLogEntry[]>([]);
-  const [adminError, setAdminError] = useState<string | null>(null);
-
-  const ready = prefsReady && authReady && profileReady;
-  const isAdmin = !!user && user.id === sessionUserId && user.role === 'admin';
+  const ready = l1 && l2 && l3 && l4 && l5 && l6 && l7 && l8 && l9 && l10 && l11;
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [entered, setEntered] = useState(false);
+  const [locationStatus, setLocationStatus] = useState<LocationStatus>('idle');
+  const [nearbyDistrictId, setNearbyDistrictId] = useState<string | null>(null);
   const [sim, setSim] = useState<SimSettings>(DEFAULT_SIM);
 
-  // Keep <html data-theme> and <html lang> in sync.
+  // Keep <html data-theme> in sync.
   useEffect(() => {
     if (!l2) return;
     document.documentElement.setAttribute('data-theme', theme);
@@ -255,230 +199,58 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const simRecMetrics = useMemo(() => calculatePlanMetrics(recommendedPlan, district, safeFarm, sim), [recommendedPlan, district, safeFarm, sim]);
 
 
-  // ---------- Session ----------
+  // ---------- Location ----------
 
-  // Follow Supabase's session. Only set state in the listener: calling Supabase
-  // from inside it can deadlock.
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSessionUserId(data.session?.user.id ?? null);
-      setAuthReady(true);
-    });
-    const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      setSessionUserId(session?.user.id ?? null);
-      if (event === 'PASSWORD_RECOVERY') setPasswordRecovery(true);
-    });
-    return () => data.subscription.unsubscribe();
-  }, []);
-
-  const logAction = useCallback(async (actorId: string, action: AdminAction, target?: string) => {
-    await supabase.from('activity_log').insert({ actor_id: actorId, action, target: target ?? null });
-  }, []);
-
-  // Load the profile whenever the signed-in person changes.
-  const hadNoUser = useRef(false);
-  useEffect(() => {
-    if (!authReady || !prefsReady) return;
-    if (!sessionUserId) {
-      setUser(null);
-      setProfileReady(true);
-      hadNoUser.current = true;
+  const locate = (apply: boolean) => {
+    if (typeof navigator === 'undefined' || !('geolocation' in navigator) || !window.isSecureContext) {
+      setLocationStatus('unsupported');
       return;
     }
-    let cancelled = false;
-    setProfileReady(false);
-    supabase.from('profiles').select('*').eq('id', sessionUserId).single<ProfileRow>().then(({ data, error }) => {
-      if (cancelled) return;
-      if (data?.blocked) {
-        setAuthNotice('blocked');
-        supabase.auth.signOut({ scope: 'local' });
-        return;
-      }
-      if (data) {
-        const fresh = userFromProfile(data);
-        setUser(fresh);
-        // A sign-in that happened on this page (not a restored session): open the right tab.
-        if (hadNoUser.current) {
-          hadNoUser.current = false;
-          setMenuOpen(false);
-          setActiveTab(fresh.role === 'admin' ? 'admin' : 'rotation');
-          if (fresh.role === 'admin') logAction(fresh.id, 'login');
-        }
-      } else if (!(user && user.id === sessionUserId)) {
-        // No profile and nothing cached for this person (offline on first use, or a server error).
-        setAuthNotice('profile-error');
-        console.error('Could not load profile', error);
-        supabase.auth.signOut({ scope: 'local' });
-        return;
-      }
-      // Otherwise keep the cached profile, e.g. when offline.
-      setProfileReady(true);
-    });
-    return () => { cancelled = true; };
-    // `user` is only read as an offline fallback; reloading on its changes would loop.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authReady, prefsReady, sessionUserId, logAction, setUser, setActiveTab]);
+    setLocationStatus('locating');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const nearest = nearestDistrict(pos.coords.latitude, pos.coords.longitude);
+        setNearbyDistrictId(nearest.id);
+        if (apply) setDistrictId(nearest.id);
+        setLocationStatus('found');
+      },
+      () => setLocationStatus('denied'),
+      { timeout: 15000, maximumAge: 600000 }
+    );
+  };
 
-  // Re-check the account when the person comes back to the app, so a block or role
-  // change made by an admin takes effect without a reload.
+  // Ask for the location as soon as the site opens. New visitors get their district
+  // picked for them; returning ones keep their choice and are offered the nearby one.
+  const askedLocation = useRef(false);
   useEffect(() => {
-    if (!sessionUserId) return;
-    const recheck = async () => {
-      if (document.visibilityState !== 'visible') return;
-      const { data } = await supabase.from('profiles').select('*').eq('id', sessionUserId).maybeSingle<ProfileRow>();
-      if (!data) return; // offline or a server error: keep the current state
-      if (data.blocked) {
-        setAuthNotice('blocked');
-        await supabase.auth.signOut({ scope: 'local' });
-        return;
-      }
-      setUser(userFromProfile(data));
-    };
-    document.addEventListener('visibilitychange', recheck);
-    return () => document.removeEventListener('visibilitychange', recheck);
-  }, [sessionUserId, setUser]);
+    if (!ready || askedLocation.current) return;
+    askedLocation.current = true;
+    locate(!onboarded);
+    // Runs once, after saved settings have loaded.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready]);
 
-  const signOut = useCallback(async () => {
-    if (isAdmin && user) await logAction(user.id, 'logout');
-    await supabase.auth.signOut({ scope: 'local' });
-    setUser(null);
+  // ---------- Local profile ----------
+
+  const makeUser = (name: string, phone: string): User => {
+    const clean = name.trim() || tr(lang, 'Farmer', 'কৃষক');
+    return { id: LOCAL_USER_ID, name: clean, email: '', phone: phone.trim() || '—', initials: initialsOf(clean), role: 'farmer' };
+  };
+
+  const getStarted = (name: string) => {
+    const clean = name.trim();
+    if (!user) setUser(makeUser(clean, '—'));
+    else if (clean && clean !== user.name) setUser(makeUser(clean, user.phone));
+    setEntered(true);
     setMenuOpen(false);
     setActiveTab('rotation');
-  }, [isAdmin, user, logAction, setUser, setActiveTab]);
+  };
 
   const updateUser = async (patch: { name?: string; phone?: string }) => {
     if (!user) return false;
-    const row: { name?: string; phone?: string | null } = {};
-    if (patch.name !== undefined) row.name = patch.name;
-    if (patch.phone !== undefined) row.phone = patch.phone === '—' ? null : patch.phone;
-    const { data, error } = await supabase.from('profiles').update(row).eq('id', user.id).select().single<ProfileRow>();
-    if (error || !data) return false;
-    setUser(userFromProfile(data));
+    setUser(makeUser(patch.name ?? user.name, patch.phone ?? user.phone));
     return true;
   };
-
-  // ---------- Admin data ----------
-
-  const loadAdminData = useCallback(async () => {
-    const [profiles, farms, log] = await Promise.all([
-      supabase.from('profiles').select('*').returns<ProfileRow[]>(),
-      supabase.from('farms')
-        .select('user_id, district_id, size_bigha, texture, ph, organic_matter, irrigation')
-        .order('updated_at', { ascending: false })
-        .returns<FarmRow[]>(),
-      supabase.from('activity_log')
-        .select('id, action, target, created_at, actor:profiles(name, email)')
-        .order('created_at', { ascending: false })
-        .limit(MAX_LOG)
-        .returns<LogRow[]>(),
-    ]);
-    const firstError = profiles.error ?? farms.error ?? log.error;
-    if (firstError) setAdminError(firstError.message);
-
-    // Newest farm per person, for the admin statistics.
-    const farmOf = new Map<string, Pick<Account, 'districtId' | 'farm'>>();
-    for (const f of farms.data ?? []) {
-      if (farmOf.has(f.user_id)) continue;
-      farmOf.set(f.user_id, {
-        districtId: f.district_id,
-        farm: { sizeBigha: f.size_bigha, texture: f.texture, ph: f.ph, organicMatter: f.organic_matter, irrigation: f.irrigation },
-      });
-    }
-    setAccounts((profiles.data ?? []).map(p => accountFromProfile(p, farmOf.get(p.id))));
-    setAdminLog((log.data ?? []).map(e => {
-      const actor = Array.isArray(e.actor) ? e.actor[0] : e.actor;
-      return {
-        id: e.id,
-        at: Date.parse(e.created_at),
-        actor: actor?.email || actor?.name || '—',
-        action: e.action,
-        target: e.target ?? undefined,
-      };
-    }));
-  }, []);
-
-  useEffect(() => {
-    if (isAdmin) loadAdminData();
-    else { setAccounts([]); setAdminLog([]); }
-  }, [isAdmin, loadAdminData]);
-
-  // ---------- Admin actions ----------
-
-  const labelOf = (id: string) => {
-    const a = accounts.find(x => x.id === id);
-    return a ? (a.email !== '—' ? a.email : a.name) : id;
-  };
-
-  /** Runs a change for an admin acting on someone else, logs it, then reloads the lists. */
-  const adminChange = async (
-    id: string,
-    change: () => PromiseLike<{ error: { message: string } | null }>,
-    action: AdminAction,
-  ) => {
-    if (!isAdmin || !user || id === user.id) return;
-    const { error } = await change();
-    if (error) { setAdminError(error.message); return; }
-    await logAction(user.id, action, labelOf(id));
-    await loadAdminData();
-  };
-
-  const admin: AdminActions = {
-    updateAccount: (id, patch) => adminChange(id, () => supabase.from('profiles').update({
-      ...(patch.name !== undefined && { name: patch.name }),
-      ...(patch.phone !== undefined && { phone: patch.phone === '—' ? null : patch.phone }),
-    }).eq('id', id), 'edit_user'),
-    setBlocked: (id, blocked) => adminChange(id,
-      () => supabase.from('profiles').update({ blocked }).eq('id', id), blocked ? 'block_user' : 'unblock_user'),
-    setRole: (id, role) => adminChange(id,
-      () => supabase.from('profiles').update({ role }).eq('id', id), role === 'admin' ? 'make_admin' : 'remove_admin'),
-    changePassword: async (current, next) => {
-      if (!isAdmin || !user) return 'error';
-      const self = accounts.find(a => a.id === user.id);
-      if (self && self.method !== 'email') return 'no-password';
-      // Supabase does not check the old password itself, so confirm it first.
-      const check = await supabase.auth.signInWithPassword({ email: user.email, password: current });
-      if (check.error) return 'wrong-password';
-      const { error } = await supabase.auth.updateUser({ password: next });
-      if (error) { setAdminError(error.message); return 'error'; }
-      await logAction(user.id, 'change_password', user.email);
-      await loadAdminData();
-      return 'ok';
-    },
-    recordExport: async () => {
-      if (!isAdmin || !user) return;
-      await logAction(user.id, 'export_users');
-      await loadAdminData();
-    },
-    clearLog: async () => {
-      if (!isAdmin || !user) return;
-      const { error } = await supabase.from('activity_log').delete().not('id', 'is', null);
-      if (error) { setAdminError(error.message); return; }
-      await logAction(user.id, 'clear_log');
-      await loadAdminData();
-    },
-    reload: loadAdminData,
-  };
-
-  // ---------- Farm and plan sync (Supabase) ----------
-
-  const farmSyncStatus = useFarmSync({
-    userId: user && user.id === sessionUserId ? user.id : null,
-    ready,
-    onboarded,
-    setOnboarded,
-    districtId: district.id,
-    setDistrictId,
-    farm: safeFarm,
-    setFarm,
-    recommendedPlan,
-    traditionalPlan,
-    isCustomPlan,
-    setTraditionalPlan,
-    setPlanOverride: (id, plan) => setPlanOverrides(prev => ({ ...prev, [id]: plan })),
-    isPlan,
-    risks: recommendation.risks,
-    climate,
-  });
 
   const value: AppState = {
     ready,
@@ -489,20 +261,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     theme, setTheme,
     isNight: theme === 'night',
 
-    // Only trust the cached profile while Supabase has a session for the same person.
-    user: user && user.id === sessionUserId ? user : null,
-    isAdmin,
-    signOut,
+    user,
+    entered,
+    getStarted,
+    locationStatus,
+    nearbyDistrictId,
+    locate,
     updateUser,
-    authNotice,
-    clearAuthNotice: () => setAuthNotice(null),
-    passwordRecovery,
-    finishPasswordRecovery: () => setPasswordRecovery(false),
 
     onboarded,
     finishOnboarding: () => { setOnboarded(true); setActiveTab('rotation'); },
 
-    activeTab: activeTab === 'admin' && !isAdmin ? 'rotation' : activeTab,
+    activeTab,
     setActiveTab,
     menuOpen, setMenuOpen,
 
@@ -516,7 +286,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     farm: safeFarm,
     updateFarm: (patch) => setFarm(prev => ({ ...DEFAULT_FARM, ...prev, ...patch })),
-    farmSyncStatus,
 
     sim, setSim,
 
@@ -546,11 +315,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     tradMetrics, recMetrics, simTradMetrics, simRecMetrics,
 
-    accounts,
-    adminLog,
-    adminError,
-    clearAdminError: () => setAdminError(null),
-    admin,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

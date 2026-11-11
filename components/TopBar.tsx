@@ -34,7 +34,7 @@ export default function TopBar() {
 
   return (
     <div className="no-print">
-      <header className="glass-bar border-b border-sky-600/10 sticky top-0 z-30 pl-[4.25rem] pr-4 sm:pr-6 lg:px-10 py-2.5">
+      <header className="glass-bar border-b border-sky-600/10 sticky top-0 z-30 pl-[4.25rem] pr-4 sm:pr-6 lg:pr-10 py-2.5">
         <div className="max-w-[1240px] mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <span className="h-9 w-9 rounded-full bg-sky-600/10 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0">
