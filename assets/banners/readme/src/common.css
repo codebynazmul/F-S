@@ -1,6 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@500;600&display=swap');
+/* Shared base for the README banners. Fonts match the app: Baloo Da 2 (display), Figtree (text), Hind Siliguri (Bangla). */
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=Hind+Siliguri:wght@500;600;700&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --paddy-900:#163815;--paddy-800:#1C4719;--paddy-700:#22591C;--paddy-600:#2A7121;--paddy-500:#3B8F2C;--paddy-300:#8FC874;--paddy-100:#DDEFD3;
+  --gold-300:#F7CB4D;--gold-400:#EDB224;--gold-600:#B0740B;
+  --soil-500:#9C6638;--soil-700:#653F25;
+  --cream:#FAF6EA;--ink:#14261A;
+}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:1280px;height:400px;overflow:hidden}
-body{font-family:'Instrument Sans','Noto Sans Bengali',sans-serif;-webkit-font-smoothing:antialiased}
-.bn{font-family:'Noto Sans Bengali',sans-serif}
+body{font-family:'Figtree','Hind Siliguri',sans-serif;-webkit-font-smoothing:antialiased;position:relative}
+.display{font-family:'Baloo Da 2','Hind Siliguri',sans-serif}
+.bn{font-family:'Hind Siliguri',sans-serif}
 .mono{font-family:'DM Mono',monospace}
+/* Render at 2x when the export window is 2560px wide. */
+@media (min-width:2000px){html{zoom:2}}

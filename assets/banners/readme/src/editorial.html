@@ -1,22 +1,49 @@
 <!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
-body{background:#F6F3EA;color:#032D33;position:relative}
-.field{position:absolute;right:0;top:0;width:560px;height:400px;overflow:hidden}
-.c{position:absolute;left:88px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center}
-.eyebrow{font-size:14px;letter-spacing:3px;text-transform:uppercase;color:#06525C;display:flex;align-items:center;gap:12px}
-.eyebrow:before{content:"";width:32px;height:2px;background:#C8901A}
-h1{font-size:84px;font-weight:700;letter-spacing:-3px;line-height:1;margin-top:18px}
-h1 span{color:#157A80}
-p{font-size:23px;color:#3B4F52;margin-top:18px;max-width:560px;line-height:1.4}
-.bn{color:#9A6A0C;font-size:20px;margin-top:14px;font-weight:600}
-.logo{position:absolute;left:820px;top:50%;transform:translate(-50%,-50%);width:250px;height:250px;filter:drop-shadow(0 18px 30px rgba(3,45,51,.28))}
-</style></head><body>
-<svg class="field" viewBox="0 0 560 400" preserveAspectRatio="none">
-<defs><clipPath id="k"><path d="M120 0 H560 V400 H40 Z"/></clipPath></defs>
-<g clip-path="url(#k)"><rect width="560" height="400" fill="#06525C"/>
-<g id="r"></g></g></svg>
-<script>const r=document.getElementById('r');const cols=['#0A6670','#157A80','#3F9A9E','#C8901A','#8A5A2B'];
-for(let i=0;i<22;i++){const p=document.createElementNS('http://www.w3.org/2000/svg','path');const y=i*22-40;
-p.setAttribute('d',`M0 ${y+120} Q 300 ${y-20}, 560 ${y+60}`);p.setAttribute('stroke',cols[i%5]);p.setAttribute('stroke-width','9');p.setAttribute('fill','none');p.setAttribute('opacity','.55');r.appendChild(p)}</script>
-<div class="c"><div class="eyebrow mono">NASA Space Apps · SPIDERX</div><h1>Field <span>Shift</span></h1>
-<p>Crop rotations that use less water, build soil, and hold up under climate stress.</p><div class="bn">বাংলাদেশের ৬৪ জেলার জন্য</div></div>
-<img class="logo" src="../../../../public/logo.png"></body></html>
+body{background:var(--cream);color:var(--ink)}
+/* soft field stripes behind the right side */
+.stripes{position:absolute;right:0;top:0;width:640px;height:400px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%);mask-image:linear-gradient(90deg,transparent,#000 22%);background:repeating-linear-gradient(115deg,rgba(59,143,44,.07) 0 18px,transparent 18px 36px)}
+.c{position:absolute;left:88px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;width:600px}
+.eyebrow{font-size:14px;letter-spacing:3px;text-transform:uppercase;color:var(--paddy-700);display:flex;align-items:center;gap:12px}
+.eyebrow:before{content:"";width:32px;height:2px;background:var(--gold-400)}
+h1{font-size:80px;font-weight:800;line-height:.95;letter-spacing:-1px;margin-top:16px;color:var(--paddy-800)}
+h1 span{color:var(--gold-600)}
+p{font-size:22px;color:#3E4F41;margin-top:16px;line-height:1.4;max-width:540px}
+.bnline{font-size:19px;color:var(--soil-700);margin-top:12px;font-weight:600}
+/* the 4-season rotation strip */
+.rot{position:absolute;right:72px;top:50%;transform:translateY(-50%);width:500px}
+.rot-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.rot-h .mono{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--paddy-700)}
+.logo{width:64px;height:64px}
+.seasons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.s{border-radius:18px;padding:16px 14px 14px;height:196px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 10px 24px -14px rgba(20,38,26,.45)}
+.s .n{font-size:12px;letter-spacing:.5px;opacity:.8;white-space:nowrap}
+.s .crop{font-size:20px;font-weight:700;line-height:1.05}
+.s .bn{font-size:15px;opacity:.9;margin-top:4px}
+.s1{background:var(--gold-300);color:#3D2A05}
+.s2{background:#E2C6A6;color:#3D271B}
+.s3{background:var(--paddy-600);color:#fff}
+.s4{background:var(--paddy-300);color:#163815}
+.ico{width:34px;height:34px}
+.arrow{margin-top:14px;height:10px;border-bottom:2px dashed rgba(34,89,28,.35);position:relative}
+.arrow:after{content:"";position:absolute;right:-2px;bottom:-7px;border:6px solid transparent;border-left:10px solid rgba(34,89,28,.55)}
+.foot{margin-top:12px;font-size:14px;color:#3E4F41;display:flex;justify-content:space-between}
+.foot b{color:var(--paddy-700)}
+</style></head><body><div class="stripes"></div>
+<div class="c">
+  <div class="eyebrow mono">NASA Space Apps · Team SPIDERX</div>
+  <h1 class="display">Agro Cosmic <span>Weave</span></h1>
+  <p>Crop rotations that use less water, build soil, and hold up under climate stress.</p>
+  <div class="bnline bn">বাংলাদেশের ৬৪ জেলার জন্য ফসল ও মাটির পরিকল্পনা</div>
+</div>
+<div class="rot">
+  <div class="rot-h"><span class="mono">One year · four seasons</span><img class="logo" src="../../../../public/logo.png" alt=""></div>
+  <div class="seasons">
+    <div class="s s1"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="3"/><circle cx="7" cy="12" r="3"/><circle cx="17" cy="12" r="3"/><circle cx="12" cy="17" r="3"/></svg><div><div class="n mono">S1 · Winter</div><div class="crop display">Mustard</div><div class="bn">সরিষা</div></div></div>
+    <div class="s s2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="8" cy="10" rx="3.5" ry="2.6"/><ellipse cx="15" cy="9" rx="3.5" ry="2.6"/><ellipse cx="11" cy="15.5" rx="3.5" ry="2.6"/></svg><div><div class="n mono">S2 · Spring</div><div class="crop display">Lentil</div><div class="bn">মসুর</div></div></div>
+    <div class="s s3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 21V8"/><path d="M12 12c-3-1-4-4-4-6 2 0 4 1.5 4 4"/><path d="M12 9c3-1 4-4 4-6-2 0-4 1.5-4 4"/><path d="M12 16c-3-1-5-3-5-5 2 0 4 1 5 3"/><path d="M12 15c3-1 5-3 5-5-2 0-4 1-5 3"/></svg><div><div class="n mono">S3 · Monsoon</div><div class="crop display">Aman rice</div><div class="bn">আমন ধান</div></div></div>
+    <div class="s s4"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 19c2-8 6-12 14-14"/><circle cx="9" cy="14" r="1.6"/><circle cx="12" cy="11" r="1.6"/><circle cx="15" cy="8" r="1.6"/></svg><div><div class="n mono">S4 · Summer</div><div class="crop display">Mungbean</div><div class="bn">মুগডাল</div></div></div>
+  </div>
+  <div class="arrow"></div>
+  <div class="foot"><span>Less water · less urea</span><span><b>NASA</b> POWER · MODIS · SMAP · NASADEM</span></div>
+</div>
+</body></html>
