@@ -434,7 +434,6 @@ html[lang="bn"] .fs-eyebrow { text-transform: none; letter-spacing: 0; }
   .fs-fab:hover { background: var(--accent-soft); border-color: var(--border-soft); }
 }
 .fs-fab:active { transform: scale(0.96); }
-@media (min-width: 1024px) { .fs-fab { display: none; } }
 
 /* Side menu link: a 3px bar marks the current page. It lives inside the sliding
    highlight (Sidebar.tsx), so it glides between items with it. */
@@ -480,6 +479,16 @@ html[lang="bn"] .fs-eyebrow { text-transform: none; letter-spacing: 0; }
 .fs-login-media > .fs-login-media-copy { position: relative; z-index: 2; }
 
 .fs-login-panel { background: var(--bg-page); }
+
+/* Full-screen welcome: darker on the left where the text sits */
+.fs-login-full::after {
+  background:
+    linear-gradient(90deg, rgba(10, 24, 8, 0.82) 0%, rgba(10, 24, 8, 0.55) 55%, rgba(10, 24, 8, 0.25) 100%),
+    linear-gradient(180deg, rgba(10, 24, 8, 0.35) 0%, rgba(10, 24, 8, 0) 30%, rgba(10, 24, 8, 0.45) 100%);
+}
+@media (max-width: 640px) {
+  .fs-login-full::after { background: rgba(10, 24, 8, 0.68); }
+}
 
 /* Fields: one hairline box, the border darkens on focus */
 .fs-field {

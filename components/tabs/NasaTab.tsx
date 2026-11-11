@@ -26,7 +26,7 @@ export default function NasaTab() {
           `Long-term monthly climate averages and the last 30 days for ${base.name} (${base.lat.toFixed(2)}°N, ${base.lng.toFixed(2)}°E), from NASA POWER.`,
           `নাসা POWER থেকে ${base.nameBn} জেলার (${base.lat.toFixed(2)}°N, ${base.lng.toFixed(2)}°E) দীর্ঘমেয়াদি মাসিক জলবায়ু গড় ও গত ৩০ দিনের তথ্য।`
         )}
-        actions={<StatusPill status={climateStatus} hasData={!!data} updatedAt={climate?.updatedAt ?? null} onRetry={retryClimate} />}
+        actions={<StatusPill status={climateStatus} hasData={!!data} onRetry={retryClimate} />}
       />
 
       <Card className="p-4 sm:p-6 rounded-[var(--radius-card)] space-y-6">
@@ -114,8 +114,8 @@ export default function NasaTab() {
         )}
 
         <p className="text-xs text-slate-500 dark:text-slate-400 border-t border-sky-500/10 pt-3">
-          {t('Sources: NASA POWER (climate), MODIS via ORNL DAAC (vegetation, land temperature, evapotranspiration), and SMAP soil moisture and NASADEM elevation via AppEEARS. Field Shift fetches them on a schedule and keeps only the processed values. Risk levels are simple rules over these values, not a forecast model.',
-             'উৎস: নাসা POWER (জলবায়ু), ORNL DAAC-এর মাধ্যমে MODIS (গাছপালা, ভূমির তাপমাত্রা, বাষ্পীভবন), এবং AppEEARS-এর মাধ্যমে SMAP মাটির আর্দ্রতা ও NASADEM উচ্চতা। ফিল্ড শিফট নির্দিষ্ট সময় পরপর তথ্য সংগ্রহ করে এবং শুধু প্রক্রিয়াজাত মান রাখে। ঝুঁকির মাত্রা এসব মানের উপর সহজ নিয়মে হিসাব করা, পূর্বাভাস মডেল নয়।')}
+          {t('Sources: NASA POWER (climate), MODIS via ORNL DAAC (vegetation, land temperature, evapotranspiration), and SMAP soil moisture and NASADEM elevation via AppEEARS. Agro Cosmic Weave fetches them on a schedule and keeps only the processed values. Risk levels are simple rules over these values, not a forecast model.',
+             'উৎস: নাসা POWER (জলবায়ু), ORNL DAAC-এর মাধ্যমে MODIS (গাছপালা, ভূমির তাপমাত্রা, বাষ্পীভবন), এবং AppEEARS-এর মাধ্যমে SMAP মাটির আর্দ্রতা ও NASADEM উচ্চতা। অ্যাগ্রো কসমিক উইভ নির্দিষ্ট সময় পরপর তথ্য সংগ্রহ করে এবং শুধু প্রক্রিয়াজাত মান রাখে। ঝুঁকির মাত্রা এসব মানের উপর সহজ নিয়মে হিসাব করা, পূর্বাভাস মডেল নয়।')}
         </p>
       </Card>
     </div>
@@ -354,11 +354,10 @@ function Metric({ icon: Icon, color, source, value, label, sub }: {
   );
 }
 
-export function StatusPill({ status, hasData, updatedAt, onRetry }: {
-  status: ClimateStatus; hasData: boolean; updatedAt: number | null; onRetry: () => void;
+export function StatusPill({ status, hasData, onRetry }: {
+  status: ClimateStatus; hasData: boolean; onRetry: () => void;
 }) {
-  const { t, lang } = useApp();
-  const date = updatedAt ? new Date(updatedAt).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-GB', { dateStyle: 'medium' }) : null;
+  const { t } = useApp();
   if (status === 'error') {
     return (
       <button type="button" onClick={onRetry} className={ghostBtn}>
@@ -372,7 +371,7 @@ export function StatusPill({ status, hasData, updatedAt, onRetry }: {
   if (hasData) {
     return (
       <span className="text-xs font-medium px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 flex items-center gap-1.5 w-fit">
-        <Database className="h-4 w-4" />{date ? t(`Synced ${date}`, `সংগ্রহ ${date}`) : t('Synced', 'সংগ্রহ হয়েছে')}
+        <Database className="h-4 w-4" />{t('Synced', 'সংগ্রহ হয়েছে')}
       </span>
     );
   }

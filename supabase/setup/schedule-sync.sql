@@ -1,4 +1,4 @@
--- Field Shift: schedule the NASA sync functions and the observation cleanup.
+-- Agro Cosmic Weave: schedule the NASA sync functions and the observation cleanup.
 -- Run in the Supabase SQL editor AFTER deploying the functions. Safe to run again.
 -- Replace the two values in step 2 first. Do not commit your real values.
 

@@ -60,9 +60,6 @@ export type TabId =
   | 'analytics'
   | 'nasa'
   | 'farm_profile'
-  | 'user_account'
-  | 'settings'
-  | 'admin'
   | 'report';
 
 export type SoilTexture =

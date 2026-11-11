@@ -59,8 +59,8 @@ export default function AnalyticsTab() {
             ))}
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            {t('Scores are 0–100 from the Field Shift screening model for the selected district and your farm profile. Higher is better.',
-               'স্কোর ০–১০০, নির্বাচিত জেলা ও আপনার খামারের তথ্যের ভিত্তিতে ফিল্ড শিফট মডেল থেকে হিসাব করা। বেশি হলে ভালো।')}
+            {t('Scores are 0–100 from the Agro Cosmic Weave screening model for the selected district and your farm profile. Higher is better.',
+               'স্কোর ০–১০০, নির্বাচিত জেলা ও আপনার খামারের তথ্যের ভিত্তিতে অ্যাগ্রো কসমিক উইভ মডেল থেকে হিসাব করা। বেশি হলে ভালো।')}
           </p>
         </Card>
 

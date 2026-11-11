@@ -486,8 +486,8 @@ function Disclaimer() {
     <SubCard className="p-4 rounded-2xl text-sm leading-relaxed flex items-start gap-2 border border-sky-500/25">
       <ShieldCheck className="h-5 w-5 text-sky-600 dark:text-sky-300 shrink-0 mt-0.5" />
       <span>
-        {t('Field Shift helps you explore options. It does not replace your own experience or advice from your Upazila Agriculture Officer. Talk through the "Check locally" items with them before changing crops.',
-           'ফিল্ড শিফট আপনাকে বিকল্পগুলো ভেবে দেখতে সাহায্য করে। এটি আপনার নিজের অভিজ্ঞতা বা উপজেলা কৃষি কর্মকর্তার পরামর্শের বিকল্প নয়। ফসল বদলানোর আগে "স্থানীয়ভাবে যাচাই করুন" অংশগুলো তাঁর সাথে আলোচনা করুন।')}
+        {t('Agro Cosmic Weave helps you explore options. It does not replace your own experience or advice from your Upazila Agriculture Officer. Talk through the "Check locally" items with them before changing crops.',
+           'অ্যাগ্রো কসমিক উইভ আপনাকে বিকল্পগুলো ভেবে দেখতে সাহায্য করে। এটি আপনার নিজের অভিজ্ঞতা বা উপজেলা কৃষি কর্মকর্তার পরামর্শের বিকল্প নয়। ফসল বদলানোর আগে "স্থানীয়ভাবে যাচাই করুন" অংশগুলো তাঁর সাথে আলোচনা করুন।')}
       </span>
     </SubCard>
   );
@@ -541,11 +541,8 @@ function PlanList({ plan, onChange, variant }: { plan: string[]; onChange: (i: n
         return (
           <li key={idx} className="glass-subtle p-3 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="relative shrink-0">
+              <div className="shrink-0">
                 <CropIcon id={crop.id} size={48} />
-                <span className={`absolute -top-1.5 -left-1.5 h-6 min-w-6 px-1 rounded-full font-bold text-xs flex items-center justify-center ring-2 ring-[var(--bg-surface)] ${rec ? 'bg-sky-600 text-white' : 'bg-slate-600 text-white'}`}>
-                  {t(`S${idx + 1}`, `${idx + 1}`)}
-                </span>
               </div>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">

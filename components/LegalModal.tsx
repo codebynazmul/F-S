@@ -14,10 +14,10 @@ type Section = { title: [string, string]; body: [string, string] };
 // Each entry is [English, Bangla].
 const TERMS: Section[] = [
   {
-    title: ['About Field Shift', 'ফিল্ড শিফট সম্পর্কে'],
+    title: ['About Agro Cosmic Weave', 'অ্যাগ্রো কসমিক উইভ সম্পর্কে'],
     body: [
-      'Field Shift is a free, open decision-support tool that suggests crop rotations for Bangladesh using district data and NASA POWER climate data. It was built for the NASA Space Apps Challenge.',
-      'ফিল্ড শিফট একটি বিনামূল্যের সিদ্ধান্ত-সহায়ক টুল, যা জেলার তথ্য ও নাসা পাওয়ার জলবায়ু তথ্য ব্যবহার করে বাংলাদেশের জন্য ফসল আবর্তনের পরামর্শ দেয়। এটি নাসা স্পেস অ্যাপস চ্যালেঞ্জের জন্য তৈরি।',
+      'Agro Cosmic Weave is a free, open decision-support tool that suggests crop rotations for Bangladesh using district data and NASA POWER climate data. It was built for the NASA Space Apps Challenge.',
+      'অ্যাগ্রো কসমিক উইভ একটি বিনামূল্যের সিদ্ধান্ত-সহায়ক টুল, যা জেলার তথ্য ও নাসা পাওয়ার জলবায়ু তথ্য ব্যবহার করে বাংলাদেশের জন্য ফসল আবর্তনের পরামর্শ দেয়। এটি নাসা স্পেস অ্যাপস চ্যালেঞ্জের জন্য তৈরি।',
     ],
   },
   {
@@ -44,8 +44,8 @@ const TERMS: Section[] = [
   {
     title: ['No warranty', 'কোনো নিশ্চয়তা নেই'],
     body: [
-      'The app is provided as is. Climate data may be late, missing or wrong, and the service may change or stop at any time. The Field Shift team is not liable for crop losses or other damage from using it.',
-      'অ্যাপটি যেমন আছে তেমনভাবে দেওয়া হয়েছে। জলবায়ু তথ্য দেরিতে আসতে, অনুপস্থিত বা ভুল হতে পারে, এবং সেবাটি যেকোনো সময় বদলাতে বা বন্ধ হতে পারে। এটি ব্যবহারের ফলে ফসলের ক্ষতি বা অন্য কোনো ক্ষতির জন্য ফিল্ড শিফট দল দায়ী নয়।',
+      'The app is provided as is. Climate data may be late, missing or wrong, and the service may change or stop at any time. The Agro Cosmic Weave team is not liable for crop losses or other damage from using it.',
+      'অ্যাপটি যেমন আছে তেমনভাবে দেওয়া হয়েছে। জলবায়ু তথ্য দেরিতে আসতে, অনুপস্থিত বা ভুল হতে পারে, এবং সেবাটি যেকোনো সময় বদলাতে বা বন্ধ হতে পারে। এটি ব্যবহারের ফলে ফসলের ক্ষতি বা অন্য কোনো ক্ষতির জন্য অ্যাগ্রো কসমিক উইভ দল দায়ী নয়।',
     ],
   },
   {
@@ -61,8 +61,8 @@ const PRIVACY: Section[] = [
   {
     title: ['What we store', 'আমরা কী সংরক্ষণ করি'],
     body: [
-      'Your name, email or phone number, farm profile, plans and settings are saved only in this browser on this device. Field Shift has no server or database, so this information is not sent to us.',
-      'আপনার নাম, ইমেইল বা ফোন নম্বর, খামারের তথ্য, পরিকল্পনা ও সেটিংস শুধু এই ডিভাইসের এই ব্রাউজারে সংরক্ষিত থাকে। ফিল্ড শিফটের কোনো সার্ভার বা ডেটাবেস নেই, তাই এই তথ্য আমাদের কাছে পাঠানো হয় না।',
+      'Your name, email or phone number, farm profile, plans and settings are saved only in this browser on this device. Agro Cosmic Weave has no server or database, so this information is not sent to us.',
+      'আপনার নাম, ইমেইল বা ফোন নম্বর, খামারের তথ্য, পরিকল্পনা ও সেটিংস শুধু এই ডিভাইসের এই ব্রাউজারে সংরক্ষিত থাকে। অ্যাগ্রো কসমিক উইভের কোনো সার্ভার বা ডেটাবেস নেই, তাই এই তথ্য আমাদের কাছে পাঠানো হয় না।',
     ],
   },
   {

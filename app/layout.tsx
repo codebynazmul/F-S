@@ -13,12 +13,12 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const bengali = Noto_Sans_Bengali({ subsets: ["bengali"], variable: "--font-bengali", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Field Shift | Agricultural Decision Support System",
+  title: "Agro Cosmic Weave | Agricultural Decision Support System",
   description:
     "A Climate-Adaptive Crop Rotation & Soil Health Decision-Support System for Bangladesh, developed by SPIDERX.",
-  applicationName: "Field Shift",
+  applicationName: "Agro Cosmic Weave",
   icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
-  appleWebApp: { capable: true, title: "Field Shift", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Agro Cosmic Weave", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

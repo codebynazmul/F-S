@@ -1,4 +1,4 @@
-// Field Shift: MODIS sync (ORNL DAAC MODIS Web Service, no key needed).
+// Agro Cosmic Weave: MODIS sync (ORNL DAAC MODIS Web Service, no key needed).
 //
 // For each district, reads the newest MODIS values around the district point and
 // stores only one processed number per metric in `observations`:
@@ -27,6 +27,8 @@ interface Product {
   metric: string;
   /** Turns a raw pixel into the stored value, or null when it is a fill value. */
   convert: (raw: number, scale: number) => number | null;
+  /** Pixels that never have a value because of the land cover (city, water, ...). */
+  isPermanentGap?: (raw: number) => boolean;
 }
 
 const PRODUCTS: Product[] = [
@@ -35,7 +37,9 @@ const PRODUCTS: Product[] = [
   { id: 'MOD11A2', band: 'LST_Day_1km', metric: 'lst_day_c',
     convert: (v, s) => (v <= 0 ? null : v * s - 273.15) },
   { id: 'MOD16A2', band: 'ET_500m', metric: 'et_mm_day',
-    convert: (v, s) => (v < 0 || v > 32700 ? null : (v * s) / 8) },
+    convert: (v, s) => (v < 0 || v > 32700 ? null : (v * s) / 8),
+    // 32761–32766: unclassified, urban, snow, wetland, barren, water. Fixed by land cover, not weather.
+    isPermanentGap: (v) => v >= 32761 && v <= 32766 },
 ];
 
 interface District { id: string; lat: number; lng: number }
@@ -118,7 +122,10 @@ async function syncOne(db: SupabaseClient, { district: d, product: p }: Task): P
   const newestFirst = [...subsets].sort((a, b) => b.calendar_date.localeCompare(a.calendar_date));
   for (const s of newestFirst) {
     const values = s.data.map(v => p.convert(v, scale)).filter((v): v is number => v !== null);
-    if (values.length < Math.max(3, s.data.length * 0.1)) continue;
+    // Only pixels that could have a value count towards the 10% minimum. Otherwise a box
+    // that is mostly city (e.g. Chattogram for ET) fails every composite.
+    const possible = s.data.filter(v => !p.isPermanentGap?.(v)).length;
+    if (values.length < Math.max(3, possible * 0.1)) continue;
     const { error } = await db.from('observations').upsert({
       district_id: d.id, farm_id: null, source: 'modis', metric: p.metric,
       value: Math.round(median(values) * 1000) / 1000,
@@ -128,7 +135,10 @@ async function syncOne(db: SupabaseClient, { district: d, product: p }: Task): P
     if (error) throw error;
     return 1;
   }
-  throw new Error('Only cloudy or empty pixels in the last composites');
+  const usable = newestFirst[0]?.data.filter(v => !p.isPermanentGap?.(v)).length ?? 0;
+  throw new Error(usable < 3
+    ? 'Too few pixels with this measurement here (city, water or wetland around the point)'
+    : 'Only cloudy or empty pixels in the last composites');
 }
 
 function median(xs: number[]): number {
