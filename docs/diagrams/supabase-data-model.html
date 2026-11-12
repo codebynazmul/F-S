@@ -7,17 +7,103 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Primitive tokens: raw values ─────────────────────────── */
     :root {
-      --color-paper:  #f5f5f5;
-      --color-ink:    #2d3142;
-      --color-muted:  #4f5d75;
-      --color-accent: #bf4520;
+      --slate-50:  #f5f5f5;
+      --slate-0:   #ffffff;
+      --slate-500: #4f5d75;
+      --slate-400: #8a93a6;
+      --slate-800: #2d3142;
+      --slate-900: #12141b;
+      --slate-850: #1b1e28;
+      --slate-750: #262a37;
+      --slate-200: #d9dce4;
+      --slate-300: #a9b0c0;
+      --rust-600:  #bf4520;
+      --rust-400:  #e0754f;
+      --leaf-600:  #2e7d32;
+      --leaf-400:  #6dbf71;
+
       --font-sans:  'Geist', system-ui, sans-serif;
-      --font-serif: 'Instrument Serif', serif;
+      --font-serif: 'Instrument Serif', Georgia, serif;
       --font-mono:  'Geist Mono', ui-monospace, monospace;
+
+      --size-2xs: 8px;
+      --size-xs:  8.5px;
+      --size-sm:  10px;
+      --size-md:  14px;
+      --radius-sm: 2px;
     }
+
+    /* ── Semantic tokens: purpose (light) ─────────────────────── */
+    :root {
+      --color-canvas:    var(--slate-50);
+      --color-surface:   var(--slate-0);
+      --color-ink:       var(--slate-800);
+      --color-muted:     var(--slate-500);
+      --color-faint:     var(--slate-400);
+      --color-accent:    var(--rust-600);
+      --color-positive:  var(--leaf-600);
+      --tint-ink:        45, 49, 66;    /* rgb of --color-ink, for alpha mixes */
+      --tint-accent:     191, 69, 32;
+      --tint-positive:   46, 125, 50;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --color-canvas:   var(--slate-900);
+        --color-surface:  var(--slate-850);
+        --color-ink:      var(--slate-200);
+        --color-muted:    var(--slate-300);
+        --color-faint:    var(--slate-500);
+        --color-accent:   var(--rust-400);
+        --color-positive: var(--leaf-400);
+        --tint-ink:       217, 220, 228;
+        --tint-accent:    224, 117, 79;
+        --tint-positive:  109, 191, 113;
+      }
+    }
+    :root[data-theme="dark"] {
+      --color-canvas:   var(--slate-900);
+      --color-surface:  var(--slate-850);
+      --color-ink:      var(--slate-200);
+      --color-muted:    var(--slate-300);
+      --color-faint:    var(--slate-500);
+      --color-accent:   var(--rust-400);
+      --color-positive: var(--leaf-400);
+      --tint-ink:       217, 220, 228;
+      --tint-accent:    224, 117, 79;
+      --tint-positive:  109, 191, 113;
+    }
+
+    /* ── Component tokens ─────────────────────────────────────── */
+    :root {
+      --box-body:   var(--color-surface);
+      --box-head:   rgba(var(--tint-ink), 0.04);
+      --box-frame:  var(--color-ink);
+      --box-rule:   rgba(var(--tint-ink), 0.22);
+      --box-tag:    var(--color-muted);
+
+      --box-app-body:  rgba(var(--tint-accent), 0.04);
+      --box-app-head:  rgba(var(--tint-accent), 0.10);
+      --box-app-frame: var(--color-accent);
+      --box-app-tag:   var(--color-accent);
+
+      --box-view-head:  rgba(var(--tint-positive), 0.10);
+      --box-view-frame: var(--color-positive);
+      --box-view-tag:   var(--color-positive);
+
+      --box-admin-body:  rgba(var(--tint-ink), 0.03);
+      --box-admin-frame: rgba(var(--tint-ink), 0.30);
+
+
+      --rel-stroke:        var(--color-muted);
+      --panel-fill:        rgba(var(--tint-ink), 0.03);
+      --panel-frame:       rgba(var(--tint-ink), 0.14);
+    }
+
     body {
-      font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink);
+      font-family: var(--font-sans); background: var(--color-canvas); color: var(--color-ink);
       min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem;
     }
     .frame { max-width: 1280px; width: 100%; }
@@ -32,13 +118,56 @@
     }
     .caption {
       font-family: var(--font-serif); font-style: italic; font-size: 1.05rem; color: var(--color-muted);
-      margin-top: 1rem; max-width: 60ch;
+      margin-top: 1rem; max-width: 72ch;
     }
+    .caption code { font-family: var(--font-mono); font-style: normal; font-size: 0.85em; }
     svg { width: 100%; min-width: 1280px; display: block; }
     @media print {
       .diagram-container { overflow-x: visible; }
       svg { min-width: 0; }
     }
+
+    /* SVG components */
+    .canvas { fill: var(--color-canvas); }
+    .box__body  { fill: var(--box-body); }
+    .box__head  { fill: var(--box-head); }
+    .box__frame { fill: none; stroke: var(--box-frame); stroke-width: 1; }
+    .box__rule  { stroke: var(--box-rule); stroke-width: 1; }
+    .box__tag   { fill: var(--box-tag); font: 500 var(--size-2xs) var(--font-mono); letter-spacing: 0.14em; }
+    .box__name  { fill: var(--color-ink); font: 600 var(--size-md) var(--font-sans); }
+    .field      { fill: var(--color-ink); font: 400 var(--size-sm) var(--font-mono); }
+    .type       { fill: var(--color-muted); font: 400 var(--size-sm) var(--font-mono); }
+
+    .box--app .box__body  { fill: var(--box-app-body); }
+    .box--app .box__head  { fill: var(--box-app-head); }
+    .box--app .box__frame { stroke: var(--box-app-frame); }
+    .box--app .box__tag   { fill: var(--box-app-tag); }
+
+    .box--view .box__head  { fill: var(--box-view-head); }
+    .box--view .box__frame { stroke: var(--box-view-frame); stroke-dasharray: 5 3; }
+    .box--view .box__tag   { fill: var(--box-view-tag); }
+
+    .box--admin .box__body  { fill: var(--box-admin-body); }
+    .box--admin .box__frame { stroke: var(--box-admin-frame); }
+
+
+    .rel            { fill: none; stroke: var(--rel-stroke); stroke-width: 1; }
+    .rel--derived   { stroke-dasharray: 5 3; marker-end: url(#arrow); }
+    .arrowhead      { fill: var(--rel-stroke); }
+    .chip-bg        { fill: var(--color-canvas); }
+    .card           { fill: var(--color-muted); font: 600 var(--size-sm) var(--font-mono); }
+    .rel-label      { fill: var(--color-muted); font: 500 var(--size-2xs) var(--font-mono); letter-spacing: 0.12em; }
+
+    .band__label    { fill: var(--color-muted); font: 500 var(--size-2xs) var(--font-mono); letter-spacing: 0.18em; }
+
+    .panel       { fill: var(--panel-fill); stroke: var(--panel-frame); stroke-width: 1; }
+    .panel__head { fill: var(--color-ink); font: 600 11px var(--font-sans); }
+    .panel__text { fill: var(--color-muted); font: 400 var(--size-sm) var(--font-mono); }
+    .panel__fn   { fill: var(--color-ink); font-weight: 600; }
+    .panel__note { fill: var(--color-faint); font: italic 400 11px var(--font-serif); }
+
+    .legend__title { fill: var(--color-muted); font: 500 var(--size-2xs) var(--font-mono); letter-spacing: 0.18em; }
+    .legend__text  { fill: var(--color-muted); font: 400 var(--size-xs) var(--font-sans); }
   </style>
 </head>
 <body>
@@ -46,230 +175,188 @@
     <p class="eyebrow">Data model · Agro Cosmic Weave</p>
     <h1>Agro Cosmic Weave database tables</h1>
     <div class="diagram-container">
-      <svg viewBox="0 0 1280 676" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fs-data-model-title fs-data-model-desc">
-        <title id="fs-data-model-title">Agro Cosmic Weave database tables</title>
-        <desc id="fs-data-model-desc">Entity-relationship diagram of the planned Supabase tables: users own farms and saved plans, farms sit in districts, and districts and farms hold processed NASA observations and risk predictions.</desc>
+      <svg viewBox="0 0 1280 672" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dm-title dm-desc">
+        <title id="dm-title">Agro Cosmic Weave database tables</title>
+        <desc id="dm-desc">Entity-relationship diagram of the Supabase tables the running system uses. Each district has one climate_normals row and many observations and predictions; latest_observations is a view of the newest observation per metric; sync_runs logs the Edge Function runs. The web app reads climate_normals, latest_observations and predictions; only the Edge Functions write.</desc>
         <defs>
-          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
-          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bf4520"/></marker>
-          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="arrowhead" points="0 0, 8 3, 0 6"/></marker>
         </defs>
-        <rect width="100%" height="100%" fill="#f5f5f5"/>
-        <path d="M 264,176 H 400" fill="none" stroke="#4f5d75" stroke-width="1"/>
-        <path d="M 624,176 H 760" fill="none" stroke="#4f5d75" stroke-width="1"/>
-        <path d="M 512,288 V 360" fill="none" stroke="#4f5d75" stroke-width="1"/>
-        <path d="M 264,440 H 400" fill="none" stroke="#4f5d75" stroke-width="1"/>
-        <path d="M 624,440 H 760" fill="none" stroke="#4f5d75" stroke-width="1"/>
-        <path d="M 576,532 V 564 Q 576,572 584,572 H 1132 Q 1140,572 1140,564 V 552" fill="none" stroke="#4f5d75" stroke-width="1"/>
-        <rect x="270" y="170" width="12" height="12" rx="2" fill="#f5f5f5"/>
-        <text x="276" y="180" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600">1</text>
-        <rect x="382" y="170" width="12" height="12" rx="2" fill="#f5f5f5"/>
-        <text x="388" y="180" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600">N</text>
-        <rect x="314" y="156" width="36" height="14" rx="2" fill="#f5f5f5"/>
-        <text x="332" y="166" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">OWNS</text>
-        <rect x="630" y="170" width="12" height="12" rx="2" fill="#f5f5f5"/>
-        <text x="636" y="180" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600">1</text>
-        <rect x="742" y="170" width="12" height="12" rx="2" fill="#f5f5f5"/>
-        <text x="748" y="180" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600">N</text>
-        <rect x="676" y="156" width="32" height="14" rx="2" fill="#f5f5f5"/>
-        <text x="692" y="166" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">HAS</text>
-        <rect x="506" y="294" width="12" height="12" rx="2" fill="#f5f5f5"/>
-        <text x="512" y="304" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600">N</text>
-        <rect x="506" y="342" width="12" height="12" rx="2" fill="#f5f5f5"/>
-        <text x="512" y="352" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600">1</text>
-        <rect x="520" y="317" width="24" height="14" rx="2" fill="#f5f5f5"/>
-        <text x="532" y="327" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">IN</text>
-        <rect x="270" y="434" width="12" height="12" rx="2" fill="#f5f5f5"/>
-        <text x="276" y="444" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600">1</text>
-        <rect x="382" y="434" width="12" height="12" rx="2" fill="#f5f5f5"/>
-        <text x="388" y="444" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600">1</text>
-        <rect x="630" y="434" width="12" height="12" rx="2" fill="#f5f5f5"/>
-        <text x="636" y="444" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600">1</text>
-        <rect x="742" y="434" width="12" height="12" rx="2" fill="#f5f5f5"/>
-        <text x="748" y="444" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600">N</text>
-        <rect x="594" y="566" width="12" height="12" rx="2" fill="#f5f5f5"/>
-        <text x="600" y="576" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600">1</text>
-        <rect x="1110" y="566" width="12" height="12" rx="2" fill="#f5f5f5"/>
-        <text x="1116" y="576" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" font-weight="600">N</text>
-        <rect x="40" y="96" width="224" height="172" rx="6" fill="#f5f5f5"/>
-        <rect x="40" y="96" width="224" height="172" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
-        <rect x="40" y="96" width="224" height="40" rx="6" fill="rgba(45,49,66,0.04)" stroke="none"/>
-        <rect x="40" y="128" width="224" height="8" fill="rgba(45,49,66,0.04)"/>
-        <line x1="40" y1="136" x2="264" y2="136" stroke="rgba(45,49,66,0.22)" stroke-width="1"/>
-        <text x="56" y="112" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TABLE · SELF + ADMIN</text>
-        <text x="56" y="128" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif">profiles</text>
-        <text x="56" y="156" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace"># id</text>
-        <text x="248" y="156" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">uuid → auth</text>
-        <text x="56" y="176" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">name · email</text>
-        <text x="248" y="176" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="56" y="196" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">phone</text>
-        <text x="248" y="196" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="56" y="216" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">language</text>
-        <text x="248" y="216" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">en | bn</text>
-        <text x="56" y="236" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">role</text>
-        <text x="248" y="236" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">farmer|admin</text>
-        <text x="56" y="256" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">blocked</text>
-        <text x="248" y="256" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">bool</text>
-        <rect x="400" y="96" width="224" height="192" rx="6" fill="#f5f5f5"/>
-        <rect x="400" y="96" width="224" height="192" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
-        <rect x="400" y="96" width="224" height="40" rx="6" fill="rgba(45,49,66,0.04)" stroke="none"/>
-        <rect x="400" y="128" width="224" height="8" fill="rgba(45,49,66,0.04)"/>
-        <line x1="400" y1="136" x2="624" y2="136" stroke="rgba(45,49,66,0.22)" stroke-width="1"/>
-        <text x="416" y="112" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TABLE · OWNER ONLY</text>
-        <text x="416" y="128" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif">farms</text>
-        <text x="416" y="156" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace"># id</text>
-        <text x="608" y="156" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">uuid</text>
-        <text x="416" y="176" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">→ user_id</text>
-        <text x="608" y="176" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">uuid</text>
-        <text x="416" y="196" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">→ district_id</text>
-        <text x="608" y="196" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="416" y="216" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">size_bigha</text>
-        <text x="608" y="216" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">numeric</text>
-        <text x="416" y="236" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">texture · ph</text>
-        <text x="608" y="236" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">enum · num</text>
-        <text x="416" y="256" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">irrigation</text>
-        <text x="608" y="256" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">enum</text>
-        <text x="416" y="276" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">lat · lng</text>
-        <text x="608" y="276" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">numeric?</text>
-        <rect x="760" y="96" width="240" height="172" rx="6" fill="#f5f5f5"/>
-        <rect x="760" y="96" width="240" height="172" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
-        <rect x="760" y="96" width="240" height="40" rx="6" fill="rgba(45,49,66,0.04)" stroke="none"/>
-        <rect x="760" y="128" width="240" height="8" fill="rgba(45,49,66,0.04)"/>
-        <line x1="760" y1="136" x2="1000" y2="136" stroke="rgba(45,49,66,0.22)" stroke-width="1"/>
-        <text x="776" y="112" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TABLE · OWNER ONLY</text>
-        <text x="776" y="128" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif">plans</text>
-        <text x="776" y="156" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace"># id</text>
-        <text x="984" y="156" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">uuid</text>
-        <text x="776" y="176" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">→ farm_id</text>
-        <text x="984" y="176" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">uuid</text>
-        <text x="776" y="196" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">plan</text>
-        <text x="984" y="196" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">jsonb</text>
-        <text x="776" y="216" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">risks</text>
-        <text x="984" y="216" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">jsonb</text>
-        <text x="776" y="236" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">climate_snapshot</text>
-        <text x="984" y="236" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">jsonb</text>
-        <text x="776" y="256" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">created_at</text>
-        <text x="984" y="256" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">timestamptz</text>
-        <rect x="1040" y="96" width="200" height="192" rx="6" fill="#f5f5f5"/>
-        <rect x="1040" y="96" width="200" height="192" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
-        <rect x="1040" y="96" width="200" height="40" rx="6" fill="rgba(45,49,66,0.05)" stroke="none"/>
-        <rect x="1040" y="128" width="200" height="8" fill="rgba(45,49,66,0.05)"/>
-        <line x1="1040" y1="136" x2="1240" y2="136" stroke="rgba(45,49,66,0.18)" stroke-width="1"/>
-        <text x="1056" y="112" fill="#5a6580" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TABLE · ADMIN ONLY</text>
-        <text x="1056" y="128" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif">sync_runs</text>
-        <text x="1056" y="156" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace"># id</text>
-        <text x="1224" y="156" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">uuid</text>
-        <text x="1056" y="176" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">job</text>
-        <text x="1224" y="176" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="1056" y="196" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">status</text>
-        <text x="1224" y="196" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="1056" y="216" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">task_id</text>
-        <text x="1224" y="216" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text?</text>
-        <text x="1056" y="236" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">rows_updated</text>
-        <text x="1224" y="236" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">int</text>
-        <text x="1056" y="256" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">error</text>
-        <text x="1224" y="256" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="1056" y="276" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">started_at</text>
-        <text x="1224" y="276" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">timestamptz</text>
-        <rect x="40" y="360" width="224" height="172" rx="6" fill="#f5f5f5"/>
-        <rect x="40" y="360" width="224" height="172" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
-        <rect x="40" y="360" width="224" height="40" rx="6" fill="rgba(45,49,66,0.08)" stroke="none"/>
-        <rect x="40" y="392" width="224" height="8" fill="rgba(45,49,66,0.08)"/>
-        <line x1="40" y1="400" x2="264" y2="400" stroke="rgba(79,93,117,0.40)" stroke-width="1"/>
-        <text x="56" y="376" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TABLE · PUBLIC READ</text>
-        <text x="56" y="392" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif">climate_normals</text>
-        <text x="56" y="420" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace"># → district_id</text>
-        <text x="248" y="420" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="56" y="440" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">monthly_rain_mm</text>
-        <text x="248" y="440" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">numeric[12]</text>
-        <text x="56" y="460" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">monthly_wetness</text>
-        <text x="248" y="460" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">numeric[12]</text>
-        <text x="56" y="480" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">temp · humidity</text>
-        <text x="248" y="480" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">numeric</text>
-        <text x="56" y="500" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">solar_mj · et0</text>
-        <text x="248" y="500" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">numeric</text>
-        <text x="56" y="520" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">fetched_at</text>
-        <text x="248" y="520" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">timestamptz</text>
-        <rect x="400" y="360" width="224" height="172" rx="6" fill="#f5f5f5"/>
-        <rect x="400" y="360" width="224" height="172" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
-        <rect x="400" y="360" width="224" height="40" rx="6" fill="rgba(45,49,66,0.08)" stroke="none"/>
-        <rect x="400" y="392" width="224" height="8" fill="rgba(45,49,66,0.08)"/>
-        <line x1="400" y1="400" x2="624" y2="400" stroke="rgba(79,93,117,0.40)" stroke-width="1"/>
-        <text x="416" y="376" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TABLE · PUBLIC READ</text>
-        <text x="416" y="392" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif">districts</text>
-        <text x="416" y="420" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace"># id</text>
-        <text x="608" y="420" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="416" y="440" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">name · name_bn</text>
-        <text x="608" y="440" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="416" y="460" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">division</text>
-        <text x="608" y="460" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="416" y="480" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">lat · lng</text>
-        <text x="608" y="480" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">numeric</text>
-        <text x="416" y="500" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">soil</text>
-        <text x="608" y="500" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="416" y="520" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">risk · risk_bn</text>
-        <text x="608" y="520" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <rect x="760" y="360" width="240" height="192" rx="6" fill="#f5f5f5"/>
-        <rect x="760" y="360" width="240" height="192" rx="6" fill="rgba(191,69,32,0.04)" stroke="#bf4520" stroke-width="1"/>
-        <rect x="760" y="360" width="240" height="40" rx="6" fill="rgba(191,69,32,0.10)" stroke="none"/>
-        <rect x="760" y="392" width="240" height="8" fill="rgba(191,69,32,0.10)"/>
-        <line x1="760" y1="400" x2="1000" y2="400" stroke="rgba(191,69,32,0.40)" stroke-width="1"/>
-        <text x="776" y="376" fill="#bf4520" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TABLE · PUBLIC / OWNER</text>
-        <text x="776" y="392" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif">observations</text>
-        <text x="776" y="420" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace"># id</text>
-        <text x="984" y="420" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">uuid</text>
-        <text x="776" y="440" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">→ district_id</text>
-        <text x="984" y="440" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text?</text>
-        <text x="776" y="460" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">→ farm_id</text>
-        <text x="984" y="460" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">uuid?</text>
-        <text x="776" y="480" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">source</text>
-        <text x="984" y="480" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="776" y="500" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">metric</text>
-        <text x="984" y="500" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="776" y="520" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">value</text>
-        <text x="984" y="520" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">numeric</text>
-        <text x="776" y="540" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">observed_at</text>
-        <text x="984" y="540" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">date</text>
-        <rect x="1040" y="360" width="200" height="192" rx="6" fill="#f5f5f5"/>
-        <rect x="1040" y="360" width="200" height="192" rx="6" fill="rgba(191,69,32,0.04)" stroke="#bf4520" stroke-width="1"/>
-        <rect x="1040" y="360" width="200" height="40" rx="6" fill="rgba(191,69,32,0.10)" stroke="none"/>
-        <rect x="1040" y="392" width="200" height="8" fill="rgba(191,69,32,0.10)"/>
-        <line x1="1040" y1="400" x2="1240" y2="400" stroke="rgba(191,69,32,0.40)" stroke-width="1"/>
-        <text x="1056" y="376" fill="#bf4520" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TABLE · PUBLIC / OWNER</text>
-        <text x="1056" y="392" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif">predictions</text>
-        <text x="1056" y="420" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace"># id</text>
-        <text x="1224" y="420" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">uuid</text>
-        <text x="1056" y="440" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">→ district_id</text>
-        <text x="1224" y="440" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text?</text>
-        <text x="1056" y="460" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">→ farm_id</text>
-        <text x="1224" y="460" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">uuid?</text>
-        <text x="1056" y="480" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">kind</text>
-        <text x="1224" y="480" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">text</text>
-        <text x="1056" y="500" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">level</text>
-        <text x="1224" y="500" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">low|med|high</text>
-        <text x="1056" y="520" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">valid_until</text>
-        <text x="1224" y="520" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">date</text>
-        <text x="1056" y="540" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">computed_at</text>
-        <text x="1224" y="540" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="end">timestamptz</text>
-        <line x1="40" y1="616" x2="1240" y2="616" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
-        <text x="40" y="632" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
-        <rect x="40" y="644" width="14" height="10" rx="2" fill="rgba(191,69,32,0.08)" stroke="#bf4520" stroke-width="1"/>
-        <text x="60" y="652" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Observations &amp; predictions</text>
-        <rect x="220" y="644" width="14" height="10" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
-        <text x="240" y="652" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">User data</text>
-        <rect x="330" y="644" width="14" height="10" rx="2" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
-        <text x="350" y="652" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Reference data</text>
-        <rect x="460" y="644" width="14" height="10" rx="2" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
-        <text x="480" y="652" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Admin only</text>
-        <text x="577" y="653" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">#</text>
-        <text x="590" y="652" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Primary key</text>
-        <text x="687" y="653" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">→</text>
-        <text x="700" y="652" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Foreign key</text>
-        <text x="797" y="653" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">1</text>
-        <text x="810" y="652" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Cardinality (1 / N)</text>
+        <rect class="canvas" width="1280" height="672"/>
+        <text class="band__label" x="40" y="44">NASA DATA PIPELINE · DISTRICT LEVEL</text>
+        <path class="rel" d="M 280,140 H 360"/>
+        <path class="rel" d="M 600,140 H 680"/>
+        <path class="rel rel--derived" d="M 920,140 H 998"/>
+        <path class="rel" d="M 480,264 V 368"/>
+        <g class="box box--app">
+        <rect class="box__body" x="40" y="72" width="240" height="212" rx="6"/>
+        <path class="box__head" d="M 40,112 V 78 Q 40,72 46,72 H 274 Q 280,72 280,78 V 112 Z"/>
+        <rect class="box__frame" x="40" y="72" width="240" height="212" rx="6"/>
+        <line class="box__rule" x1="40" y1="112" x2="280" y2="112"/>
+        <text class="box__tag" x="56" y="88">TABLE · APP READS</text>
+        <text class="box__name" x="56" y="104">climate_normals</text>
+        <text class="field" x="56" y="132"># → district_id</text>
+        <text class="type" x="264" y="132" text-anchor="end">text</text>
+        <text class="field" x="56" y="152">monthly_rain_mm</text>
+        <text class="type" x="264" y="152" text-anchor="end">numeric[12]</text>
+        <text class="field" x="56" y="172">monthly_wetness</text>
+        <text class="type" x="264" y="172" text-anchor="end">numeric[12]</text>
+        <text class="field" x="56" y="192">annual_rain_mm</text>
+        <text class="type" x="264" y="192" text-anchor="end">numeric</text>
+        <text class="field" x="56" y="212">temp_mean · humidity</text>
+        <text class="type" x="264" y="212" text-anchor="end">numeric</text>
+        <text class="field" x="56" y="232">solar_mj · root_wetness</text>
+        <text class="type" x="264" y="232" text-anchor="end">numeric</text>
+        <text class="field" x="56" y="252">et0_mm_day</text>
+        <text class="type" x="264" y="252" text-anchor="end">numeric</text>
+        <text class="field" x="56" y="272">fetched_at</text>
+        <text class="type" x="264" y="272" text-anchor="end">timestamptz</text>
+        </g>
+        <g class="box box--ref">
+        <rect class="box__body" x="360" y="72" width="240" height="192" rx="6"/>
+        <path class="box__head" d="M 360,112 V 78 Q 360,72 366,72 H 594 Q 600,72 600,78 V 112 Z"/>
+        <rect class="box__frame" x="360" y="72" width="240" height="192" rx="6"/>
+        <line class="box__rule" x1="360" y1="112" x2="600" y2="112"/>
+        <text class="box__tag" x="376" y="88">TABLE · PUBLIC READ · 64 ROWS</text>
+        <text class="box__name" x="376" y="104">districts</text>
+        <text class="field" x="376" y="132"># id</text>
+        <text class="type" x="584" y="132" text-anchor="end">text</text>
+        <text class="field" x="376" y="152">name · name_bn</text>
+        <text class="type" x="584" y="152" text-anchor="end">text</text>
+        <text class="field" x="376" y="172">division</text>
+        <text class="type" x="584" y="172" text-anchor="end">text</text>
+        <text class="field" x="376" y="192">lat · lng</text>
+        <text class="type" x="584" y="192" text-anchor="end">float8</text>
+        <text class="field" x="376" y="212">soil</text>
+        <text class="type" x="584" y="212" text-anchor="end">text</text>
+        <text class="field" x="376" y="232">rainfall · temp</text>
+        <text class="type" x="584" y="232" text-anchor="end">baseline</text>
+        <text class="field" x="376" y="252">risk · risk_bn</text>
+        <text class="type" x="584" y="252" text-anchor="end">text</text>
+        </g>
+        <g class="box box--ref">
+        <rect class="box__body" x="680" y="72" width="240" height="192" rx="6"/>
+        <path class="box__head" d="M 680,112 V 78 Q 680,72 686,72 H 914 Q 920,72 920,78 V 112 Z"/>
+        <rect class="box__frame" x="680" y="72" width="240" height="192" rx="6"/>
+        <line class="box__rule" x1="680" y1="112" x2="920" y2="112"/>
+        <text class="box__tag" x="696" y="88">TABLE · PUBLIC READ</text>
+        <text class="box__name" x="696" y="104">observations</text>
+        <text class="field" x="696" y="132"># id</text>
+        <text class="type" x="904" y="132" text-anchor="end">uuid</text>
+        <text class="field" x="696" y="152">→ district_id</text>
+        <text class="type" x="904" y="152" text-anchor="end">text</text>
+        <text class="field" x="696" y="172">source</text>
+        <text class="type" x="904" y="172" text-anchor="end">power|modis|smap|nasadem</text>
+        <text class="field" x="696" y="192">metric</text>
+        <text class="type" x="904" y="192" text-anchor="end">text</text>
+        <text class="field" x="696" y="212">value</text>
+        <text class="type" x="904" y="212" text-anchor="end">numeric</text>
+        <text class="field" x="696" y="232">observed_at</text>
+        <text class="type" x="904" y="232" text-anchor="end">date</text>
+        <text class="field" x="696" y="252">fetched_at</text>
+        <text class="type" x="904" y="252" text-anchor="end">timestamptz</text>
+        </g>
+        <g class="box box--view">
+        <rect class="box__body" x="1000" y="72" width="240" height="152" rx="6"/>
+        <path class="box__head" d="M 1000,112 V 78 Q 1000,72 1006,72 H 1234 Q 1240,72 1240,78 V 112 Z"/>
+        <rect class="box__frame" x="1000" y="72" width="240" height="152" rx="6"/>
+        <line class="box__rule" x1="1000" y1="112" x2="1240" y2="112"/>
+        <text class="box__tag" x="1016" y="88">VIEW · APP READS</text>
+        <text class="box__name" x="1016" y="104">latest_observations</text>
+        <text class="field" x="1016" y="132">district_id</text>
+        <text class="type" x="1224" y="132" text-anchor="end">text</text>
+        <text class="field" x="1016" y="152">source · metric</text>
+        <text class="type" x="1224" y="152" text-anchor="end">text</text>
+        <text class="field" x="1016" y="172">value</text>
+        <text class="type" x="1224" y="172" text-anchor="end">numeric</text>
+        <text class="field" x="1016" y="192">observed_at</text>
+        <text class="type" x="1224" y="192" text-anchor="end">date</text>
+        <text class="field" x="1016" y="212">fetched_at</text>
+        <text class="type" x="1224" y="212" text-anchor="end">timestamptz</text>
+        </g>
+        <g class="box box--admin">
+        <rect class="box__body" x="40" y="368" width="240" height="212" rx="6"/>
+        <path class="box__head" d="M 40,408 V 374 Q 40,368 46,368 H 274 Q 280,368 280,374 V 408 Z"/>
+        <rect class="box__frame" x="40" y="368" width="240" height="212" rx="6"/>
+        <line class="box__rule" x1="40" y1="408" x2="280" y2="408"/>
+        <text class="box__tag" x="56" y="384">TABLE · EDGE FUNCTIONS ONLY</text>
+        <text class="box__name" x="56" y="400">sync_runs</text>
+        <text class="field" x="56" y="428"># id</text>
+        <text class="type" x="264" y="428" text-anchor="end">uuid</text>
+        <text class="field" x="56" y="448">job</text>
+        <text class="type" x="264" y="448" text-anchor="end">text</text>
+        <text class="field" x="56" y="468">status</text>
+        <text class="type" x="264" y="468" text-anchor="end">running|pending|ok|error</text>
+        <text class="field" x="56" y="488">task_id</text>
+        <text class="type" x="264" y="488" text-anchor="end">text?</text>
+        <text class="field" x="56" y="508">rows_updated</text>
+        <text class="type" x="264" y="508" text-anchor="end">int</text>
+        <text class="field" x="56" y="528">error</text>
+        <text class="type" x="264" y="528" text-anchor="end">text?</text>
+        <text class="field" x="56" y="548">started_at</text>
+        <text class="type" x="264" y="548" text-anchor="end">timestamptz</text>
+        <text class="field" x="56" y="568">finished_at</text>
+        <text class="type" x="264" y="568" text-anchor="end">timestamptz?</text>
+        </g>
+        <g class="box box--app">
+        <rect class="box__body" x="360" y="368" width="240" height="192" rx="6"/>
+        <path class="box__head" d="M 360,408 V 374 Q 360,368 366,368 H 594 Q 600,368 600,374 V 408 Z"/>
+        <rect class="box__frame" x="360" y="368" width="240" height="192" rx="6"/>
+        <line class="box__rule" x1="360" y1="408" x2="600" y2="408"/>
+        <text class="box__tag" x="376" y="384">TABLE · APP READS</text>
+        <text class="box__name" x="376" y="400">predictions</text>
+        <text class="field" x="376" y="428"># id</text>
+        <text class="type" x="584" y="428" text-anchor="end">uuid</text>
+        <text class="field" x="376" y="448">→ district_id</text>
+        <text class="type" x="584" y="448" text-anchor="end">text</text>
+        <text class="field" x="376" y="468">kind</text>
+        <text class="type" x="584" y="468" text-anchor="end">6 risk kinds</text>
+        <text class="field" x="376" y="488">level</text>
+        <text class="type" x="584" y="488" text-anchor="end">low|medium|high</text>
+        <text class="field" x="376" y="508">score</text>
+        <text class="type" x="584" y="508" text-anchor="end">0–1</text>
+        <text class="field" x="376" y="528">valid_until</text>
+        <text class="type" x="584" y="528" text-anchor="end">date</text>
+        <text class="field" x="376" y="548">computed_at</text>
+        <text class="type" x="584" y="548" text-anchor="end">timestamptz</text>
+        </g>
+        <rect class="chip-bg" x="282.5" y="144" width="15" height="14" rx="2"/><text class="card" x="290" y="154" text-anchor="middle">1</text>
+        <rect class="chip-bg" x="342.5" y="144" width="15" height="14" rx="2"/><text class="card" x="350" y="154" text-anchor="middle">1</text>
+        <rect class="chip-bg" x="285" y="122" width="70" height="14" rx="2"/><text class="rel-label" x="320" y="132" text-anchor="middle">NORMALS OF</text>
+        <rect class="chip-bg" x="602.5" y="144" width="15" height="14" rx="2"/><text class="card" x="610" y="154" text-anchor="middle">1</text>
+        <rect class="chip-bg" x="662.5" y="144" width="15" height="14" rx="2"/><text class="card" x="670" y="154" text-anchor="middle">N</text>
+        <rect class="chip-bg" x="626.7" y="122" width="26.6" height="14" rx="2"/><text class="rel-label" x="640" y="132" text-anchor="middle">HAS</text>
+        <rect class="chip-bg" x="928.1" y="122" width="63.800000000000004" height="14" rx="2"/><text class="rel-label" x="960" y="132" text-anchor="middle">NEWEST OF</text>
+        <rect class="chip-bg" x="482.5" y="268" width="15" height="14" rx="2"/><text class="card" x="490" y="278" text-anchor="middle">1</text>
+        <rect class="chip-bg" x="482.5" y="352" width="15" height="14" rx="2"/><text class="card" x="490" y="362" text-anchor="middle">N</text>
+        <rect class="chip-bg" x="498.7" y="310" width="26.6" height="14" rx="2"/><text class="rel-label" x="512" y="320" text-anchor="middle">HAS</text>
+        <rect class="panel" x="680" y="368" width="560" height="212" rx="6"/>
+        <text class="box__tag" x="700" y="392">WHO READS AND WRITES</text>
+        <text class="panel__head" x="700" y="418">Web app · publishable key, read only</text>
+        <text class="panel__text" x="700" y="436">climate_normals, latest_observations, predictions (district rows)</text>
+        <text class="panel__head" x="700" y="466">Edge Functions · service key, the only writers</text>
+        <text class="panel__text" x="700" y="484"><tspan class="panel__fn">sync-power</tspan> → climate_normals, observations</text>
+        <text class="panel__text" x="700" y="502"><tspan class="panel__fn">sync-modis</tspan> → observations</text>
+        <text class="panel__text" x="700" y="520"><tspan class="panel__fn">sync-appeears</tspan> → observations (SMAP, NASADEM), AppEEARS task ids in sync_runs</text>
+        <text class="panel__text" x="700" y="538"><tspan class="panel__fn">predict-risk</tspan> → predictions</text>
+        <text class="panel__note" x="700" y="564">Every run logs to sync_runs. Observations are pruned after 84 days (NASADEM kept).</text>
+        <text class="legend__title" x="40" y="624">LEGEND</text>
+        <g class="box box--app"><rect class="box__body" x="40" y="636" width="14" height="10" rx="2"/><rect class="box__frame" x="40" y="636" width="14" height="10" rx="2"/></g>
+        <text class="legend__text" x="60" y="644">Read by the app</text>
+        <g class="box box--ref"><rect class="box__body" x="169" y="636" width="14" height="10" rx="2"/><rect class="box__frame" x="169" y="636" width="14" height="10" rx="2"/></g>
+        <text class="legend__text" x="189" y="644">Pipeline / reference data</text>
+        <g class="box box--view"><rect class="box__body" x="352" y="636" width="14" height="10" rx="2"/><rect class="box__frame" x="352" y="636" width="14" height="10" rx="2"/></g>
+        <text class="legend__text" x="372" y="644">View</text>
+        <g class="box box--admin"><rect class="box__body" x="421.6" y="636" width="14" height="10" rx="2"/><rect class="box__frame" x="421.6" y="636" width="14" height="10" rx="2"/></g>
+        <text class="legend__text" x="441.6" y="644">Edge Functions only</text>
+        <text class="field" x="572.2" y="645">#</text>
+        <text class="legend__text" x="586.2" y="644">Primary key</text>
+        <text class="field" x="673.6" y="645">→</text>
+        <text class="legend__text" x="687.6" y="644">Foreign key</text>
+        <text class="field" x="775" y="645">1 / N</text>
+        <text class="legend__text" x="813" y="644">Cardinality</text>
       </svg>
     </div>
-    <p class="caption">Observations and predictions belong to a district, or to one farm (farm_id) for field-level AppEEARS data. Not shown: activity_log, the admin-only audit feed.</p>
+    <p class="caption">Every row belongs to a district: the app has no sign-in and keeps the farm, plans and settings in the browser. The migrations still contain tables from an earlier sign-in version (profiles, farms, plans, activity_log); the running system does not use them, so they are not shown here.</p>
   </div>
 </body>
 </html>
