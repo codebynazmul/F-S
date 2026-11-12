@@ -28,17 +28,17 @@ const TERMS: Section[] = [
     ],
   },
   {
-    title: ['Demo sign-in', 'ডেমো সাইন-ইন'],
+    title: ['No account needed', 'অ্যাকাউন্ট লাগে না'],
     body: [
-      'Sign-in, sign-up, verification codes and social logins are demonstrations only. They do not create a protected account. Do not use a password you use anywhere else.',
-      'সাইন-ইন, নিবন্ধন, যাচাই কোড ও সোশ্যাল লগইন কেবল প্রদর্শনের জন্য। এগুলো কোনো সুরক্ষিত অ্যাকাউন্ট তৈরি করে না। অন্য কোথাও ব্যবহার করা পাসওয়ার্ড এখানে দেবেন না।',
+      'You do not need to sign up or sign in. Your profile exists only on this device and is not a protected account.',
+      'নিবন্ধন বা সাইন-ইন করতে হয় না। আপনার প্রোফাইল শুধু এই ডিভাইসে থাকে এবং এটি কোনো সুরক্ষিত অ্যাকাউন্ট নয়।',
     ],
   },
   {
     title: ['Fair use', 'যথাযথ ব্যবহার'],
     body: [
-      'Please do not try to disrupt the app or misuse the NASA POWER service through it.',
-      'অ্যাপটি বিঘ্নিত করার বা এর মাধ্যমে নাসা পাওয়ার সেবার অপব্যবহারের চেষ্টা করবেন না।',
+      'Please do not try to disrupt the app or misuse the data services it relies on.',
+      'অ্যাপটি বিঘ্নিত করার বা এটি যে তথ্যসেবার উপর নির্ভর করে তার অপব্যবহারের চেষ্টা করবেন না।',
     ],
   },
   {
@@ -61,15 +61,22 @@ const PRIVACY: Section[] = [
   {
     title: ['What we store', 'আমরা কী সংরক্ষণ করি'],
     body: [
-      'Your name, email or phone number, farm profile, plans and settings are saved only in this browser on this device. Agro Cosmic Weave has no server or database, so this information is not sent to us.',
-      'আপনার নাম, ইমেইল বা ফোন নম্বর, খামারের তথ্য, পরিকল্পনা ও সেটিংস শুধু এই ডিভাইসের এই ব্রাউজারে সংরক্ষিত থাকে। অ্যাগ্রো কসমিক উইভের কোনো সার্ভার বা ডেটাবেস নেই, তাই এই তথ্য আমাদের কাছে পাঠানো হয় না।',
+      'Your farm profile, plans, chosen district and settings are saved only in this browser on this device. They are never sent to us or anyone else.',
+      'আপনার খামারের তথ্য, পরিকল্পনা, বাছাই করা জেলা ও সেটিংস শুধু এই ডিভাইসের এই ব্রাউজারে সংরক্ষিত থাকে। এগুলো কখনো আমাদের বা অন্য কারও কাছে পাঠানো হয় না।',
+    ],
+  },
+  {
+    title: ['Your location', 'আপনার অবস্থান'],
+    body: [
+      'If you allow it, your browser tells the app where you are so it can pick the nearest district. This is worked out on your device; your location is not sent or saved. You can say no and choose your district yourself.',
+      'আপনি অনুমতি দিলে ব্রাউজার অ্যাপকে আপনার অবস্থান জানায়, যাতে কাছের জেলাটি বেছে নেওয়া যায়। এটি আপনার ডিভাইসেই হিসাব হয়; আপনার অবস্থান কোথাও পাঠানো বা সংরক্ষণ করা হয় না। আপনি অনুমতি না দিয়ে নিজে জেলা বেছে নিতে পারেন।',
     ],
   },
   {
     title: ['Climate data requests', 'জলবায়ু তথ্যের অনুরোধ'],
     body: [
-      'To show live climate figures, the app asks NASA POWER for data about your district\'s location. That request includes the location coordinates but not your name or contact details. NASA\'s own privacy policy applies to it.',
-      'সরাসরি জলবায়ু তথ্য দেখাতে অ্যাপটি আপনার জেলার অবস্থানের জন্য নাসা পাওয়ার থেকে তথ্য চায়। সেই অনুরোধে অবস্থানের স্থানাঙ্ক থাকে, কিন্তু আপনার নাম বা যোগাযোগের তথ্য থাকে না। এর ক্ষেত্রে নাসার নিজস্ব গোপনীয়তা নীতি প্রযোজ্য।',
+      'To show NASA climate and satellite figures, the app asks our database for data about your selected district. That request names only the district, not you or your farm. The database is filled with data from NASA services on a schedule.',
+      'নাসার জলবায়ু ও স্যাটেলাইট তথ্য দেখাতে অ্যাপটি আপনার বাছাই করা জেলার তথ্য আমাদের ডেটাবেস থেকে চায়। সেই অনুরোধে শুধু জেলার নাম থাকে, আপনার বা আপনার খামারের তথ্য থাকে না। নাসার সেবা থেকে নিয়মিত তথ্য এনে ডেটাবেসটি হালনাগাদ রাখা হয়।',
     ],
   },
   {
@@ -82,8 +89,8 @@ const PRIVACY: Section[] = [
   {
     title: ['Deleting your data', 'আপনার তথ্য মুছে ফেলা'],
     body: [
-      'You can delete everything at any time from Settings, or by clearing this site\'s data in your browser.',
-      'সেটিংস থেকে অথবা ব্রাউজারে এই সাইটের তথ্য মুছে আপনি যেকোনো সময় সবকিছু মুছে ফেলতে পারেন।',
+      'You can delete everything at any time by clearing this site\'s data in your browser settings.',
+      'ব্রাউজারের সেটিংসে এই সাইটের তথ্য মুছে আপনি যেকোনো সময় সবকিছু মুছে ফেলতে পারেন।',
     ],
   },
   {

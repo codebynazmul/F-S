@@ -7,9 +7,18 @@ import { useApp } from './AppProvider';
 import { LangToggle } from './ui';
 import LegalModal, { type LegalDoc } from './LegalModal';
 
-// Short, compressed background loop (about 1 MB). public/login-bg.jpg is shown until it plays,
-// and instead of it on slow connections, with data saver on, or when motion is reduced.
-const VIDEO_URL = '/login-bg.mp4';
+// 11-second background loop (egrets over paddy fields, Pixabay #43612 from 0:04, free to use).
+// 720p (about 2.3 MB) by default, 1080p (about 4.4 MB) on large screens. public/login-bg.jpg
+// is shown until it plays, and instead of it on slow connections, with data saver on, or
+// when motion is reduced.
+const VIDEO_720 = '/login-bg.mp4';
+const VIDEO_1080 = '/login-bg-1080.mp4';
+
+/** The sharper file only where it shows: wide or high-density screens. */
+function videoUrl(): string {
+  const px = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2);
+  return px > 1600 ? VIDEO_1080 : VIDEO_720;
+}
 
 /** Play the background video only when it won't cost the user much data or time. */
 function canPlayVideo(): boolean {
@@ -39,8 +48,12 @@ export default function WelcomeScreen() {
   const [showSteps, setShowSteps] = useState(false);
   const [legal, setLegal] = useState<LegalDoc | null>(null);
   const [showVideo, setShowVideo] = useState(false);
+  const [videoSrc, setVideoSrc] = useState(VIDEO_720);
   const videoRef = useRef<HTMLVideoElement>(null);
-  useEffect(() => { setShowVideo(canPlayVideo()); }, []);
+  useEffect(() => {
+    setVideoSrc(videoUrl());
+    setShowVideo(canPlayVideo());
+  }, []);
 
   // Start the background video ourselves. Browsers only autoplay muted video, and React
   // doesn't always set `muted` before the browser decides, so the video can stay paused.
@@ -97,7 +110,7 @@ export default function WelcomeScreen() {
           aria-hidden
           onError={() => setShowVideo(false)}
         >
-          <source src={VIDEO_URL} type="video/mp4" onError={() => setShowVideo(false)} />
+          <source src={videoSrc} type="video/mp4" onError={() => setShowVideo(false)} />
         </video>
       )}
       <main className="fs-login-media-copy flex-1 flex flex-col">

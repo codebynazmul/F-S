@@ -5,7 +5,7 @@
  * - Supabase and other sites are not touched; the app keeps its own offline copy of NASA data.
  * Bump VERSION to drop old caches after a big change.
  */
-const VERSION = 'v3';
+const VERSION = 'v4';
 const PAGES = `fs-pages-${VERSION}`;
 const ASSETS = `fs-assets-${VERSION}`;
 const PRECACHE = ['/', '/manifest.webmanifest', '/icon-192.png', '/login-bg.jpg', '/logo-sm.png'];

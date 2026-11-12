@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/logo.png" alt="Agro Cosmic Weave logo" width="160" />
+  <img src="assets/banners/readme/editorial-2560x800.png" alt="Agro Cosmic Weave: crop rotations that use less water, build soil, and hold up under climate stress. A sample four-season rotation: mustard, lentil, Aman rice, mungbean." width="100%" />
 </p>
 
 <h1 align="center">Agro Cosmic Weave</h1>
@@ -18,7 +18,7 @@
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 18" />
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/Supabase-Postgres_%7C_Auth_%7C_Edge-3FCF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" />
+  <img src="https://img.shields.io/badge/Supabase-Postgres_%7C_Edge_Functions-3FCF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" />
   <img src="https://img.shields.io/badge/PWA-offline_ready-5A0FC8?style=flat-square&logo=pwa&logoColor=white" alt="PWA" />
 </p>
 
@@ -39,8 +39,9 @@ Built by **SPIDERX** for the NASA Space Apps Challenge.
 ## Contents
 
 - [What it does](#what-it-does)
+- [System architecture](#system-architecture)
 - [Quick start](#quick-start)
-- [Signing in](#signing-in)
+- [Welcome screen](#welcome-screen)
 - [First-time setup](#first-time-setup)
 - [Install and offline use](#install-and-offline-use)
 - [How the recommendations work](#how-the-recommendations-work)
@@ -56,7 +57,9 @@ Built by **SPIDERX** for the NASA Space Apps Challenge.
 
 ## What it does
 
-The dashboard is split into tabs. They are listed in the side menu; on phones a bottom bar also gives quick access to **Plan**, **What-If**, **NASA** and **Report**, and **More** opens the full menu.
+No account or sign-in is needed. Press **Get Started**, answer three quick setup questions, and the dashboard opens.
+
+The dashboard is split into tabs. They are listed in the side menu, which also has the English/Bangla switch and the day/night theme switch. On phones a bottom bar gives quick access to **Plan**, **What-If**, **NASA** and **Report**, and **More** opens the full menu. The top bar shows the selected district with its soil, yearly rainfall and main risk, a district picker grouped by division, and a shortcut to the dossier.
 
 | Tab | What you can do |
 | --- | --- |
@@ -65,10 +68,25 @@ The dashboard is split into tabs. They are listed in the side menu; on phones a 
 | **Soil & Water Analytics** | Compare water use, nitrogen balance, soil score, drought resilience and crop diversity, plus a 3-year soil organic matter projection. |
 | **NASA Earth Data** | 30-year NASA POWER averages for the district (monthly rainfall, temperature, humidity, solar radiation, root-zone soil wetness, estimated crop water demand), the last 30 days against normal (rain, hot days, cold nights), a satellite view (MODIS vegetation health and land temperature, SMAP soil moisture, NASADEM elevation) and current risk levels. |
 | **Farm & Soil Profile** | Enter farm size (bigha), soil texture, pH, organic matter and irrigation source. Recommendations update immediately. |
-| **Farm Action Dossier** | A printable plan with the crop schedule, water and urea savings, and soil tips. Copy the summary or save it as PDF. |
-| **Account** | Edit your name and phone number, see whether your farm and plan are saved to your account, and sign out. |
-| **Settings** | Day or night theme, English or Bangla, and clearing the data saved on this device. |
-| **Admin Panel** | Admins only. See [Admin panel](#admin-panel). |
+| **Farm Action Dossier** | A printable plan with the farm summary, 4-season crop schedule, water and urea savings, soil health score, what to check with your agriculture officer, the evidence and information gaps, and soil management actions. Copy the summary or save it as PDF. |
+
+Everything you enter is saved automatically in your browser, and the app works on phones, tablets and desktops. Animations are reduced to simple fades for people who turn on "reduce motion" in their device settings.
+
+---
+
+## System architecture
+
+![Agro Cosmic Weave system architecture: NASA POWER, MODIS and AppEEARS feed four scheduled Supabase Edge Functions, which write processed values to Postgres; the Next.js app on the farmer's device reads those tables and keeps everything else in the browser.](docs/diagrams/supabase-architecture.png)
+
+*Open [docs/diagrams/supabase-architecture.html](docs/diagrams/supabase-architecture.html) in a browser for a sharper version that follows your light or dark setting.*
+
+The system has three parts:
+
+- **NASA data services.** NASA POWER and MODIS need no key; AppEEARS (SMAP soil moisture, NASADEM elevation) uses a free Earthdata login.
+- **Supabase, on a schedule.** `pg_cron` triggers four Edge Functions. `sync-power`, `sync-modis` and `sync-appeears` fetch from NASA and save only processed values to Postgres. `predict-risk` turns the latest observations into risk levels. Only these functions can write, using the service key.
+- **The farmer's device.** The Next.js app reads `climate_normals`, `latest_observations` and `predictions` with the publishable key (read only, protected by row-level security). It builds the rotation and all scores on the device. The profile, farm, plans, settings and an offline copy of the NASA data stay in `localStorage`; the service worker caches the app for offline use; the bundled crop and district data are the fallback when NASA data hasn't synced; and location is matched to the nearest district on the device.
+
+There is no sign-in and no account, so nothing about the farmer is sent to the server.
 
 ---
 
@@ -89,7 +107,7 @@ The dashboard is split into tabs. They are listed in the side menu; on phones a 
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable-or-anon-key>
    ```
 
-   The app will not start without these. The publishable key is safe in the browser; row-level security in the database decides what each user can see.
+   The app will not start without these. The app only reads public NASA data from Supabase, and the publishable key is safe in the browser; row-level security in the database decides what can be read.
 
 3. Set up the database by applying the migrations (see [Database setup](#database-setup)).
 
@@ -114,48 +132,29 @@ NASA data appears once the sync functions have run (see [Deploying the NASA sync
 
 ---
 
-## Signing in
+## Welcome screen
 
-Sign-in uses Supabase Auth. Farmers can:
+Every visit starts on the welcome screen ([components/WelcomeScreen.tsx](components/WelcomeScreen.tsx)):
 
-- **Continue with Google**
-- **Email and password** — new accounts get a confirmation link by email.
-- **Email code** — a one-time code (or magic link) sent by email, no password needed.
+- **Get Started** (or **Continue** for returning visitors) opens the app. There are no accounts or passwords; a local profile is created on this device.
+- **See how it works** shows the three steps: pick your district, add your soil and water, get your crop plan.
+- An English/Bangla switch in the corner.
+- Links to the **Terms of Service** and **Privacy Policy**, shown in a pop-up ([components/LegalModal.tsx](components/LegalModal.tsx)).
+- A looping background video of paddy fields. A 720p file is used by default and a 1080p file on large or high-density screens (`public/login-bg.mp4`, `public/login-bg-1080.mp4`). A still image (`public/login-bg.jpg`) is shown instead on slow connections, with data saver on, or when reduced motion is turned on.
 
-For Google sign-in, turn on the Google provider in your Supabase project (**Authentication → Providers**) and add your site URL (e.g. `http://localhost:3000`) to the allowed redirect URLs.
-
-A `profiles` row is created automatically for every new account, with the role `farmer`. Blocked users are signed out straight away.
-
-### Admin panel
-
-There is no built-in admin account. To make the first admin, sign up normally, then run this in the Supabase SQL editor:
-
-```sql
-update public.profiles set role = 'admin' where email = 'you@example.com';
-```
-
-After that, admins can promote other users from the panel.
-
-| Section | What the admin can do |
-| --- | --- |
-| **Overview** | Total, active, new, blocked and admin counts; users by division and top districts; most recommended crops; sign-in methods; recent sign-ins. |
-| **Users** | Search and filter accounts; edit name and phone; block or unblock; make or remove admins; export the list as CSV. Admins cannot change their own account here. Deleting accounts needs the planned `admin-actions` function and is not available yet. |
-| **Activity log** | Admin actions (edits, blocks, role changes, exports, password changes), newest first. Filter by type or clear the log. |
-| **Security** | Change the signed-in admin's password (minimum 6 characters). |
-
-The admin tab is hidden for non-admins, but the real protection is in the database: row-level security and a trigger stop non-admins from changing their own role, blocked status or sign-in details.
+When the app opens it asks the browser for the person's location (only on HTTPS or `localhost`). For a new visitor, the nearest district is selected automatically ([lib/geo.ts](lib/geo.ts)); a returning visitor keeps the district they chose.
 
 ---
 
 ## First-time setup
 
-After a farmer signs in for the first time, a short three-step setup asks for:
+On the first visit, a short three-step setup asks for:
 
-1. **District** — pick from the list, or tap *Use my location* to choose the nearest district by GPS.
+1. **District** — already filled in from the person's location if they allowed it. They can pick another from the list (grouped by division, with the district's rainfall and main risk), or tap *Use my location* to try again.
 2. **Soil texture** — with plain-language hints (e.g. "sticky when wet, cracks when dry").
 3. **Water source and farm size** — irrigation type and farm size in bigha.
 
-It can be skipped, and every value can be changed later in **Farm & Soil Profile**. Setup is shown once per browser.
+It can be skipped, and every value can be changed later in **Farm & Soil Profile** (or the district from the top bar). Setup is shown once per browser.
 
 ---
 
@@ -164,9 +163,9 @@ It can be skipped, and every value can be changed later in **Farm & Soil Profile
 Agro Cosmic Weave is a Progressive Web App:
 
 - [app/manifest.ts](app/manifest.ts) provides the web app manifest, so it can be installed to a phone's home screen.
-- [public/sw.js](public/sw.js) is a service worker that caches pages, built files, fonts and images, so the app still opens without a connection. It does not touch Supabase requests.
-- The app keeps its own offline copy of the last NASA data it loaded, and of the farm profile and plans. Farm and plan edits made offline are uploaded when the connection returns.
-- The service worker is registered only in production builds (`npm run build && npm run start`), not under `npm run dev`. To drop old caches after a big change, bump `VERSION` in `public/sw.js`.
+- [public/sw.js](public/sw.js) is a service worker that caches pages, built files, fonts and images, so the app still opens without a connection. It does not touch Supabase requests or the background videos (those stream normally).
+- The farm profile and plans are stored in the browser, so they work offline. The app also keeps an offline copy of the last NASA data it loaded for each district, so recommendations still use it without internet.
+- The service worker is registered by [components/ServiceWorker.tsx](components/ServiceWorker.tsx), only in production builds (`npm run build && npm run start`). Under `npm run dev` it removes any worker left from an earlier production run, so stale code is never served. To drop old caches after a big change, bump `VERSION` in `public/sw.js`.
 
 ---
 
@@ -222,20 +221,21 @@ This is a screening model for **comparing plans**, not a crop growth model. Trea
 ```text
 .
 ├── app/
-│   ├── layout.tsx          # HTML shell, metadata, fonts, theme set before first paint
-│   ├── page.tsx            # Login screen → first-time setup → dashboard
+│   ├── layout.tsx          # HTML shell, metadata, fonts, theme and language set before first paint
+│   ├── page.tsx            # Welcome screen → first-time setup → dashboard (with crossfades)
 │   ├── manifest.ts         # PWA manifest (name, colours, icons)
 │   ├── not-found.tsx
 │   └── globals.css
 ├── components/
-│   ├── AppProvider.tsx     # Shared app state (session, profile, district, farm, plans, NASA data, admin actions)
-│   ├── useFarmSync.ts      # Saves the farm and plans to Supabase, with an offline copy
-│   ├── Dashboard.tsx       # Layout and tab switching
-│   ├── LoginScreen.tsx     # Google / email + password / email code sign-in
+│   ├── AppProvider.tsx     # Shared app state (local profile, location, district, farm, plans, NASA data)
+│   ├── WelcomeScreen.tsx   # First screen: Get Started, how it works, video background
+│   ├── LegalModal.tsx      # Terms of Service and Privacy Policy pop-up
 │   ├── Onboarding.tsx      # First-time setup
+│   ├── Dashboard.tsx       # Layout and tab switching
 │   ├── Sidebar.tsx, TopBar.tsx, BottomNav.tsx
-│   ├── ui.tsx              # Shared cards, buttons, input styles
-│   ├── admin/              # Admin panel sections (overview, users, activity, security)
+│   ├── CropIcon.tsx        # Drawn crop icons
+│   ├── ServiceWorker.tsx   # Registers public/sw.js in production
+│   ├── ui.tsx              # Shared cards, buttons, input styles, language switch
 │   └── tabs/               # One file per dashboard tab
 ├── data/
 │   ├── crops.ts            # 8 crops: water use, nitrogen, tolerance, income, fodder, Bangla names
@@ -245,8 +245,10 @@ This is a screening model for **comparing plans**, not a crop growth model. Trea
 │   ├── climate.ts          # Reads NASA averages, latest observations and risk levels from Supabase
 │   ├── recommend.ts        # Evidence, risk detection, strategies, ranking, soil tips
 │   ├── metrics.ts          # Plan scoring and soil organic matter projection
+│   ├── geo.ts              # Distance and nearest-district lookup for the location feature
 │   ├── storage.ts          # localStorage-backed React state
-│   ├── auth.ts             # Profile → user helpers, validation
+│   ├── motion.ts           # Shared animation settings (Motion)
+│   ├── auth.ts             # Initials helper (plus helpers left from the old sign-in)
 │   ├── options.ts          # Divisions, soil textures, irrigation types, priorities, default farm
 │   ├── i18n.ts             # English / Bangla helpers
 │   └── types.ts
@@ -255,11 +257,12 @@ This is a screening model for **comparing plans**, not a crop growth model. Trea
 │   ├── functions/          # Edge Functions: sync-power, sync-modis, sync-appeears, predict-risk
 │   └── setup/              # schedule-sync.sql (cron jobs for the functions)
 ├── docs/diagrams/          # Backend architecture and data model diagrams
+├── assets/banners/         # README banner images and their HTML sources
 ├── public/
 │   ├── sw.js               # Service worker (offline cache)
 │   ├── logo.png, logo-sm.png
-│   ├── icon-*.png, apple-touch-icon.png   # App icons
-│   └── login-bg.mp4, login-bg.jpg         # Login screen background
+│   ├── icon-*.png, apple-touch-icon.png         # App icons
+│   └── login-bg.mp4, login-bg-1080.mp4, login-bg.jpg   # Welcome screen background
 └── global.d.ts             # Lets TypeScript accept CSS imports
 ```
 
@@ -271,19 +274,17 @@ The `@/` import alias points to the project root.
 
 - **Crops** — rice (Boro and Aman), wheat, lentil, chickpea, mustard, maize and mungbean, in [data/crops.ts](data/crops.ts). To add a crop, add an entry to `CROP_DATABASE` (including `incomeScore` and `forageScore`) and it becomes available in the plan editors. Optionally add a drawn icon for it in [components/CropIcon.tsx](components/CropIcon.tsx); without one it shows a plain tile. The recommendations only use the rules above, so a new crop is not suggested until you add it to a strategy.
 - **Districts** — all 64 districts in [data/districts.ts](data/districts.ts), with coordinates and baseline climate. The same list is seeded into the `districts` table for the NASA sync.
-- **Your account** — profile, farm (one per account) and plans are stored in Supabase. Language, theme, the selected tab and an offline copy of the farm and NASA data are kept in the browser. **Settings → Clear all saved data** only clears this device; it does not delete anything from your account.
+- **Your data** — there are no accounts. The local profile, farm profile, current and suggested plans, chosen priorities, district, language, theme, selected tab and the offline copy of NASA data are all saved in the browser's `localStorage` under keys starting with `fs-` ([lib/storage.ts](lib/storage.ts)). Nothing about the farmer is sent to a server. To delete it, clear this site's data in the browser. Data does not move between devices or browsers.
 
 ---
 
 ## Backend (Supabase)
 
+Supabase is used only for NASA data. The app reads district climate averages, the latest observations and risk levels; it never writes to the database.
+
 **How it works:** NASA APIs → Supabase Edge Functions (fetch, filter, process) → Supabase Postgres (only the values the app needs). We never store raw NASA files or responses. The app reads from our database, so it never waits on NASA and keeps working if a NASA service is slow or down.
 
-### Architecture
-
-![Agro Cosmic Weave backend on Supabase](docs/diagrams/supabase-architecture.png)
-
-*Interactive version: [docs/diagrams/supabase-architecture.html](docs/diagrams/supabase-architecture.html)*
+See [System architecture](#system-architecture) for the diagram.
 
 ### NASA data sources
 
@@ -316,7 +317,7 @@ Long jobs process districts in batches so each run stays inside the Edge Functio
 | The latest value plus about 12 weeks of history | Satellite images and map tiles |
 | Climate averages per district (64 rows) | Data for places no farm is in |
 | Latest risk predictions per district | Old predictions after they expire |
-| Each farmer's farm and saved plans | |
+| | Farmers' names, farms or plans (these stay in the browser) |
 
 NASA-derived data stays at roughly 10,000 rows (64 districts × about 12 metrics × 12 weeks), no matter how much NASA data exists.
 
@@ -338,11 +339,13 @@ NASA-derived data stays at roughly 10,000 rows (64 districts × about 12 metrics
 | `sync_runs` | id, job, status, task_id, rows_updated, error, started_at | Sync health and AppEEARS tasks |
 | `activity_log` | id, actor_id, action, target, created_at | Admin activity feed |
 
+The app itself reads only `climate_normals`, `latest_observations` and `predictions`. The `profiles`, `farms`, `plans` and `activity_log` tables come from the earlier version with sign-in and an admin panel; they are still in the migrations but the current app does not use them.
+
 ### Access rules (RLS)
 
 - `districts`, `climate_normals`, and district-level `observations` and `predictions`: anyone can read; only Edge Functions (service key) can write.
 - `farms` and `plans`: only the owner (`user_id = auth.uid()`); admins can read all.
-- `profiles`: users can edit their own name, phone and language only. Role, blocked status and sign-in details can only be changed by an admin or the system.
+- `profiles`: users can edit their own name, phone and language only. Role, blocked status and sign-in details can only be changed by an admin or the system. (Unused by the current app.)
 - `activity_log` and `sync_runs`: admins only.
 
 ### Database setup
@@ -351,8 +354,8 @@ The schema lives in [supabase/migrations/](supabase/migrations/). Apply them in 
 
 1. `20261108120000_init_schema.sql` — tables, access rules, triggers
 2. `20261108120100_seed_districts.sql` — the 64 districts from `data/districts.ts`
-3. `20261108130000_auth_tracking.sql` — sign-in details for the admin panel, activity log rules, blocking
-4. `20261109090000_farm_sync_and_satellite.sql` — one farm per account, the latest-value view, keeping elevation
+3. `20261108130000_auth_tracking.sql` — sign-in details, activity log rules, blocking (from the earlier sign-in version)
+4. `20261109090000_farm_sync_and_satellite.sql` — one farm per account, the `latest_observations` view, keeping elevation
 
 ### Deploying the NASA sync
 
@@ -388,7 +391,8 @@ POWER and MODIS need no key. Never put the service role key or Earthdata passwor
 - NASA data is per district (around the district's centre point), not per farm.
 - Salinity risk comes only from the district profile; no live salinity data is connected.
 - The rotation is built in the browser so it works offline; only the risk levels come from the server.
-- Deleting user accounts from the admin panel needs a server-side `admin-actions` function, which is not built yet.
+- There are no accounts, so a farm and plan saved on one phone or browser are not available on another.
+- There is no in-app button to delete saved data; clear the site's data in the browser instead.
 - Free Supabase projects pause after about a week without visits, and scheduled syncs do not run while paused.
 - The scoring model is a simplified comparison tool and has not been validated against field data. Income and fodder scores are relative values, not live market prices.
 
@@ -399,7 +403,8 @@ POWER and MODIS need no key. Never put the service role key or Earthdata passwor
 - [Next.js 14](https://nextjs.org/) (App Router) and React 18
 - TypeScript
 - Tailwind CSS
-- [Supabase](https://supabase.com/) (Postgres, Auth, Edge Functions, cron)
+- [Motion](https://motion.dev/) for animations (respects reduced-motion settings)
+- [Supabase](https://supabase.com/) (Postgres, Edge Functions, cron)
 - Inter and Noto Sans Bengali fonts via `next/font`
 - [lucide-react](https://lucide.dev/) icons
 - NASA [POWER](https://power.larc.nasa.gov/), [MODIS via ORNL DAAC](https://modis.ornl.gov/) and [AppEEARS](https://appeears.earthdatacloud.nasa.gov/) (SMAP, NASADEM)
