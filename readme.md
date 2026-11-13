@@ -427,7 +427,7 @@ No license has been chosen yet, so all rights are reserved by the repository own
 ## Acknowledgements
 
 - [NASA Space Apps Challenge](https://www.spaceappschallenge.org/)
-- NASA Langley Research Center [POWER Project](https://power.larc.nasa.gov/) for climate data
-- [ORNL DAAC](https://modis.ornl.gov/) for the MODIS web service
-- NASA [AppEEARS](https://appeears.earthdatacloud.nasa.gov/) for SMAP and NASADEM data
-- AI assistants (Claude, ChatGPT and Gemini) helped during research and development; see [ai.md](ai.md) for how we used them
+- NASA Langley Research Center [POWER Project](https://power.larc.nasa.gov/) for climate data.
+- [ORNL DAAC](https://modis.ornl.gov/) for the MODIS web service.
+- NASA [AppEEARS](https://appeears.earthdatacloud.nasa.gov/) for SMAP and NASADEM data.
+- AI assistants (Claude, ChatGPT and Gemini) helped during research and development; see [ai.md](ai.md) for how we used them.
