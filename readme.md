@@ -8,9 +8,21 @@
   <strong>A climate-adaptive crop rotation and soil health planner for Bangladesh.</strong>
 </p>
 
-<p align="center">
-  <a href="https://fieldshift-space-apps-challenge.vercel.app"><img src="https://img.shields.io/badge/Live_Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo on Vercel" /></a>
+<div align="center">
+
+### 🌐 Live Website
+
+<a href="https://fieldshift-space-apps-challenge.vercel.app/">
+  <img src="https://img.shields.io/badge/Visit%20Live%20Website-16A34A?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Website" />
+</a>
+
+<p>
+  <a href="https://fieldshift-space-apps-challenge.vercel.app/">
+    https://fieldshift-space-apps-challenge.vercel.app/
+  </a>
 </p>
+
+</div>
 
 <p align="center">
   <a href="https://www.spaceappschallenge.org/"><img src="https://img.shields.io/badge/NASA_Space_Apps-Challenge-0B3D91?style=for-the-badge&logo=nasa&logoColor=white" alt="NASA Space Apps Challenge" /></a>
