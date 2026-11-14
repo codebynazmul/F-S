@@ -7,7 +7,7 @@
 <p align="center">
   <strong>A climate-adaptive crop rotation and soil health planner for Bangladesh.</strong>
 </p>
-
+fieldshift-space-apps-challenge.vercel.app
 <p align="center">
   <a href="https://www.spaceappschallenge.org/"><img src="https://img.shields.io/badge/NASA_Space_Apps-Challenge-0B3D91?style=for-the-badge&logo=nasa&logoColor=white" alt="NASA Space Apps Challenge" /></a>
   <img src="https://img.shields.io/badge/Team-SPIDERX-2E7D32?style=for-the-badge" alt="Team SPIDERX" />
@@ -27,7 +27,6 @@
   <img src="https://img.shields.io/badge/Coverage-64_districts-2E7D32?style=flat-square" alt="64 districts" />
   <img src="https://img.shields.io/badge/Language-English_%7C_%E0%A6%AC%E0%A6%BE%E0%A6%82%E0%A6%B2%E0%A6%BE-F57C00?style=flat-square" alt="English and Bangla" />
 </p>
-fieldshift-space-apps-challenge.vercel.app
 ---
 
 Agro Cosmic Weave helps farmers and agricultural officers pick crop rotations that use less water, build soil health, and hold up better under climate stress. It covers all 64 districts of Bangladesh, uses NASA climate and satellite data (POWER, MODIS, SMAP and NASADEM), and works in both English and Bangla.
