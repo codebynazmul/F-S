@@ -27,7 +27,7 @@
   <img src="https://img.shields.io/badge/Coverage-64_districts-2E7D32?style=flat-square" alt="64 districts" />
   <img src="https://img.shields.io/badge/Language-English_%7C_%E0%A6%AC%E0%A6%BE%E0%A6%82%E0%A6%B2%E0%A6%BE-F57C00?style=flat-square" alt="English and Bangla" />
 </p>
-
+fieldshift-space-apps-challenge.vercel.app
 ---
 
 Agro Cosmic Weave helps farmers and agricultural officers pick crop rotations that use less water, build soil health, and hold up better under climate stress. It covers all 64 districts of Bangladesh, uses NASA climate and satellite data (POWER, MODIS, SMAP and NASADEM), and works in both English and Bangla.
